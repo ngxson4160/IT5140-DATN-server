@@ -4,31 +4,31 @@ export const MessageResponse = {
   HTTPS: {
     INTERNAL_SERVER_ERROR: {
       code: 500000,
-      message: 'Internal Server Error.',
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: 'Internal Server Error.',
     },
     UNAUTHORIZED: {
       code: 401000,
-      message: 'Unauthorize.',
       statusCode: HttpStatus.UNAUTHORIZED,
+      message: 'Unauthorize.',
     },
     FORBIDDEN: {
       code: 403000,
-      message: 'Forbidden.',
       statusCode: HttpStatus.FORBIDDEN,
+      message: 'Forbidden.',
     },
   },
 
   COMMON: {
     UNAUTHORIZED: {
       code: 401001,
-      message: 'Please enter token in following format: Bearer <JWT>.',
       statusCode: HttpStatus.UNAUTHORIZED,
+      message: 'Please enter token in following format: Bearer <JWT>.',
     },
     FORBIDDEN: {
       code: 403001,
-      message: 'The user does not have execute this permission.',
       statusCode: HttpStatus.FORBIDDEN,
+      message: 'The user does not have execute this permission.',
     },
   },
 
