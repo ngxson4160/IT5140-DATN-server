@@ -15,9 +15,8 @@ async function bootstrap() {
 
   app.setGlobalPrefix(prefix);
 
-  await app.listen(port, () => {
-    logger.log(`🚀 Server start at ${url}/${prefix}/${port}`);
+  await app.listen(port || 3000, () => {
+    logger.log(`🚀🚀🚀 Server start at ${url}/${prefix}/${port}`);
   });
-  // await app.listen(3000);
 }
 bootstrap();
