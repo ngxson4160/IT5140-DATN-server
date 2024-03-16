@@ -80,5 +80,5 @@
         "yarn format",
         "git add ."
     ]
-}
+  }
 }
