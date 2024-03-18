@@ -9,6 +9,7 @@ import * as moment from 'moment';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { COMMON_CONSTANT } from 'src/_core/constant/common.constant';
+import { MessageResponse } from 'src/_core/constant/message-response.constant';
 import { IApiResponse } from 'src/_core/type/response.type';
 
 @Injectable()
@@ -21,15 +22,29 @@ export class FormatResponseInterceptor implements NestInterceptor {
         const res = context.switchToHttp().getResponse();
         const req = context.switchToHttp().getRequest();
 
-        const responseData = {
-          meta: {
-            code: data.meta.code,
-            statusCode: res.statusCode,
-            message: data.meta.message,
-            extraMeta: data.meta.extraMeta ? data.meta.extraMeta : {},
-          },
-          data: data.data ? data.data : null,
-        };
+        let responseData = {};
+
+        if (!data.meta || !data.data) {
+          responseData = {
+            meta: {
+              code: MessageResponse.COMMON.OK.code,
+              statusCode: MessageResponse.COMMON.OK.statusCode,
+              message: MessageResponse.COMMON.OK.message,
+              extraMeta: {},
+            },
+            data: data,
+          };
+        } else {
+          responseData = {
+            meta: {
+              code: data.meta.code,
+              statusCode: res.statusCode,
+              message: data.meta.message,
+              extraMeta: data.meta.extraMeta ? data.meta.extraMeta : {},
+            },
+            data: data.data ? data.data : null,
+          };
+        }
 
         if (parseInt(process.env.loggingEnable)) {
           const responseLog = {

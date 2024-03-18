@@ -20,6 +20,11 @@ export const MessageResponse = {
   },
 
   COMMON: {
+    OK: {
+      code: 200000,
+      statusCode: HttpStatus.OK,
+      message: 'Success.',
+    },
     UNAUTHORIZED: {
       code: 401001,
       statusCode: HttpStatus.UNAUTHORIZED,
@@ -29,6 +34,11 @@ export const MessageResponse = {
       code: 403001,
       statusCode: HttpStatus.FORBIDDEN,
       message: 'The user does not have execute this permission.',
+    },
+    S3_UPLOAD_ERROR: {
+      code: 500001,
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: 'An error occurred when uploading the file to s3.',
     },
   },
 
