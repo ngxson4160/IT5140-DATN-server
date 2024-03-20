@@ -6,9 +6,10 @@ import { FormatResponseInterceptor } from './_core/middleware/interceptor/format
 import { HttpExceptionFilter } from './_core/middleware/filter/exception.filter';
 import { UserModule } from './module/user/user.module';
 import { PrismaModule } from './_core/prisma/prisma.module';
+import { FileSystemModule } from './_core/file-system/file-system.module';
 
 @Module({
-  imports: [PrismaModule, UserModule],
+  imports: [PrismaModule, UserModule, FileSystemModule],
   controllers: [AppController],
   providers: [
     AppService,
