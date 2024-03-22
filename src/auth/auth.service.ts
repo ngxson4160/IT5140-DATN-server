@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
-import { sign, verify } from 'jsonwebtoken';
 import { PrismaService } from 'src/_core/prisma/prisma.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { CommonException } from 'src/_core/middleware/filter/exception.filter';
@@ -9,38 +7,18 @@ import { MessageResponse } from 'src/_core/constant/message-response.constant';
 import { ERole, EUserStatus } from 'src/_core/constant/enum.constant';
 import { SignUpDto } from './dto/sign-up.dto';
 import { ENV } from 'src/_core/config/env.config';
+import {
+  comparePassword,
+  createToken,
+  hashPassword,
+} from 'src/_core/helper/utils';
+
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
   ) {}
-
-  async hashPassword(password: string) {
-    return await bcrypt.hash(
-      password,
-      parseInt(this.configService.get(ENV.AUTH_SALT_ROUND)),
-    );
-  }
-
-  async comparePassword(
-    inputPassword: string,
-    userPassword: string,
-  ): Promise<boolean> {
-    return await bcrypt.compare(inputPassword, userPassword);
-  }
-
-  async createToken(
-    payload: any,
-    privateKey: string,
-    tokenLife: string,
-  ): Promise<string> {
-    return sign({ data: payload }, privateKey, { expiresIn: tokenLife });
-  }
-
-  async verifyToken(token: string, privateKey: string) {
-    return verify(token, privateKey);
-  }
 
   async userSignUp(body: SignUpDto) {
     const { email, password } = body;
@@ -51,7 +29,7 @@ export class AuthService {
       throw new CommonException(MessageResponse.AUTH.EMAIL_EXIST);
     }
 
-    const passwordHash = await this.hashPassword(password);
+    const passwordHash = await hashPassword(password);
 
     const userCreated = await this.prisma.user.create({
       data: {
@@ -105,7 +83,7 @@ export class AuthService {
       throw new CommonException(MessageResponse.USER.NOT_EXIST);
     }
 
-    const isMatchPassword = await this.comparePassword(password, user.password);
+    const isMatchPassword = await comparePassword(password, user.password);
 
     if (!isMatchPassword) {
       throw new CommonException(
@@ -119,12 +97,12 @@ export class AuthService {
       status: user.status,
       roleIds: user.userRoles,
     };
-    const accessToken = await this.createToken(
+    const accessToken = await createToken(
       payload,
       this.configService.get(ENV.ACCESS_TOKEN_SECRET),
       this.configService.get(ENV.ACCESS_TOKEN_LIFE),
     );
-    const refreshToken = await this.createToken(
+    const refreshToken = await createToken(
       payload,
       this.configService.get(ENV.ACCESS_TOKEN_SECRET),
       this.configService.get(ENV.REFRESH_TOKEN_LIFE),
