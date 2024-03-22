@@ -14,18 +14,77 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
-  posts Post[]
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  firstName    String
+  lastName     String
+  password     String    @db.VarChar(255)
+  avatar       String?
+  cv           Json?
+  dob          DateTime
+  gender       Int
+  phoneNumber  String?   @map("phone_number") @db.VarChar(255)
+  accessToken  String?   @db.VarChar(500)
+  refreshToken String?   @map("refresh_token") @db.VarChar(500)
+
+  status    Int        @default(0) @db.TinyInt
+  createAt  DateTime?  @default(now()) @map("create_at") @db.Timestamp(0)
+  createBy  Int?       @map("create_by")
+  isDelete  Int?       @default(0) @map("is_delete")
+  updateAt  DateTime?  @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+  updateBy  Int?       @map("update_by")
+  userRoles UserRole[]
 }
 
-model Post {
-  id        Int     @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean @default(false)
-  author    User    @relation(fields: [authorId], references: [id])
-  authorId  Int
+model Role {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  status   Int?      @db.TinyInt
+  createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+  createBy Int?      @map("create_by")
+  isDelete Int?      @default(0) @map("is_delete")
+  updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+  updateBy Int?      @map("update_by")
+
+  userRoles       UserRole[]
+  rolePermissions RolePermission[]
+
+  @@map("role")
 }
 
+model Permission {
+  id     Int    @id @default(autoincrement())
+  action String @unique
+
+  status   Int?      @db.TinyInt
+  createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+  createBy Int?      @map("create_by")
+  isDelete Int?      @default(0) @map("is_delete")
+  updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+  updateBy Int?      @map("update_by")
+
+  rolePermissions RolePermission[]
+
+  @@map("permission")
+}
+
+model UserRole {
+  userId Int  @map("user_id")
+  roleId Int  @map("role_id")
+  user   User @relation(fields: [userId], references: [id])
+  role   Role @relation(fields: [roleId], references: [id])
+
+  @@unique([userId, roleId])
+  @@map("user_role")
+}
+
+model RolePermission {
+  permissionId Int        @map("permission_id")
+  roleId      Int        @map("role_id")
+  permission  Permission @relation(fields: [permissionId], references: [id])
+  role        Role       @relation(fields: [roleId], references: [id])
+
+  @@unique([permissionId, roleId])
+  @@map("role_permission")
+}
