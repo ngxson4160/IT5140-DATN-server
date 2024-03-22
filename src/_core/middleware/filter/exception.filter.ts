@@ -6,6 +6,7 @@ import {
   HttpStatus,
   InternalServerErrorException,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
@@ -14,7 +15,7 @@ import * as moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { COMMON_CONSTANT } from 'src/_core/constant/common.constant';
 
-export class BaseException extends HttpException {
+export class CommonException extends HttpException {
   constructor(response: IApiMeta, cause?: any) {
     super(response, response.statusCode || HttpStatus.INTERNAL_SERVER_ERROR);
     this.stack = cause;
@@ -26,12 +27,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
   catch(exception: HttpException, host: ArgumentsHost) {
     if (exception instanceof InternalServerErrorException) {
-      exception = new BaseException(
+      exception = new CommonException(
         MessageResponse.HTTPS.INTERNAL_SERVER_ERROR,
         exception.stack,
       );
-    } else if (!(exception instanceof BaseException)) {
-      exception = new BaseException(
+    } else if (exception instanceof UnauthorizedException) {
+      exception = new CommonException(MessageResponse.HTTPS.UNAUTHORIZED);
+    } else if (!(exception instanceof HttpException)) {
+      console.log(exception);
+      exception = new CommonException(
         MessageResponse.HTTPS.INTERNAL_SERVER_ERROR,
       );
     }
