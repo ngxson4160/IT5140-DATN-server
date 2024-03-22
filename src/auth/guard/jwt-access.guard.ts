@@ -1,7 +1,6 @@
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
-import { PrismaService } from 'src/_core/prisma/prisma.service';
 
 @Injectable()
 export class AccessTokenGuard extends AuthGuard('jwt') {

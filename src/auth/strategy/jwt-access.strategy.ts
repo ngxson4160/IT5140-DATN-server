@@ -5,7 +5,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
 import { CommonException } from 'src/_core/middleware/filter/exception.filter';
-import { PrismaService } from 'src/_core/prisma/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
