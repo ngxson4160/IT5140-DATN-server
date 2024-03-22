@@ -45,6 +45,16 @@ export const MessageResponse = {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       message: 'An error occurred when uploading the file to s3.',
     },
+    S3_DELETE_ERROR: {
+      code: 500002,
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: 'An error occurred when deleting the file in s3.',
+    },
+    LOCAL_UPLOAD_ERROR: {
+      code: 500003,
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: 'An error occurred when uploading the file local.',
+    },
   },
 
   AUTH: {

@@ -1,3 +1,7 @@
+import * as path from 'path';
+global.__mainDir = path.resolve(__dirname);
+global.__rootDir = path.resolve(__dirname, '../..');
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
