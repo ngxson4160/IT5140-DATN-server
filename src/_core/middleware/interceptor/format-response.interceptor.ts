@@ -8,13 +8,17 @@ import {
 import * as moment from 'moment';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { ENV } from 'src/_core/config/env.config';
 import { COMMON_CONSTANT } from 'src/_core/constant/common.constant';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
 import { IApiResponse } from 'src/_core/interface/response.type';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class FormatResponseInterceptor implements NestInterceptor {
   private logger = new Logger('😍😋😉 ResponseInterceptor');
+
+  constructor(private readonly configService: ConfigService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
@@ -46,7 +50,7 @@ export class FormatResponseInterceptor implements NestInterceptor {
           };
         }
 
-        if (parseInt(process.env.loggingEnable)) {
+        if (parseInt(this.configService.get(ENV.loggingEnable))) {
           const responseLog = {
             timestamp: moment().format(COMMON_CONSTANT.LOG_TIMESTAMP_FORMAT),
             request: {

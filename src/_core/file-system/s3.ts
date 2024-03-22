@@ -1,14 +1,17 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
-import { error } from 'console';
+import { ConfigService } from '@nestjs/config';
+import { ENV } from '../config/env.config';
 
 @Injectable()
 export class S3Service {
+  constructor(private readonly configService: ConfigService) {}
+
   private readonly s3Client = new S3Client({
-    region: process.env.AWS_BUCKET_REGION,
+    region: this.configService.get(ENV.AWS_BUCKET_REGION),
     credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      accessKeyId: this.configService.get(ENV.AWS_ACCESS_KEY),
+      secretAccessKey: this.configService.get(ENV.AWS_SECRET_ACCESS_KEY),
     },
     endpoint: 's3-ap-southeast-1.amazonaws.com/pdf',
   });
@@ -19,7 +22,7 @@ export class S3Service {
     try {
       const fileUpload = await this.s3Client.send(
         new PutObjectCommand({
-          Bucket: process.env.AWS_BUCKET_NAME,
+          Bucket: this.configService.get(ENV.AWS_BUCKET_NAME),
           Key: fileName,
           Body: file.buffer,
         }),

@@ -12,17 +12,16 @@ export class AuthController {
     private readonly authService: AuthService,
   ) {}
 
-  // @Role(ROLE.ADMIN)
   @IsPublic()
   @Post('sign-up')
-  async signUp(@Body() signUpDto: SignUpDto) {
-    return this.authService.signUp(signUpDto);
+  async signUp(@Body() body: SignUpDto) {
+    return this.authService.userSignUp(body);
   }
 
   @IsPublic()
   @Post('sign-in')
   async signIn(@Body() body: SignInDto) {
-    return this.authService.signIn(body);
+    return this.authService.userSignIn(body);
   }
 
   // @Role(ROLE.PILOT)

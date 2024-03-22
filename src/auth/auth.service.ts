@@ -1,23 +1,26 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { sign, verify } from 'jsonwebtoken';
-import { Prisma, User } from '@prisma/client';
 import { PrismaService } from 'src/_core/prisma/prisma.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { CommonException } from 'src/_core/middleware/filter/exception.filter';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
 import { ERole, EUserStatus } from 'src/_core/constant/enum.constant';
 import { SignUpDto } from './dto/sign-up.dto';
+import { ENV } from 'src/_core/config/env.config';
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async hashPassword(password: string) {
-    return await bcrypt.hash(password, parseInt(process.env.AUTH_SALT_ROUND));
+    return await bcrypt.hash(
+      password,
+      parseInt(this.configService.get(ENV.AUTH_SALT_ROUND)),
+    );
   }
 
   async comparePassword(
@@ -39,7 +42,7 @@ export class AuthService {
     return verify(token, privateKey);
   }
 
-  async signUp(body: SignUpDto) {
+  async userSignUp(body: SignUpDto) {
     const { email, password } = body;
 
     const user = await this.prisma.user.findUnique({ where: { email } });
@@ -80,7 +83,7 @@ export class AuthService {
     };
   }
 
-  async signIn(body: SignInDto) {
+  async userSignIn(body: SignInDto) {
     const { email, password } = body;
 
     const user = await this.prisma.user.findUnique({
@@ -109,7 +112,6 @@ export class AuthService {
         MessageResponse.AUTH.EMAIL_OR_PASSWORD_NOT_TRUE,
       );
     }
-    console.log(user.userRoles);
 
     const payload = {
       id: user.id,
@@ -119,15 +121,15 @@ export class AuthService {
     };
     const accessToken = await this.createToken(
       payload,
-      process.env.ACCESS_TOKEN_SECRET,
-      process.env.ACCESS_TOKEN_LIFE,
+      this.configService.get(ENV.ACCESS_TOKEN_SECRET),
+      this.configService.get(ENV.ACCESS_TOKEN_LIFE),
     );
     const refreshToken = await this.createToken(
       payload,
-      process.env.ACCESS_TOKEN_SECRET,
-      process.env.REFRESH_TOKEN_LIFE,
+      this.configService.get(ENV.ACCESS_TOKEN_SECRET),
+      this.configService.get(ENV.REFRESH_TOKEN_LIFE),
     );
-    const userUpdated = await this.prisma.user.update({
+    await this.prisma.user.update({
       where: { email },
       data: { accessToken, refreshToken },
     });

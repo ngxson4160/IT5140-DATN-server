@@ -9,9 +9,16 @@ import { PrismaModule } from './_core/prisma/prisma.module';
 import { FileSystemModule } from './_core/file-system/file-system.module';
 import { AccessTokenGuard } from './auth/guard/jwt-access.guard';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [PrismaModule, UserModule, FileSystemModule, AuthModule],
+  imports: [
+    PrismaModule,
+    UserModule,
+    FileSystemModule,
+    AuthModule,
+    ConfigModule.forRoot({ isGlobal: true }),
+  ],
   controllers: [AppController],
   providers: [
     AppService,
