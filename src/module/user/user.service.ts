@@ -1,34 +1,20 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { MessageResponse } from 'src/_core/constant/message-response.constant';
-import { BaseException } from 'src/_core/middleware/filter/exception.filter';
+import { BadRequestException, Body, Get, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/_core/prisma/prisma.service';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createUser() {
-    // const userExist = await this.prisma.user.findUnique({ where: { id } });
-    const userCreated = await this.prisma.user.create({
-      data: {
-        email: 'test' + new Date(),
-      },
+  async getDetail(id: number) {
+    const userFound = await this.prisma.user.findFirst({
+      where: { id },
     });
 
-    // const userUpdated = await this.prisma.user.update({
-    //   where: {
-    //     id: 1,
-    //   },
-    //   data: {
-    //     email: 'test' + new Date(),
-    //   },
-    // });
-
-    // throw new BaseException(MessageResponse.USER.NOT_FOUND(1))
+    if (!userFound) throw new BadRequestException('asdads');
 
     return {
-      meta: MessageResponse.USER.CREATE_SUCCESS,
-      data: userCreated,
+      message: 'sdfsdf',
+      data: userFound,
     };
   }
 }

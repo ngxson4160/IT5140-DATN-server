@@ -30,6 +30,11 @@ export const MessageResponse = {
       statusCode: HttpStatus.UNAUTHORIZED,
       message: 'Please enter token in following format: Bearer <JWT>.',
     },
+    MIN_LENGTH_8: {
+      code: 400002,
+      statusCode: HttpStatus.UNAUTHORIZED,
+      message: 'Minimum 8 characters',
+    },
     FORBIDDEN: {
       code: 403001,
       statusCode: HttpStatus.FORBIDDEN,
@@ -42,15 +47,42 @@ export const MessageResponse = {
     },
   },
 
+  AUTH: {
+    SIGN_UP_SUCCESS: {
+      code: 200001,
+      message:
+        'Account registration is successful, please wait for admin to approve your account',
+    },
+    SIGN_IN_SUCCESS: {
+      code: 200002,
+      message: 'Sign in user successfully.',
+    },
+    EMAIL_OR_PASSWORD_NOT_TRUE: {
+      code: 400001,
+      message: `Email or password not true.`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    EMAIL_EXIST: {
+      code: 400002,
+      message: `Email already exist.`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+  },
+
   USER: {
     CREATE_SUCCESS: {
-      code: 200001,
+      code: 200021,
       message: 'Create user successfully.',
     },
     NOT_FOUND: (id: number) => ({
-      code: 404001,
+      code: 400021,
       message: `User not found with id = ${id}.`,
-      statusCode: HttpStatus.UNAUTHORIZED,
+      statusCode: HttpStatus.BAD_REQUEST,
     }),
+    NOT_EXIST: {
+      code: 400022,
+      message: `User does not exist.`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
   },
 };
