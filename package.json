@@ -87,7 +87,8 @@
   "lint-staged": {
     "*.{js,ts,css,md}": [
       "yarn lint",
-      "yarn format"
+      "yarn format",
+      "git add ."
     ]
   }
 }
