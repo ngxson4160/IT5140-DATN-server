@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { COMMON_CONSTANT } from 'src/_core/constant/common.constant';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
-import { IApiResponse } from 'src/_core/type/response.type';
+import { IApiResponse } from 'src/_core/interface/response.type';
 
 @Injectable()
 export class FormatResponseInterceptor implements NestInterceptor {

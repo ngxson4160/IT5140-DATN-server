@@ -10,10 +10,10 @@ import {
 } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
-import { IApiMeta, IApiResponse } from 'src/_core/type/response.type';
 import * as moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { COMMON_CONSTANT } from 'src/_core/constant/common.constant';
+import { IApiMeta, IApiResponse } from 'src/_core/interface/response.type';
 
 export class CommonException extends HttpException {
   constructor(response: IApiMeta, cause?: any) {
