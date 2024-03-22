@@ -80,11 +80,11 @@ model UserRole {
 }
 
 model RolePermission {
-  permissioId Int        @map("permission_id")
+  permissionId Int        @map("permission_id")
   roleId      Int        @map("role_id")
-  permission  Permission @relation(fields: [permissioId], references: [id])
+  permission  Permission @relation(fields: [permissionId], references: [id])
   role        Role       @relation(fields: [roleId], references: [id])
 
-  @@unique([permissioId, roleId])
+  @@unique([permissionId, roleId])
   @@map("role_permission")
 }
