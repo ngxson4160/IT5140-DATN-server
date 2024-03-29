@@ -4,6 +4,7 @@ import {
   ExecutionContext,
   CallHandler,
   Logger,
+  HttpStatus,
 } from '@nestjs/common';
 import * as moment from 'moment';
 import { Observable } from 'rxjs';
@@ -11,8 +12,8 @@ import { map } from 'rxjs/operators';
 import { ENV } from 'src/_core/config/env.config';
 import { COMMON_CONSTANT } from 'src/_core/constant/common.constant';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
-import { IApiResponse } from 'src/_core/interface/response.type';
 import { ConfigService } from '@nestjs/config';
+import { IApiResponse } from 'src/_core/type/response.type';
 
 @Injectable()
 export class FormatResponseInterceptor implements NestInterceptor {
@@ -21,9 +22,17 @@ export class FormatResponseInterceptor implements NestInterceptor {
   constructor(private readonly configService: ConfigService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const request = context.switchToHttp().getRequest<Request>();
+    const response = context.switchToHttp().getResponse();
+
+    if (request.method === 'POST') {
+      if (response.statusCode === 201)
+        context.switchToHttp().getResponse().status(HttpStatus.OK);
+    }
+
     return next.handle().pipe(
       map((data: IApiResponse) => {
-        if (!data) {
+        if (typeof data !== 'object') {
           return {
             meta: {
               code: MessageResponse.COMMON.OK.code,
@@ -31,12 +40,8 @@ export class FormatResponseInterceptor implements NestInterceptor {
               message: MessageResponse.COMMON.OK.message,
               extraMeta: {},
             },
-            data: null,
+            data: data ? data : null,
           };
-        }
-
-        if (typeof data !== 'object') {
-          return;
         }
 
         const res = context.switchToHttp().getResponse();
