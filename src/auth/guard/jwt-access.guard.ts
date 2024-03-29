@@ -1,6 +1,7 @@
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
+import { DECORATOR_KEY } from 'src/_core/constant/common.constant';
 
 @Injectable()
 export class AccessTokenGuard extends AuthGuard('jwt') {
@@ -15,10 +16,10 @@ export class AccessTokenGuard extends AuthGuard('jwt') {
     const classHandlerRequest = context.getClass().name;
     req.permission = `${classHandlerRequest}.${methodHandlerRequest}`;
 
-    const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const isPublic = this.reflector.getAllAndOverride<boolean>(
+      DECORATOR_KEY.IS_PUBLIC,
+      [context.getHandler(), context.getClass()],
+    );
 
     if (isPublic) {
       return true;

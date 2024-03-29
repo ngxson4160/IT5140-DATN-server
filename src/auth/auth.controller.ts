@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { UserService } from 'src/module/user/user.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
-import { IsPublic } from './decorator/public.decorator';
+import { Public } from './decorator/public.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -12,13 +12,13 @@ export class AuthController {
     private readonly authService: AuthService,
   ) {}
 
-  @IsPublic()
+  @Public()
   @Post('sign-up')
   async signUp(@Body() body: SignUpDto) {
     return this.authService.userSignUp(body);
   }
 
-  @IsPublic()
+  @Public()
   @Post('sign-in')
   async signIn(@Body() body: SignInDto) {
     return this.authService.userSignIn(body);

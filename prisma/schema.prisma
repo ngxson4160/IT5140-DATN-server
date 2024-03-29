@@ -14,17 +14,22 @@ datasource db {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  firstName    String
-  lastName     String
-  password     String   @db.VarChar(255)
-  avatar       String?
-  dob          DateTime
-  gender       Int
-  phoneNumber  String?  @map("phone_number") @db.VarChar(255)
-  accessToken  String?  @db.VarChar(500)
-  refreshToken String?  @map("refresh_token") @db.VarChar(500)
+  id             Int      @id @default(autoincrement())
+  email          String   @unique
+  firstName      String
+  lastName       String
+  password       String   @db.VarChar(255)
+  avatar         String?
+  dob            DateTime
+  gender         Int
+  phoneNumber    String?  @map("phone_number") @db.VarChar(255)
+  cv             Json?
+  canApplyJob    Boolean? @default(false)
+  city           String?
+  desiredSalary  String
+  yearExperience Float
+  accessToken    String?  @db.VarChar(500)
+  refreshToken   String?  @map("refresh_token") @db.VarChar(500)
 
   status    Int        @default(0) @db.TinyInt
   isDeleted Int?       @default(0) @map("is_delete")
