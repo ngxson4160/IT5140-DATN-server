@@ -120,7 +120,7 @@ export class AuthService {
     const { email, password } = body;
 
     const user = await this.prisma.user.findUnique({
-      where: { email, status: EUserStatus.ACTIVE },
+      where: { email },
       select: {
         id: true,
         email: true,
@@ -136,6 +136,10 @@ export class AuthService {
 
     if (!user) {
       throw new CommonException(MessageResponse.USER.NOT_EXIST);
+    }
+
+    if (user.status === EUserStatus.INACTIVE) {
+      throw new CommonException(MessageResponse.AUTH.ACTIVE_ACCOUNT);
     }
 
     const isMatchPassword = await comparePassword(password, user.password);

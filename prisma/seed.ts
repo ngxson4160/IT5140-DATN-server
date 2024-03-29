@@ -87,6 +87,12 @@ const main = async () => {
       id: 5,
       action: 'FileController.uploadFile',
     },
+
+    //UserController
+    {
+      id: 6,
+      action: 'UserController.updateUser',
+    },
   ];
   const permissionPromise = permissions.map((permission) => {
     return prisma.permission.upsert({
@@ -154,6 +160,10 @@ const main = async () => {
     {
       roleId: 4,
       permissionId: 4,
+    },
+    {
+      roleId: 4,
+      permissionId: 6,
     },
   ];
 

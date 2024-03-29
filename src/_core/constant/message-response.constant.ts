@@ -87,10 +87,14 @@ export const MessageResponse = {
       message: `Email already exist.`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
-
     ACTIVE_ACCOUNT_FAIL: {
       code: 400010,
       message: `Active account fail.`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    ACTIVE_ACCOUNT: {
+      code: 400011,
+      message: `Please activate your account via email before performing this operation.`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
   },
@@ -99,6 +103,11 @@ export const MessageResponse = {
     CREATE_SUCCESS: {
       code: 200021,
       message: 'Create user successfully.',
+    },
+    UPDATE_SUCCESS: {
+      code: 200022,
+      message: `Update user success.`,
+      statusCode: HttpStatus.BAD_REQUEST,
     },
     NOT_FOUND: (id: number) => ({
       code: 400021,

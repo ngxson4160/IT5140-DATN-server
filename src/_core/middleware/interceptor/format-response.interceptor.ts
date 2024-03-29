@@ -12,8 +12,8 @@ import { map } from 'rxjs/operators';
 import { ENV } from 'src/_core/config/env.config';
 import { COMMON_CONSTANT } from 'src/_core/constant/common.constant';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
-import { IApiResponse } from 'src/_core/interface/response.type';
 import { ConfigService } from '@nestjs/config';
+import { IApiResponse } from 'src/_core/type/response.type';
 
 @Injectable()
 export class FormatResponseInterceptor implements NestInterceptor {
