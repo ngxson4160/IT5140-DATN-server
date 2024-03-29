@@ -40,7 +40,6 @@ const main = async () => {
       id: 2,
       name: 'ADMIN',
     },
-
     {
       id: 3,
       name: 'ENTERPRISE',
@@ -78,6 +77,16 @@ const main = async () => {
       id: 3,
       action: 'AuthController.userSignIn',
     },
+    {
+      id: 4,
+      action: 'AuthController.userActive',
+    },
+
+    //FileController
+    {
+      id: 5,
+      action: 'FileController.uploadFile',
+    },
   ];
   const permissionPromise = permissions.map((permission) => {
     return prisma.permission.upsert({
@@ -109,20 +118,47 @@ const main = async () => {
   await Promise.all(userRolePromise);
 
   //** ROLE - PERMISSION */
-  const rolePermissions = [
+  const roleRootPermission = permissions.map((permission) => ({
+    roleId: 1,
+    permissionId: permission.id,
+  }));
+
+  let rolePermissions = [
+    //ENTERPRISE
     {
-      roleId: 1,
+      roleId: 3,
       permissionId: 1,
     },
     {
-      roleId: 1,
+      roleId: 3,
       permissionId: 2,
     },
     {
-      roleId: 1,
+      roleId: 3,
       permissionId: 3,
     },
+
+    //USER
+    {
+      roleId: 4,
+      permissionId: 1,
+    },
+    {
+      roleId: 4,
+      permissionId: 2,
+    },
+    {
+      roleId: 4,
+      permissionId: 3,
+    },
+    {
+      roleId: 4,
+      permissionId: 4,
+    },
   ];
+
+  rolePermissions = [...rolePermissions, ...roleRootPermission];
+
   const rolePermissionPromise = rolePermissions.map((rolePermission) => {
     return prisma.rolePermission.upsert({
       where: {

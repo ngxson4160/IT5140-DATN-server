@@ -4,6 +4,7 @@ import {
   ExecutionContext,
   CallHandler,
   Logger,
+  HttpStatus,
 } from '@nestjs/common';
 import * as moment from 'moment';
 import { Observable } from 'rxjs';
@@ -21,6 +22,14 @@ export class FormatResponseInterceptor implements NestInterceptor {
   constructor(private readonly configService: ConfigService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const request = context.switchToHttp().getRequest<Request>();
+    const response = context.switchToHttp().getResponse();
+
+    if (request.method === 'POST') {
+      if (response.statusCode === 201)
+        context.switchToHttp().getResponse().status(HttpStatus.OK);
+    }
+
     return next.handle().pipe(
       map((data: IApiResponse) => {
         if (typeof data !== 'object') {
