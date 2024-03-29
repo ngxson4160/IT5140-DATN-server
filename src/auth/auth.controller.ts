@@ -1,9 +1,11 @@
-import { Body, Controller, Get, Post, Request } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserService } from 'src/module/user/user.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { Public } from './decorator/public.decorator';
+import { UserActiveDto } from './dto/user-active.dto';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -14,14 +16,21 @@ export class AuthController {
 
   @Public()
   @Post('sign-up')
-  async signUp(@Body() body: SignUpDto) {
+  signUp(@Body() body: SignUpDto) {
     return this.authService.userSignUp(body);
   }
 
   @Public()
   @Post('sign-in')
-  async signIn(@Body() body: SignInDto) {
+  signIn(@Body() body: SignInDto) {
     return this.authService.userSignIn(body);
+  }
+
+  @Public()
+  @Get('user-active')
+  async userActive(@Query() query: UserActiveDto, @Res() res: Response) {
+    await this.authService.userActive(query);
+    res.redirect('https://www.facebook.com/');
   }
 
   // @Role(ROLE.PILOT)

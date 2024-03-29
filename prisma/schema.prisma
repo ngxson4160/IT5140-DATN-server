@@ -26,8 +26,8 @@ model User {
   cv             Json?
   canApplyJob    Boolean? @default(false)
   city           String?
-  desiredSalary  String
-  yearExperience Float
+  desiredSalary  String?
+  yearExperience Float?
   accessToken    String?  @db.VarChar(500)
   refreshToken   String?  @map("refresh_token") @db.VarChar(500)
 

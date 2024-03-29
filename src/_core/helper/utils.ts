@@ -1,5 +1,7 @@
 import * as bcrypt from 'bcrypt';
-import { sign, verify } from 'jsonwebtoken';
+import { JwtPayload, sign, verify } from 'jsonwebtoken';
+import { CommonException } from '../middleware/filter/exception.filter';
+import { MessageResponse } from '../constant/message-response.constant';
 
 export const hashPassword = async (password: string) => {
   return await bcrypt.hash(password, parseInt(process.env.AUTH_SALT_ROUND));
@@ -21,5 +23,9 @@ export const createToken = async (
 };
 
 export const verifyToken = async (token: string, privateKey: string) => {
-  return verify(token, privateKey);
+  try {
+    return verify(token, privateKey);
+  } catch (e) {
+    throw new CommonException(MessageResponse.COMMON.INVALID_TOKEN);
+  }
 };
