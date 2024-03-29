@@ -23,12 +23,28 @@ export class FormatResponseInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
       map((data: IApiResponse) => {
+        if (!data) {
+          return {
+            meta: {
+              code: MessageResponse.COMMON.OK.code,
+              statusCode: MessageResponse.COMMON.OK.statusCode,
+              message: MessageResponse.COMMON.OK.message,
+              extraMeta: {},
+            },
+            data: null,
+          };
+        }
+
+        if (typeof data !== 'object') {
+          return;
+        }
+
         const res = context.switchToHttp().getResponse();
         const req = context.switchToHttp().getRequest();
 
         let responseData = {};
 
-        if (!data.meta || !data.data) {
+        if (!data?.meta || !data?.data) {
           responseData = {
             meta: {
               code: MessageResponse.COMMON.OK.code,

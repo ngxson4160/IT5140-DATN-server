@@ -14,25 +14,29 @@ datasource db {
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
-  email        String    @unique
-  firstName    String
-  lastName     String
-  password     String    @db.VarChar(255)
-  avatar       String?
-  cv           Json?
-  dob          DateTime
-  gender       Int
-  phoneNumber  String?   @map("phone_number") @db.VarChar(255)
-  accessToken  String?   @db.VarChar(500)
-  refreshToken String?   @map("refresh_token") @db.VarChar(500)
+  id             Int      @id @default(autoincrement())
+  email          String   @unique
+  firstName      String
+  lastName       String
+  password       String   @db.VarChar(255)
+  avatar         String?
+  dob            DateTime
+  gender         Int
+  phoneNumber    String?  @map("phone_number") @db.VarChar(255)
+  cv             Json?
+  canApplyJob    Boolean? @default(false)
+  city           String?
+  desiredSalary  String?
+  yearExperience Float?
+  accessToken    String?  @db.VarChar(500)
+  refreshToken   String?  @map("refresh_token") @db.VarChar(500)
 
   status    Int        @default(0) @db.TinyInt
-  createAt  DateTime?  @default(now()) @map("create_at") @db.Timestamp(0)
-  createBy  Int?       @map("create_by")
-  isDelete  Int?       @default(0) @map("is_delete")
-  updateAt  DateTime?  @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
-  updateBy  Int?       @map("update_by")
+  isDeleted Int?       @default(0) @map("is_delete")
+  createdAt DateTime?  @default(now()) @map("create_at") @db.Timestamp(0)
+  createdBy Int?       @map("create_by")
+  updatedAt DateTime?  @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+  updatedBy Int?       @map("update_by")
   userRoles UserRole[]
 }
 
@@ -40,12 +44,12 @@ model Role {
   id   Int    @id @default(autoincrement())
   name String @unique
 
-  status   Int?      @db.TinyInt
-  createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
-  createBy Int?      @map("create_by")
-  isDelete Int?      @default(0) @map("is_delete")
-  updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
-  updateBy Int?      @map("update_by")
+  status    Int?      @db.TinyInt
+  isDeleted Int?      @default(0) @map("is_delete")
+  createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+  createdBy Int?      @map("create_by")
+  updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+  updatedBy Int?      @map("update_by")
 
   userRoles       UserRole[]
   rolePermissions RolePermission[]
@@ -57,12 +61,12 @@ model Permission {
   id     Int    @id @default(autoincrement())
   action String @unique
 
-  status   Int?      @db.TinyInt
-  createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
-  createBy Int?      @map("create_by")
-  isDelete Int?      @default(0) @map("is_delete")
-  updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
-  updateBy Int?      @map("update_by")
+  status    Int?      @db.TinyInt
+  isDeleted Int?      @default(0) @map("is_delete")
+  createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+  createdBy Int?      @map("create_by")
+  updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+  updatedBy Int?      @map("update_by")
 
   rolePermissions RolePermission[]
 
@@ -81,9 +85,9 @@ model UserRole {
 
 model RolePermission {
   permissionId Int        @map("permission_id")
-  roleId      Int        @map("role_id")
-  permission  Permission @relation(fields: [permissionId], references: [id])
-  role        Role       @relation(fields: [roleId], references: [id])
+  roleId       Int        @map("role_id")
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  role         Role       @relation(fields: [roleId], references: [id])
 
   @@unique([permissionId, roleId])
   @@map("role_permission")

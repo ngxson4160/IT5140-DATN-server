@@ -10,14 +10,23 @@ import {
   comparePassword,
   createToken,
   hashPassword,
+  verifyToken,
 } from 'src/_core/helper/utils';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UserActiveDto } from './dto/user-active.dto';
+import { JwtPayload } from 'jsonwebtoken';
+import { NodeMailerService } from 'src/node-mailer/node-mailer.service';
+import {
+  COMMON_CONSTANT,
+  HANDLEBARS_TEMPLATE_MAIL,
+} from 'src/_core/constant/common.constant';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
+    private readonly nodeMailer: NodeMailerService,
   ) {}
 
   async userSignUp(body: SignUpDto) {
@@ -35,6 +44,7 @@ export class AuthService {
       data: {
         ...body,
         password: passwordHash,
+        status: EUserStatus.INACTIVE,
       },
     });
 
@@ -46,8 +56,30 @@ export class AuthService {
       data: { userId: userCreated.id, roleId: role.id },
     });
 
+    const token = await createToken(
+      { email },
+      this.configService.get(ENV.COMMON_TOKEN_SECRET),
+      this.configService.get(ENV.ACCESS_TOKEN_LIFE),
+    );
+
+    const urlActive = `${this.configService.get(
+      ENV.DOMAIN,
+    )}/auth/user-active?email=${email}&token=${token}`;
+
+    const context = {
+      email,
+      urlActive,
+    };
+
+    await this.nodeMailer.sendEmail(
+      [email],
+      COMMON_CONSTANT.VERIFY_ACCOUNT,
+      HANDLEBARS_TEMPLATE_MAIL.USER_SIGN_UP,
+      context,
+    );
+
     return {
-      meta: MessageResponse.AUTH.SIGN_UP_SUCCESS,
+      meta: MessageResponse.AUTH.SIGN_UP_SUCCESS(urlActive),
       data: {
         id: userCreated.id,
         email: userCreated.email,
@@ -59,6 +91,29 @@ export class AuthService {
         phoneNumber: userCreated.phoneNumber,
       },
     };
+  }
+
+  async userActive(query: UserActiveDto) {
+    const { email, token } = query;
+    const user = await this.prisma.user.findUnique({ where: { email } });
+
+    if (!user || user.status === EUserStatus.ACTIVE) {
+      throw new CommonException(MessageResponse.AUTH.ACTIVE_ACCOUNT_FAIL);
+    }
+
+    const payload = (await verifyToken(
+      token,
+      this.configService.get(ENV.COMMON_TOKEN_SECRET),
+    )) as JwtPayload;
+
+    if (email === payload.data.email) {
+      await this.prisma.user.update({
+        where: { email },
+        data: { status: EUserStatus.ACTIVE },
+      });
+    } else {
+      throw new CommonException(MessageResponse.AUTH.ACTIVE_ACCOUNT_FAIL);
+    }
   }
 
   async userSignIn(body: SignInDto) {

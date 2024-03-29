@@ -30,8 +30,13 @@ export const MessageResponse = {
       statusCode: HttpStatus.UNAUTHORIZED,
       message: 'Please enter token in following format: Bearer <JWT>.',
     },
+    INVALID_TOKEN: {
+      code: 401002,
+      statusCode: HttpStatus.UNAUTHORIZED,
+      message: 'Invalid Token.',
+    },
     MIN_LENGTH_8: {
-      code: 400002,
+      code: 400003,
       statusCode: HttpStatus.UNAUTHORIZED,
       message: 'Minimum 8 characters',
     },
@@ -58,13 +63,18 @@ export const MessageResponse = {
   },
 
   AUTH: {
-    SIGN_UP_SUCCESS: {
+    SIGN_UP_SUCCESS: (urlActive: string) => ({
       code: 200001,
       message:
         'Account registration is successful, please wait for admin to approve your account',
+      extraMeta: { urlActive },
+    }),
+    ACTIVE_ACCOUNT_SUCCUSS: {
+      code: 200002,
+      message: 'Active account is successful.',
     },
     SIGN_IN_SUCCESS: {
-      code: 200002,
+      code: 200003,
       message: 'Sign in user successfully.',
     },
     EMAIL_OR_PASSWORD_NOT_TRUE: {
@@ -75,6 +85,12 @@ export const MessageResponse = {
     EMAIL_EXIST: {
       code: 400002,
       message: `Email already exist.`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+
+    ACTIVE_ACCOUNT_FAIL: {
+      code: 400010,
+      message: `Active account fail.`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
   },

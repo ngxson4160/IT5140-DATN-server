@@ -8,12 +8,12 @@ import {
 } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ENV } from '../config/env.config';
 import { IFileService } from './file.interface';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import { CommonException } from '../middleware/filter/exception.filter';
-import { MessageResponse } from '../constant/message-response.constant';
+import { ENV } from 'src/_core/config/env.config';
+import { CommonException } from 'src/_core/middleware/filter/exception.filter';
+import { MessageResponse } from 'src/_core/constant/message-response.constant';
 
 @Injectable()
 export class S3Service implements IFileService {

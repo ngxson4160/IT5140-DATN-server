@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { S3Service } from './file-S3';
 import { LocalFileService } from './file-local';
 import { IFileService } from './file.interface';
-import { FileType } from './enum/file-type';
+import { FileType } from '../enum/file-type';
 
 @Injectable()
 export class FileFactory {
