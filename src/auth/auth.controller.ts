@@ -30,7 +30,7 @@ export class AuthController {
   @Get('user-active')
   async userActive(@Query() query: UserActiveDto, @Res() res: Response) {
     await this.authService.userActive(query);
-    res.redirect('https://www.facebook.com/');
+    res.redirect('https://www.facebook.com/'); //TODO redirect Login Page
   }
 
   // @Role(ROLE.PILOT)

@@ -9,8 +9,8 @@ import {
 } from 'fs-extra';
 import { join, resolve } from 'path';
 import { IFileService } from './file.interface';
-import { CommonException } from '../middleware/filter/exception.filter';
-import { MessageResponse } from '../constant/message-response.constant';
+import { CommonException } from '../../middleware/filter/exception.filter';
+import { MessageResponse } from '../../constant/message-response.constant';
 
 export class LocalFileService implements IFileService {
   RELATIVE_DIR = 'public';

@@ -9,15 +9,15 @@ import { AccessTokenGuard } from './auth/guard/jwt-access.guard';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
-import { FileSystemModule } from './_core/file-system/file.module';
+import { FileModule } from './_core/file-system/file.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     UserModule,
-    FileSystemModule,
+    FileModule,
     AuthModule,
-    ConfigModule.forRoot({ isGlobal: true }),
   ],
   controllers: [AppController],
   providers: [

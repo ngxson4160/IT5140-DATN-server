@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 10px 20px 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            /* text-align: center; */
+        }
+        .logo {
+            margin-bottom: 25px;
+            text-align: center;
+            padding: 0 100px;
+        }
+        .logo .line{
+            border-bottom: solid 1px gray;
+        }
+        .logo img {
+            width: 100px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        .message {
+            margin-bottom: 30px;
+            color: black;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .signature{
+            margin-top: 30px;
+            text-align: left;
+            color: black;
+            line-height: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="https://job-nest.s3.ap-southeast-1.amazonaws.com//279c94d4e4f70a41a3616a8dd86d1e254470d9730b3de1dc977843d04200b23835af3e7f8e70d5942e8b69ca11b64c802b63fac8854010dddeaadf609ed870ab.jpg" alt="Logo">
+            <div class="line"></div>
+        </div>
+        <div class="message">
+            <p>Xin chào <b>{{email}}</b>,</p>
+            <p>Cảm ơn bạn đã đăng ký tài khoản tại trang web của chúng tôi. Để hoàn tất quá trình đăng ký, vui lòng nhấn vào nút bên dưới để xác minh địa chỉ email của bạn.</p>
+        </div>
+        <a class="btn" href="{{urlActive}}">Xác minh địa chỉ email</a>
+        <div class="signature">
+            <p>Trân trọng,</p>
+            <p>Job Nest</p>
+        </div>
+    </div>
+</body>
+</html>

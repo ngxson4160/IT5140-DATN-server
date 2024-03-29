@@ -15,12 +15,18 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserActiveDto } from './dto/user-active.dto';
 import { JwtPayload } from 'jsonwebtoken';
+import { NodeMailerService } from 'src/node-mailer/node-mailer.service';
+import {
+  COMMON_CONSTANT,
+  HANDLEBARS_TEMPLATE_MAIL,
+} from 'src/_core/constant/common.constant';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
+    private readonly nodeMailer: NodeMailerService,
   ) {}
 
   async userSignUp(body: SignUpDto) {
@@ -59,6 +65,18 @@ export class AuthService {
     const urlActive = `${this.configService.get(
       ENV.DOMAIN,
     )}/auth/user-active?email=${email}&token=${token}`;
+
+    const context = {
+      email,
+      urlActive,
+    };
+
+    await this.nodeMailer.sendEmail(
+      [email],
+      COMMON_CONSTANT.VERIFY_ACCOUNT,
+      HANDLEBARS_TEMPLATE_MAIL.USER_SIGN_UP,
+      context,
+    );
 
     return {
       meta: MessageResponse.AUTH.SIGN_UP_SUCCESS(urlActive),
