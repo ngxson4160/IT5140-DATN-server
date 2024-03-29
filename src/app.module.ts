@@ -9,7 +9,7 @@ import { AccessTokenGuard } from './auth/guard/jwt-access.guard';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
-import { FileModule } from './_core/file-system/file.module';
+import { FileModule } from './file-system/file.module';
 
 @Module({
   imports: [

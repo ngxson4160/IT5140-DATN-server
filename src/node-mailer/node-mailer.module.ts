@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { NodeMailerService } from './node-mailer.service';
-// import { BackendConfigService } from '../services/backend-config.service';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { ConfigService } from '@nestjs/config';
+import { ENV } from 'src/_core/config/env.config';
 
 @Module({
   providers: [NodeMailerService],
@@ -12,15 +12,15 @@ import { ConfigService } from '@nestjs/config';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         transport: {
-          host: configService.get('MAIL_HOST'),
+          host: configService.get(ENV.MAIL_HOST),
           secure: true,
           auth: {
-            user: configService.get('MAIL_USERNAME'),
-            pass: configService.get('MAIL_PASSWORD'),
+            user: configService.get(ENV.MAIL_USERNAME),
+            pass: configService.get(ENV.MAIL_PASSWORD),
           },
         },
         defaults: {
-          from: `"Job Nest" <Nguyen Xuan Son>`,
+          from: 'Job Nest',
         },
         template: {
           dir: process.cwd() + '/dist/templates',
