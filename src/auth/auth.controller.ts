@@ -20,7 +20,6 @@ export class AuthController {
   @Public()
   @Post('user/sign-up')
   signUp(@Body() body: SignUpDto) {
-    console.log(new Date());
     return this.authService.userSignUp(body);
   }
 
