@@ -30,7 +30,7 @@ export class AuthService {
   ) {}
 
   async userSignUp(body: SignUpDto) {
-    const { email, password } = body;
+    const { email, password, firstName, lastName } = body;
 
     const user = await this.prisma.user.findUnique({ where: { email } });
 
@@ -67,7 +67,7 @@ export class AuthService {
     )}/auth/user-active?email=${email}&token=${token}`;
 
     const context = {
-      email,
+      name: `${firstName} ${lastName}`,
       urlActive,
     };
 

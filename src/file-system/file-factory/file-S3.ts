@@ -28,16 +28,15 @@ export class S3Service implements IFileService {
   });
 
   async uploadFile(file: Express.Multer.File, pathFile?: string) {
-    const key = pathFile
-      ? `${pathFile}/${file.originalname}`
-      : file.originalname;
+    const pathFileUploadToS3 = pathFile ? `${pathFile}/` : '';
 
     const keyHash = crypto.randomBytes(64).toString('hex');
     const extname = path.extname(file.originalname);
+    const key = `${pathFileUploadToS3}${keyHash}${extname}`;
 
     const createParams: PutObjectCommandInput = {
       Bucket: this.configService.get(ENV.AWS_BUCKET_NAME),
-      Key: `${pathFile}/${keyHash}${extname}`,
+      Key: key,
       Body: file.buffer,
     };
 
@@ -46,7 +45,7 @@ export class S3Service implements IFileService {
 
       const absolutePath = `https://${this.configService.get(
         ENV.AWS_BUCKET_NAME,
-      )}.s3.amazonaws.com/${pathFile}/${keyHash}${extname}`;
+      )}.s3.amazonaws.com/${key}`;
 
       return {
         relativePath: key,

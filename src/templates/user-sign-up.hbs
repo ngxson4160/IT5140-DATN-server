@@ -34,7 +34,7 @@
         }
         .message {
             margin-bottom: 30px;
-            color: black;
+            color: black !important;
         }
         .btn {
             display: inline-block;
@@ -58,11 +58,11 @@
 <body>
     <div class="container">
         <div class="logo">
-            <img src="https://job-nest.s3.ap-southeast-1.amazonaws.com//279c94d4e4f70a41a3616a8dd86d1e254470d9730b3de1dc977843d04200b23835af3e7f8e70d5942e8b69ca11b64c802b63fac8854010dddeaadf609ed870ab.jpg" alt="Logo">
+            <img src="https://job-nest.s3.ap-southeast-1.amazonaws.com/logo.jpg" alt="Logo">
             <div class="line"></div>
         </div>
         <div class="message">
-            <p>Xin chào <b>{{email}}</b>,</p>
+            <p>Xin chào <b>{{name}}</b>,</p>
             <p>Cảm ơn bạn đã đăng ký tài khoản tại trang web của chúng tôi. Để hoàn tất quá trình đăng ký, vui lòng nhấn vào nút bên dưới để xác minh địa chỉ email của bạn.</p>
         </div>
         <a class="btn" href="{{urlActive}}">Xác minh địa chỉ email</a>
