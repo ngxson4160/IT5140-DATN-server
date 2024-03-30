@@ -82,6 +82,15 @@ export const MessageResponse = {
       code: 200004,
       message: 'Change password successfully.',
     },
+    REQUEST_RESET_PASSWORD_SUCCESS: {
+      code: 200005,
+      message:
+        'The link to create a new password has been sent to the corresponding email.',
+    },
+    RESET_PASSWORD_SUCCESS: {
+      code: 200005,
+      message: 'Reset password success.',
+    },
     EMAIL_OR_PASSWORD_NOT_TRUE: {
       code: 400001,
       message: `Email or password not true.`,
@@ -105,6 +114,11 @@ export const MessageResponse = {
     PASSWORD_INCORRECT: {
       code: 400012,
       message: `Password incorrect.`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    RESET_PASSWORD_FAIL: {
+      code: 400013,
+      message: `Reset password fail.`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
   },

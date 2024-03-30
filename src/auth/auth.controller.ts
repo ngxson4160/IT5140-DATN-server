@@ -9,6 +9,8 @@ import { Response } from 'express';
 import { UserData } from './decorator/user-data.decorator';
 import { IUserData } from 'src/_core/type/user-data.type';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -42,5 +44,17 @@ export class AuthController {
     @Body() body: ChangePasswordDto,
   ) {
     return this.authService.changePassword(userData.id, body);
+  }
+
+  @Public()
+  @Post('user/request-reset-password')
+  requestPassword(@Body() body: RequestResetPasswordDto) {
+    return this.authService.requestPassword(body);
+  }
+
+  @Public()
+  @Post('user/reset-password')
+  resetPassword(@Body() body: ResetPasswordDto) {
+    return this.authService.resetPassword(body);
   }
 }

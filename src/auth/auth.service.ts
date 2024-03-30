@@ -21,6 +21,8 @@ import {
   HANDLEBARS_TEMPLATE_MAIL,
 } from 'src/_core/constant/common.constant';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -205,6 +207,76 @@ export class AuthService {
 
     return {
       meta: MessageResponse.AUTH.CHANGE_PASSWORD_SUCCESS,
+    };
+  }
+
+  async requestPassword(body: RequestResetPasswordDto) {
+    const { email } = body;
+
+    const user = await this.prisma.user.findUnique({
+      where: { email, status: EUserStatus.ACTIVE },
+    });
+
+    if (!user) {
+      throw new CommonException(MessageResponse.USER.NOT_EXIST);
+    }
+
+    const token = await createToken(
+      { email, id: user.id },
+      this.configService.get(ENV.COMMON_TOKEN_SECRET),
+      this.configService.get(ENV.ACCESS_TOKEN_LIFE),
+    );
+
+    //TODO change url to Reset password page
+    const urlReset = `${this.configService.get(
+      ENV.DOMAIN,
+    )}/auth/user/verify?email=${email}&token=${token}`;
+
+    const context = {
+      email,
+      urlReset,
+    };
+
+    await this.nodeMailer.sendEmail(
+      [email],
+      COMMON_CONSTANT.RESET_PASSWORD,
+      HANDLEBARS_TEMPLATE_MAIL.RESET_PASSWORD,
+      context,
+    );
+
+    return {
+      meta: MessageResponse.AUTH.REQUEST_RESET_PASSWORD_SUCCESS,
+    };
+  }
+
+  //TODO invalid token when reset password successfully
+  async resetPassword(body: ResetPasswordDto) {
+    const { token, email, password } = body;
+
+    const payload = (await verifyToken(
+      token,
+      this.configService.get(ENV.COMMON_TOKEN_SECRET),
+    )) as JwtPayload;
+
+    const user = await this.prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      throw new CommonException(MessageResponse.USER.NOT_EXIST);
+    }
+
+    if (email === payload.data.email && user.id === payload.data.id) {
+      const passwordHash = await hashPassword(password);
+
+      await this.prisma.user.update({
+        where: { email },
+        data: { password: passwordHash },
+      });
+    } else {
+      throw new CommonException(MessageResponse.AUTH.RESET_PASSWORD_FAIL);
+    }
+
+    return {
+      meta: MessageResponse.AUTH.RESET_PASSWORD_SUCCESS,
     };
   }
 }
