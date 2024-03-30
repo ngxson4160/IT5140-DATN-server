@@ -117,7 +117,10 @@ export const MessageResponse = {
     UPDATE_SUCCESS: {
       code: 200022,
       message: `Update user success.`,
-      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    GET_USER_DETAIL: {
+      code: 200023,
+      message: `Get user detail success.`,
     },
     NOT_FOUND: (id: number) => ({
       code: 400021,

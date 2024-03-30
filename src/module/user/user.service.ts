@@ -9,16 +9,27 @@ import { EUserStatus } from 'src/_core/constant/enum.constant';
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getDetail(id: number) {
-    const userFound = await this.prisma.user.findFirst({
+  async getDetailUser(id: number) {
+    const user = await this.prisma.user.findFirst({
       where: { id },
     });
 
-    if (!userFound) throw new BadRequestException('asdads');
+    if (!user) throw new CommonException(MessageResponse.USER.NOT_FOUND(id));
 
     return {
-      message: 'sdfsdf',
-      data: userFound,
+      message: MessageResponse.USER.GET_USER_DETAIL,
+      data: {
+        id: user.id,
+        email: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        avatar: user.avatar,
+        dob: user.dob,
+        gender: user.gender,
+        phoneNumber: user.phoneNumber,
+        cv: user.cv,
+        city: user.city,
+      },
     };
   }
 
