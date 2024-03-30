@@ -49,7 +49,7 @@ export class FormatResponseInterceptor implements NestInterceptor {
 
         let responseData = {};
 
-        if (!data?.meta || !data?.data) {
+        if (!data?.meta && !data?.data) {
           responseData = {
             meta: {
               code: MessageResponse.COMMON.OK.code,
@@ -62,10 +62,10 @@ export class FormatResponseInterceptor implements NestInterceptor {
         } else {
           responseData = {
             meta: {
-              code: data.meta.code,
+              code: data.meta?.code ?? MessageResponse.COMMON.OK.code,
               statusCode: res.statusCode,
-              message: data.meta.message,
-              extraMeta: data.meta.extraMeta ? data.meta.extraMeta : {},
+              message: data.meta?.message ?? MessageResponse.COMMON.OK.message,
+              extraMeta: data.meta?.extraMeta ?? {},
             },
             data: data.data ? data.data : null,
           };

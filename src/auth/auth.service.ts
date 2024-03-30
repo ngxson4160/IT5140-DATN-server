@@ -20,6 +20,7 @@ import {
   COMMON_CONSTANT,
   HANDLEBARS_TEMPLATE_MAIL,
 } from 'src/_core/constant/common.constant';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -64,7 +65,7 @@ export class AuthService {
 
     const urlActive = `${this.configService.get(
       ENV.DOMAIN,
-    )}/auth/user-active?email=${email}&token=${token}`;
+    )}/auth/user/verify?email=${email}&token=${token}`;
 
     const context = {
       name: `${firstName} ${lastName}`,
@@ -93,7 +94,7 @@ export class AuthService {
     };
   }
 
-  async userActive(query: UserActiveDto) {
+  async userVerify(query: UserActiveDto) {
     const { email, token } = query;
     const user = await this.prisma.user.findUnique({ where: { email } });
 
@@ -177,6 +178,33 @@ export class AuthService {
         accessToken,
         refreshToken,
       },
+    };
+  }
+
+  async changePassword(userId: number, body: ChangePasswordDto) {
+    const { oldPassword, newPassword } = body;
+
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user) {
+      throw new CommonException(MessageResponse.USER.NOT_FOUND(userId));
+    }
+
+    const isMatchPassword = await comparePassword(oldPassword, user.password);
+
+    if (!isMatchPassword) {
+      throw new CommonException(MessageResponse.AUTH.PASSWORD_INCORRECT);
+    }
+
+    const newPasswordHash = await hashPassword(newPassword);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: newPasswordHash },
+    });
+
+    return {
+      meta: MessageResponse.AUTH.CHANGE_PASSWORD_SUCCESS,
     };
   }
 }
