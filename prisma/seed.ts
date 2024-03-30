@@ -79,18 +79,26 @@ const main = async () => {
     },
     {
       id: 4,
-      action: 'AuthController.userActive',
+      action: 'AuthController.userVerify',
+    },
+    {
+      id: 5,
+      action: 'AuthController.changePassword',
     },
 
     //FileController
     {
-      id: 5,
-      action: 'FileController.uploadFile',
+      id: 7,
+      action: 'FileController.uploadImagesToS3',
+    },
+    {
+      id: 8,
+      action: 'FileController.uploadPdfsToS3',
     },
 
     //UserController
     {
-      id: 6,
+      id: 9,
       action: 'UserController.updateUser',
     },
   ];
@@ -164,6 +172,18 @@ const main = async () => {
     {
       roleId: 4,
       permissionId: 6,
+    },
+    {
+      roleId: 4,
+      permissionId: 7,
+    },
+    {
+      roleId: 4,
+      permissionId: 8,
+    },
+    {
+      roleId: 4,
+      permissionId: 9,
     },
   ];
 

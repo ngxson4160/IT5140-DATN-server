@@ -13,13 +13,15 @@ import { Public } from 'src/auth/decorator/public.decorator';
 export class FileController {
   constructor(private readonly fileService: FileService) {}
 
-  @Public()
-  @Post()
+  @Post('images')
   @UseInterceptors(FileInterceptor('file'))
-  uploadFile(
-    @UploadedFile() file: Express.Multer.File,
-    @Body('path') path: string,
-  ) {
-    return this.fileService.uploadToS3(file, path);
+  uploadImagesToS3(@UploadedFile() file: Express.Multer.File) {
+    return this.fileService.uploadToS3(file, 'images');
+  }
+
+  @Post('pdfs')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadPdfsToS3(@UploadedFile() file: Express.Multer.File) {
+    return this.fileService.uploadToS3(file, 'pdfs');
   }
 }

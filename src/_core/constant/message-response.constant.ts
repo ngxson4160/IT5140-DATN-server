@@ -63,6 +63,7 @@ export const MessageResponse = {
   },
 
   AUTH: {
+    //TODO delete url
     SIGN_UP_SUCCESS: (urlActive: string) => ({
       code: 200001,
       message:
@@ -76,6 +77,19 @@ export const MessageResponse = {
     SIGN_IN_SUCCESS: {
       code: 200003,
       message: 'Sign in user successfully.',
+    },
+    CHANGE_PASSWORD_SUCCESS: {
+      code: 200004,
+      message: 'Change password successfully.',
+    },
+    REQUEST_RESET_PASSWORD_SUCCESS: {
+      code: 200005,
+      message:
+        'The link to create a new password has been sent to the corresponding email.',
+    },
+    RESET_PASSWORD_SUCCESS: {
+      code: 200005,
+      message: 'Reset password success.',
     },
     EMAIL_OR_PASSWORD_NOT_TRUE: {
       code: 400001,
@@ -97,6 +111,16 @@ export const MessageResponse = {
       message: `Please activate your account via email before performing this operation.`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
+    PASSWORD_INCORRECT: {
+      code: 400012,
+      message: `Password incorrect.`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    RESET_PASSWORD_FAIL: {
+      code: 400013,
+      message: `Reset password fail.`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
   },
 
   USER: {
@@ -107,7 +131,10 @@ export const MessageResponse = {
     UPDATE_SUCCESS: {
       code: 200022,
       message: `Update user success.`,
-      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    GET_USER_DETAIL: {
+      code: 200023,
+      message: `Get user detail success.`,
     },
     NOT_FOUND: (id: number) => ({
       code: 400021,

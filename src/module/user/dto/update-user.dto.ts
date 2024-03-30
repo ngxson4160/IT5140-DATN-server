@@ -1,11 +1,12 @@
 import { JsonValue } from '@prisma/client/runtime/library';
 import { Transform, TransformFnParams } from 'class-transformer';
 import {
-  IsDate,
+  IsArray,
+  IsDateString,
   IsEnum,
   IsJSON,
   IsNotEmpty,
-  IsOptional,
+  IsNumber,
   IsString,
 } from 'class-validator';
 import { EGender } from 'src/_core/constant/enum.constant';
@@ -21,12 +22,10 @@ export class UpdateUserDto {
   @Transform(({ value }: TransformFnParams) => value?.trim())
   lastName: string;
 
-  @IsOptional()
   @IsString()
   avatar: string;
 
-  @IsOptional()
-  @IsDate()
+  @IsDateString()
   dob: Date;
 
   @IsEnum(EGender)
@@ -35,7 +34,7 @@ export class UpdateUserDto {
   @IsString()
   phoneNumber: string;
 
-  @IsJSON()
+  @IsArray()
   cv: JsonValue;
 
   @IsString()
@@ -43,12 +42,9 @@ export class UpdateUserDto {
   @Transform(({ value }: TransformFnParams) => value?.trim())
   city: string;
 
-  @IsString()
-  @IsNotEmpty()
-  @Transform(({ value }: TransformFnParams) => value?.trim())
-  desiredSalary: string;
+  @IsNumber()
+  desiredSalary: number;
 
-  @IsString()
-  @IsNotEmpty()
+  @IsNumber()
   yearExperience: number;
 }

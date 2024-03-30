@@ -8,7 +8,7 @@ export class FileService {
 
   constructor(private readonly fileFactory: FileFactory) {}
 
-  uploadToS3(file: Express.Multer.File, path: string) {
-    this.s3File.uploadFile(file, path);
+  uploadToS3(file: Express.Multer.File, path?: string) {
+    return this.s3File.uploadFile(file, path);
   }
 }

@@ -6,6 +6,11 @@ import { SignUpDto } from './dto/sign-up.dto';
 import { Public } from './decorator/public.decorator';
 import { UserActiveDto } from './dto/user-active.dto';
 import { Response } from 'express';
+import { UserData } from './decorator/user-data.decorator';
+import { IUserData } from 'src/_core/type/user-data.type';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -15,33 +20,41 @@ export class AuthController {
   ) {}
 
   @Public()
-  @Post('sign-up')
+  @Post('user/sign-up')
   signUp(@Body() body: SignUpDto) {
     return this.authService.userSignUp(body);
   }
 
   @Public()
-  @Post('sign-in')
+  @Post('user/sign-in')
   signIn(@Body() body: SignInDto) {
     return this.authService.userSignIn(body);
   }
 
   @Public()
-  @Get('user-active')
-  async userActive(@Query() query: UserActiveDto, @Res() res: Response) {
-    await this.authService.userActive(query);
+  @Get('user/verify')
+  async userVerify(@Query() query: UserActiveDto, @Res() res: Response) {
+    await this.authService.userVerify(query);
     res.redirect('https://www.facebook.com/'); //TODO redirect Login Page
   }
 
-  // @Role(ROLE.PILOT)
-  // @Post('log-out')
-  // async logOut(@Request() req) {
-  //   return this.authService.logOut(req);
-  // }
+  @Post('user/change-password')
+  async changePassword(
+    @UserData() userData: IUserData,
+    @Body() body: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(userData.id, body);
+  }
 
-  // @Role(ROLE.PILOT, ROLE.ADMIN, ROLE.CUSTOMER, ROLE.TOUR_GUIDE)
-  // @Get('profile')
-  // async getProfile(@UserData() userInfo: UserDataType) {
-  //   return this.authService.getProfile(userInfo.email);
-  // }
+  @Public()
+  @Post('user/request-reset-password')
+  requestPassword(@Body() body: RequestResetPasswordDto) {
+    return this.authService.requestPassword(body);
+  }
+
+  @Public()
+  @Post('user/reset-password')
+  resetPassword(@Body() body: ResetPasswordDto) {
+    return this.authService.resetPassword(body);
+  }
 }
