@@ -20,6 +20,7 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(req: Request & { permission: string }, payload: JwtPayload) {
     const { data } = payload;
 
+    //TODO Delete roleIds, userId -> roleIds
     for (const role of data.roleIds) {
       const permission = await this.prisma.rolePermission.findFirst({
         where: {
