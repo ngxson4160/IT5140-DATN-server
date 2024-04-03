@@ -27,11 +27,11 @@ export class UserService {
         dob: user.dob,
         gender: user.gender,
         phoneNumber: user.phoneNumber,
-        cv: user.cv,
-        city: user.city,
-        canApplyJob: user.canApplyJob,
-        desiredSalary: user.desiredSalary,
-        yearExperience: user.yearExperience,
+        // cv: user.cv,
+        // city: user.city,
+        // canApplyJob: user.canApplyJob,
+        // desiredSalary: user.desiredSalary,
+        // yearExperience: user.yearExperience,
       },
     };
   }
@@ -54,8 +54,8 @@ export class UserService {
         dob: user.dob,
         gender: user.gender,
         phoneNumber: user.phoneNumber,
-        cv: user.cv,
-        city: user.city,
+        // cv: user.cv,
+        // city: user.city,
       },
     };
   }
@@ -93,11 +93,11 @@ export class UserService {
         dob,
         gender,
         phoneNumber,
-        cv,
-        city,
-        desiredSalary,
-        yearExperience,
-        canApplyJob: true,
+        // cv,
+        // city,
+        // desiredSalary,
+        // yearExperience,
+        // canApplyJob: true,
       },
     });
 

@@ -1,5 +1,7 @@
 export enum ERole {
   ROOT = 'ROOT',
+  ADMIN = 'ADMIN',
+  COMPANY = 'COMPANY',
   USER = 'USER',
 }
 

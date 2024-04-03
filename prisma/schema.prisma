@@ -17,14 +17,14 @@ model User {
   id        Int  @id @default(autoincrement())
   companyId Int? @map("company_id")
 
-  email       String   @unique
-  firstName   String   @map("first_name")
-  lastName    String   @map("last_name")
-  password    String   @db.VarChar(255)
+  email       String    @unique
+  firstName   String    @map("first_name")
+  lastName    String    @map("last_name")
+  password    String    @db.VarChar(255)
   avatar      String?
-  dob         DateTime
-  gender      Int
-  phoneNumber String?  @map("phone_number") @db.VarChar(255)
+  dob         DateTime?
+  gender      Int?
+  phoneNumber String?   @map("phone_number") @db.VarChar(255)
 
   status    Int       @default(0) @db.TinyInt
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
@@ -96,8 +96,8 @@ model Company {
   id                  Int @id @default(autoincrement())
   jobCategoryParentId Int @map("job_category_parent_id")
 
-  name           String
-  email          String  @unique
+  name           String  @unique
+  email          Json?
   aboutUs        String? @map("about_us")
   avatar         String?
   coverImage     String? @map("cover_image")
@@ -107,7 +107,7 @@ model Company {
   averageAge     Float   @map("average_Age")
   primaryCity    String  @map("primary_city")
   extraCity      Json?   @map("extra_city")
-  priamryAddress String  @map("primary_address")
+  primaryAddress String  @map("primary_address")
   extraAddress   Json?   @map("extra_address")
   phoneNumber    Json?   @map("phone_number")
   canCreateJob   Boolean @default(false)

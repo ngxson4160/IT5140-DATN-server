@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserService } from 'src/module/user/user.service';
 import { SignInDto } from './dto/sign-in.dto';
-import { SignUpDto } from './dto/sign-up.dto';
+import { UserSignUpDto } from './dto/sign-up.dto';
 import { Public } from './decorator/public.decorator';
 import { UserActiveDto } from './dto/user-active.dto';
 import { Response } from 'express';
@@ -11,6 +11,7 @@ import { IUserData } from 'src/_core/type/user-data.type';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { CompanySignUpDto } from './dto/company-sign-up.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -21,8 +22,14 @@ export class AuthController {
 
   @Public()
   @Post('user/sign-up')
-  signUp(@Body() body: SignUpDto) {
+  userSignUp(@Body() body: UserSignUpDto) {
     return this.authService.userSignUp(body);
+  }
+
+  @Public()
+  @Post('company/sign-up')
+  companySignUp(@Body() body: CompanySignUpDto) {
+    return this.authService.companySignUp(body);
   }
 
   @Public()
@@ -32,13 +39,13 @@ export class AuthController {
   }
 
   @Public()
-  @Get('user/verify')
-  async userVerify(@Query() query: UserActiveDto, @Res() res: Response) {
-    await this.authService.userVerify(query);
+  @Get('verify-account')
+  async verifyAccount(@Query() query: UserActiveDto, @Res() res: Response) {
+    await this.authService.verifyAccount(query);
     res.redirect('https://www.facebook.com/'); //TODO redirect Login Page
   }
 
-  @Post('user/change-password')
+  @Post('change-password')
   async changePassword(
     @UserData() userData: IUserData,
     @Body() body: ChangePasswordDto,

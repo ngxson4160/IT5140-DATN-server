@@ -64,31 +64,37 @@ export const MessageResponse = {
 
   AUTH: {
     //TODO delete url
-    SIGN_UP_SUCCESS: (urlActive: string) => ({
+    USER_SIGN_UP_SUCCESS: (urlActive: string) => ({
       code: 200001,
       message:
         'Account registration is successful, please wait for admin to approve your account',
       extraMeta: { urlActive },
     }),
-    ACTIVE_ACCOUNT_SUCCUSS: {
+    COMPANY_SIGN_UP_SUCCESS: (urlActive: string) => ({
       code: 200002,
+      message:
+        'Company registration is successful, please wait for admin to approve your account',
+      extraMeta: { urlActive },
+    }),
+    ACTIVE_ACCOUNT_SUCCUSS: {
+      code: 200003,
       message: 'Active account is successful.',
     },
     SIGN_IN_SUCCESS: {
-      code: 200003,
+      code: 200004,
       message: 'Sign in user successfully.',
     },
     CHANGE_PASSWORD_SUCCESS: {
-      code: 200004,
+      code: 200005,
       message: 'Change password successfully.',
     },
     REQUEST_RESET_PASSWORD_SUCCESS: {
-      code: 200005,
+      code: 200006,
       message:
         'The link to create a new password has been sent to the corresponding email.',
     },
     RESET_PASSWORD_SUCCESS: {
-      code: 200005,
+      code: 200007,
       message: 'Reset password success.',
     },
     EMAIL_OR_PASSWORD_NOT_TRUE: {
@@ -144,6 +150,14 @@ export const MessageResponse = {
     NOT_EXIST: {
       code: 400022,
       message: `User does not exist.`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+  },
+
+  COMPANY: {
+    NAME_EXIST: {
+      code: 400041,
+      message: `Company name  exist.`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
   },
