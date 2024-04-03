@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserService } from 'src/module/user/user.service';
 import { SignInDto } from './dto/sign-in.dto';
@@ -33,7 +33,7 @@ export class AuthController {
   }
 
   @Public()
-  @Post('user/sign-in')
+  @Post('sign-in')
   signIn(@Body() body: SignInDto) {
     return this.authService.userSignIn(body);
   }
@@ -45,7 +45,7 @@ export class AuthController {
     res.redirect('https://www.facebook.com/'); //TODO redirect Login Page
   }
 
-  @Post('change-password')
+  @Put('change-password')
   async changePassword(
     @UserData() userData: IUserData,
     @Body() body: ChangePasswordDto,
@@ -54,13 +54,13 @@ export class AuthController {
   }
 
   @Public()
-  @Post('user/request-reset-password')
+  @Post('request-reset-password')
   requestPassword(@Body() body: RequestResetPasswordDto) {
     return this.authService.requestPassword(body);
   }
 
   @Public()
-  @Post('user/reset-password')
+  @Put('reset-password')
   resetPassword(@Body() body: ResetPasswordDto) {
     return this.authService.resetPassword(body);
   }
