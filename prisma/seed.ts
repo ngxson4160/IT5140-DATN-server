@@ -141,6 +141,10 @@ const main = async () => {
       id: 8,
       action: 'UserController.updateUser',
     },
+    {
+      id: 9,
+      action: 'CompanyController.getMyCompany',
+    },
   ];
   const permissionPromise = permissions.map((permission) => {
     return prisma.permission.upsert({
@@ -192,6 +196,10 @@ const main = async () => {
     {
       roleId: 3,
       permissionId: 8,
+    },
+    {
+      roleId: 3,
+      permissionId: 9,
     },
 
     //USER

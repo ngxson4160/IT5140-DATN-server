@@ -2,8 +2,17 @@ import { IsNumber, IsString } from 'class-validator';
 import { UserSignUpDto } from './sign-up.dto';
 
 export class CompanyInformationSignUpDto {
+  @IsNumber()
+  jobCategoryParentId: number;
+
   @IsString()
   name: string;
+
+  @IsString()
+  avatar: string;
+
+  @IsString()
+  coverImage: string;
 
   @IsNumber()
   totalStaff: number;
@@ -17,8 +26,8 @@ export class CompanyInformationSignUpDto {
   @IsString()
   primaryAddress: string;
 
-  @IsNumber()
-  jobCategoryParentId: number;
+  @IsString()
+  primaryPhoneNumber: string;
 }
 
 export class CompanySignUpDto {

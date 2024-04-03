@@ -10,6 +10,8 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { FileModule } from './file-system/file.module';
+import { CompanyModule } from './module/company/company.module';
+import { JobModule } from './module/job/job.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { FileModule } from './file-system/file.module';
     UserModule,
     FileModule,
     AuthModule,
+    CompanyModule,
+    JobModule,
   ],
   controllers: [AppController],
   providers: [

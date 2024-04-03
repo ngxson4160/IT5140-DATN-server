@@ -160,5 +160,10 @@ export const MessageResponse = {
       message: `Company name  exist.`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
+    NOT_FOUND: (id: number) => ({
+      code: 400041,
+      message: `Company not found with id = ${id}.`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    }),
   },
 };

@@ -108,19 +108,22 @@ export class AuthService {
       firstName,
       lastName,
       password,
-      avatar,
+      avatar: userAvatar,
       dob,
       gender,
       phoneNumber,
     } = body.user;
 
     const {
-      name,
-      averageAge,
-      primaryAddress,
-      primaryCity,
-      totalStaff,
       jobCategoryParentId,
+      name,
+      avatar: companyAvatar,
+      coverImage,
+      totalStaff,
+      averageAge,
+      primaryCity,
+      primaryAddress,
+      primaryPhoneNumber,
     } = body.company;
 
     const user = await this.prisma.user.findUnique({ where: { email } });
@@ -139,13 +142,17 @@ export class AuthService {
 
         const companyCreated = await tx.company.create({
           data: {
+            jobCategoryParentId,
+            primaryEmail: email,
             name,
-            email: [email],
+            avatar: companyAvatar,
+            coverImage,
             totalStaff,
             averageAge,
             primaryCity,
             primaryAddress,
-            jobCategoryParentId,
+            primaryPhoneNumber,
+            canCreateJob: true,
           },
         });
 
@@ -156,7 +163,7 @@ export class AuthService {
             firstName,
             lastName,
             password: passwordHash,
-            avatar,
+            avatar: userAvatar,
             dob,
             gender,
             phoneNumber,
