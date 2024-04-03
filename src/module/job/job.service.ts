@@ -4,6 +4,7 @@ import { CreateJobDto } from './dto/create-job.dto';
 import { CommonException } from 'src/_core/middleware/filter/exception.filter';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
 import { UpdateJobDto } from './dto/update-job.dto';
+import { EJobStatus } from 'src/_core/constant/enum.constant';
 
 @Injectable()
 export class JobService {
@@ -23,7 +24,7 @@ export class JobService {
       city,
       address,
       quantity,
-      type,
+      status,
       benefits,
       description,
       requirement,
@@ -51,7 +52,7 @@ export class JobService {
         city,
         address,
         quantity,
-        type,
+        status,
         benefits,
         description,
         requirement,
@@ -68,17 +69,17 @@ export class JobService {
 
   async getJob(id: number) {
     const job = await this.prisma.job.findUnique({
-      where: { id },
-    });
-
-    const creator = await this.prisma.user.findUnique({
-      where: { id: job.creatorId },
-      include: { company: true },
+      where: { id, status: EJobStatus.PUBLIC },
     });
 
     if (!job) {
       throw new CommonException(MessageResponse.JOB.NOT_FOUND(id));
     }
+
+    const creator = await this.prisma.user.findUnique({
+      where: { id: job.creatorId },
+      include: { company: true },
+    });
 
     await this.prisma.job.update({
       where: { id },
@@ -102,7 +103,7 @@ export class JobService {
       city,
       address,
       quantity,
-      type,
+      status,
       benefits,
       description,
       requirement,
@@ -136,7 +137,7 @@ export class JobService {
         city,
         address,
         quantity,
-        type,
+        status,
         benefits,
         description,
         requirement,
@@ -149,5 +150,26 @@ export class JobService {
     });
 
     return jobUpdated;
+  }
+
+  async deleteJob(userId: number, jobId: number) {
+    const job = await this.prisma.job.findUnique({
+      where: { id: jobId, creatorId: userId },
+    });
+
+    if (!job) {
+      throw new CommonException(MessageResponse.JOB.NOT_FOUND(jobId));
+    }
+
+    const jobDeleted = await this.prisma.job.update({
+      where: { id: jobId },
+      data: {
+        status: EJobStatus.DELETED,
+      },
+    });
+
+    //TODO update user apply this job to  FAILURE??? ---> or delete user apply this job?
+
+    return;
   }
 }

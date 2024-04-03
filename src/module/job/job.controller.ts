@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { JobService } from './job.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UserData } from 'src/auth/decorator/user-data.decorator';
@@ -28,5 +36,10 @@ export class JobController {
     @Body() body: UpdateJobDto,
   ) {
     return this.jobService.updateJob(userData.id, +jobId, body);
+  }
+
+  @Delete(':id')
+  deleteJob(@UserData() userData: IUserData, @Param('id') jobId: string) {
+    return this.jobService.deleteJob(userData.id, +jobId);
   }
 }

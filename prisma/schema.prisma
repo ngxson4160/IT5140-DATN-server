@@ -168,7 +168,6 @@ model Job {
   city              Json
   address           Json
   quantity          Int
-  type              Int      @db.TinyInt
   totalViews        Int      @default(0) @map("total_views")
   totalCandidate    Int      @default(0) @map("total_candidate")
   benefits          String

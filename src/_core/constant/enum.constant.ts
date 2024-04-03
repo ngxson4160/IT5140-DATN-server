@@ -21,7 +21,8 @@ export enum EWorkMode {
   FULL_TIME,
 }
 
-export enum ETypeJob {
+export enum EJobStatus {
   DRAFT,
   PUBLIC,
+  DELETED,
 }

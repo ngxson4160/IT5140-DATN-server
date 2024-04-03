@@ -7,7 +7,11 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { EGender, ETypeJob, EWorkMode } from 'src/_core/constant/enum.constant';
+import {
+  EGender,
+  EJobStatus,
+  EWorkMode,
+} from 'src/_core/constant/enum.constant';
 
 export class UpdateJobDto {
   @IsNumber()
@@ -50,8 +54,8 @@ export class UpdateJobDto {
   @IsNumber()
   quantity: number;
 
-  @IsEnum(ETypeJob)
-  type: ETypeJob;
+  @IsEnum(EJobStatus)
+  status: EJobStatus;
 
   //   @IsNumber()
   //   totalViews: number;
