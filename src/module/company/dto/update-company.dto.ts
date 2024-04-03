@@ -1,7 +1,6 @@
 import { JsonValue } from '@prisma/client/runtime/library';
 import {
   IsArray,
-  IsJSON,
   IsNumber,
   IsObject,
   IsOptional,

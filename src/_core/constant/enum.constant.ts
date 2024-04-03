@@ -15,3 +15,13 @@ export enum EGender {
   FEMALE,
   OTHER,
 }
+
+export enum EWorkMode {
+  PART_TIME,
+  FULL_TIME,
+}
+
+export enum ETypeJob {
+  DRAFT,
+  PUBLIC,
+}

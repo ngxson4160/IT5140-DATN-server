@@ -166,4 +166,12 @@ export const MessageResponse = {
       statusCode: HttpStatus.BAD_REQUEST,
     }),
   },
+
+  JOB: {
+    NOT_FOUND: (id: number) => ({
+      code: 400061,
+      message: `Job not found with id = ${id}.`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    }),
+  },
 };
