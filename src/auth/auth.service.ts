@@ -4,7 +4,7 @@ import { SignInDto } from './dto/sign-in.dto';
 import { CommonException } from 'src/_core/middleware/filter/exception.filter';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
 import { ERole, EUserStatus } from 'src/_core/constant/enum.constant';
-import { SignUpDto } from './dto/sign-up.dto';
+import { UserSignUpDto } from './dto/sign-up.dto';
 import { ENV } from 'src/_core/config/env.config';
 import {
   comparePassword,
@@ -23,6 +23,7 @@ import {
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { CompanySignUpDto } from './dto/company-sign-up.dto';
 
 @Injectable()
 export class AuthService {
@@ -32,8 +33,17 @@ export class AuthService {
     private readonly nodeMailer: NodeMailerService,
   ) {}
 
-  async userSignUp(body: SignUpDto) {
-    const { email, password, firstName, lastName } = body;
+  async userSignUp(body: UserSignUpDto) {
+    const {
+      email,
+      firstName,
+      lastName,
+      password,
+      avatar,
+      dob,
+      gender,
+      phoneNumber,
+    } = body;
 
     const user = await this.prisma.user.findUnique({ where: { email } });
 
@@ -45,8 +55,14 @@ export class AuthService {
 
     const userCreated = await this.prisma.user.create({
       data: {
-        ...body,
+        email,
+        firstName,
+        lastName,
         password: passwordHash,
+        avatar,
+        dob,
+        gender,
+        phoneNumber,
         status: EUserStatus.INACTIVE,
       },
     });
@@ -67,7 +83,7 @@ export class AuthService {
 
     const urlActive = `${this.configService.get(
       ENV.DOMAIN,
-    )}/auth/user/verify?email=${email}&token=${token}`;
+    )}/auth/verify-account?email=${email}&token=${token}`;
 
     const context = {
       name: `${firstName} ${lastName}`,
@@ -82,21 +98,122 @@ export class AuthService {
     );
 
     return {
-      meta: MessageResponse.AUTH.SIGN_UP_SUCCESS(urlActive),
-      data: {
-        id: userCreated.id,
-        email: userCreated.email,
-        firstName: userCreated.firstName,
-        lastName: userCreated.lastName,
-        avatar: userCreated.avatar,
-        dob: userCreated.dob,
-        gender: userCreated.gender,
-        phoneNumber: userCreated.phoneNumber,
-      },
+      meta: MessageResponse.AUTH.USER_SIGN_UP_SUCCESS(urlActive),
     };
   }
 
-  async userVerify(query: UserActiveDto) {
+  async companySignUp(body: CompanySignUpDto) {
+    const {
+      email,
+      firstName,
+      lastName,
+      password,
+      avatar: userAvatar,
+      dob,
+      gender,
+      phoneNumber,
+    } = body.user;
+
+    const {
+      jobCategoryParentId,
+      name,
+      avatar: companyAvatar,
+      coverImage,
+      totalStaff,
+      averageAge,
+      primaryCity,
+      primaryAddress,
+      primaryPhoneNumber,
+    } = body.company;
+
+    const user = await this.prisma.user.findUnique({ where: { email } });
+
+    if (user) {
+      throw new CommonException(MessageResponse.AUTH.EMAIL_EXIST);
+    }
+
+    try {
+      const urlActive = await this.prisma.$transaction(async (tx) => {
+        const company = await tx.company.findUnique({ where: { name } });
+
+        if (company) {
+          throw new CommonException(MessageResponse.COMPANY.NAME_EXIST);
+        }
+
+        const companyCreated = await tx.company.create({
+          data: {
+            jobCategoryParentId,
+            primaryEmail: email,
+            name,
+            avatar: companyAvatar,
+            coverImage,
+            totalStaff,
+            averageAge,
+            primaryCity,
+            primaryAddress,
+            primaryPhoneNumber,
+            canCreateJob: true,
+          },
+        });
+
+        const passwordHash = await hashPassword(password);
+        const userCreated = await tx.user.create({
+          data: {
+            email,
+            firstName,
+            lastName,
+            password: passwordHash,
+            avatar: userAvatar,
+            dob,
+            gender,
+            phoneNumber,
+            status: EUserStatus.INACTIVE,
+            companyId: companyCreated.id,
+          },
+        });
+
+        const role = await tx.role.findUnique({
+          where: { name: ERole.COMPANY },
+        });
+
+        await tx.userRole.create({
+          data: { userId: userCreated.id, roleId: role.id },
+        });
+
+        const token = await createToken(
+          { email },
+          this.configService.get(ENV.COMMON_TOKEN_SECRET),
+          this.configService.get(ENV.ACCESS_TOKEN_LIFE),
+        );
+
+        const urlActive = `${this.configService.get(
+          ENV.DOMAIN,
+        )}/auth/verify-account?email=${email}&token=${token}`;
+
+        const context = {
+          name: `${firstName} ${lastName}`,
+          urlActive,
+        };
+
+        await this.nodeMailer.sendEmail(
+          [email],
+          COMMON_CONSTANT.VERIFY_ACCOUNT,
+          HANDLEBARS_TEMPLATE_MAIL.USER_SIGN_UP,
+          context,
+        );
+
+        return urlActive;
+      });
+
+      return {
+        meta: MessageResponse.AUTH.COMPANY_SIGN_UP_SUCCESS(urlActive),
+      };
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async verifyAccount(query: UserActiveDto) {
     const { email, token } = query;
     const user = await this.prisma.user.findUnique({ where: { email } });
 
@@ -169,14 +286,13 @@ export class AuthService {
       this.configService.get(ENV.ACCESS_TOKEN_SECRET),
       this.configService.get(ENV.REFRESH_TOKEN_LIFE),
     );
-    await this.prisma.user.update({
-      where: { email },
-      data: { accessToken, refreshToken },
-    });
+
+    const roles = user.userRoles.map((role) => role.roleId);
 
     return {
       meta: MessageResponse.AUTH.SIGN_IN_SUCCESS,
       data: {
+        roles,
         accessToken,
         refreshToken,
       },
@@ -230,7 +346,7 @@ export class AuthService {
     //TODO change url to Reset password page
     const urlReset = `${this.configService.get(
       ENV.DOMAIN,
-    )}/auth/user/verify?email=${email}&token=${token}`;
+    )}/auth/verify-account?email=${email}&token=${token}`;
 
     const context = {
       email,

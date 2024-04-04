@@ -14,42 +14,44 @@ datasource db {
 }
 
 model User {
-  id             Int      @id @default(autoincrement())
-  email          String   @unique
-  firstName      String
-  lastName       String
-  password       String   @db.VarChar(255)
-  avatar         String?
-  dob            DateTime
-  gender         Int
-  phoneNumber    String?  @map("phone_number") @db.VarChar(255)
-  cv             Json?
-  canApplyJob    Boolean? @default(false)
-  city           String?
-  desiredSalary  Float?
-  yearExperience Float?
-  accessToken    String?  @db.VarChar(500)
-  refreshToken   String?  @map("refresh_token") @db.VarChar(500)
+  id        Int  @id @default(autoincrement())
+  companyId Int? @map("company_id")
 
-  status    Int        @default(0) @db.TinyInt
-  isDeleted Int?       @default(0) @map("is_delete")
-  createdAt DateTime?  @default(now()) @map("create_at") @db.Timestamp(0)
-  createdBy Int?       @map("create_by")
-  updatedAt DateTime?  @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
-  updatedBy Int?       @map("update_by")
-  userRoles UserRole[]
+  email       String    @unique
+  firstName   String    @map("first_name")
+  lastName    String    @map("last_name")
+  password    String    @db.VarChar(255)
+  avatar      String?
+  dob         DateTime?
+  gender      Int?
+  phoneNumber String?   @map("phone_number") @db.VarChar(255)
+
+  status    Int       @default(0) @db.TinyInt
+  createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+  createdBy Int?      @map("create_by")
+  updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+  updatedBy Int?      @map("update_by")
+
+  company Company? @relation(fields: [companyId], references: [id])
+
+  candidateInformation CandidateInformation?
+  userRoles            UserRole[]
+  jobs                 Job[]
+  applications         Application[]
+  sendNotifications    Notification[]        @relation("notification_from_user")
+  receiveNotifications Notification[]        @relation("notification_to_user")
+  sendMessages         Conversation[]        @relation("conversation_from_user")
+  sreceiveMessages     Conversation[]        @relation("conversation_to_user")
+  messages             Message[]
+  blogs                Blog[]
+  userFollowTags       UserFollowTag[]
+
+  @@map("user")
 }
 
 model Role {
   id   Int    @id @default(autoincrement())
   name String @unique
-
-  status    Int?      @db.TinyInt
-  isDeleted Int?      @default(0) @map("is_delete")
-  createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
-  createdBy Int?      @map("create_by")
-  updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
-  updatedBy Int?      @map("update_by")
 
   userRoles       UserRole[]
   rolePermissions RolePermission[]
@@ -61,34 +63,327 @@ model Permission {
   id     Int    @id @default(autoincrement())
   action String @unique
 
-  status    Int?      @db.TinyInt
-  isDeleted Int?      @default(0) @map("is_delete")
-  createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
-  createdBy Int?      @map("create_by")
-  updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
-  updatedBy Int?      @map("update_by")
-
   rolePermissions RolePermission[]
 
   @@map("permission")
 }
 
 model UserRole {
-  userId Int  @map("user_id")
-  roleId Int  @map("role_id")
-  user   User @relation(fields: [userId], references: [id])
-  role   Role @relation(fields: [roleId], references: [id])
+  id     Int @id @default(autoincrement())
+  userId Int @map("user_id")
+  roleId Int @map("role_id")
+
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
 
   @@unique([userId, roleId])
   @@map("user_role")
 }
 
 model RolePermission {
-  permissionId Int        @map("permission_id")
-  roleId       Int        @map("role_id")
-  permission   Permission @relation(fields: [permissionId], references: [id])
-  role         Role       @relation(fields: [roleId], references: [id])
+  id           Int @id @default(autoincrement())
+  permissionId Int @map("permission_id")
+  roleId       Int @map("role_id")
+
+  permission Permission @relation(fields: [permissionId], references: [id])
+  role       Role       @relation(fields: [roleId], references: [id])
 
   @@unique([permissionId, roleId])
   @@map("role_permission")
+}
+
+model Company {
+  id                  Int @id @default(autoincrement())
+  jobCategoryParentId Int @map("job_category_parent_id")
+
+  name               String  @unique
+  primaryEmail       String
+  extraEmail         Json?   @map("extra_mail")
+  aboutUs            String? @map("about_us")
+  avatar             String
+  coverImage         String  @map("cover_image")
+  homePage           String? @map("home_page")
+  socialMedia        Json?   @map("soical_media")
+  totalStaff         Int     @map("total_staff")
+  averageAge         Float   @map("average_Age")
+  primaryCity        String  @map("primary_city")
+  extraCity          Json?   @map("extra_city")
+  primaryAddress     String  @map("primary_address")
+  extraAddress       Json?   @map("extra_address")
+  primaryPhoneNumber Json    @map("phone_number")
+  extraPhoneNumber   Json?   @map("extra_phone_number")
+  canCreateJob       Boolean @default(false)
+
+  status    Int       @default(0) @db.TinyInt
+  createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+  createdBy Int?      @map("create_by")
+  updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+  updatedBy Int?      @map("update_by")
+
+  jobCategoryParent JobCategoryParent @relation(fields: [jobCategoryParentId], references: [id])
+
+  users User[]
+
+  @@map("company")
+}
+
+model CandidateInformation {
+  id                   Int @id @default(autoincrement())
+  userId               Int @unique @map("user_id")
+  desiredJobCategoryId Int @map("desired_job_category_id")
+
+  cv             Json
+  city           String
+  address        String? @map("address")
+  desiredCity    String? @map("desired_city")
+  desiredSalary  Int?    @map("desired_salary")
+  yearExperience Float   @map("year_experience")
+  canApplyJob    Boolean @default(false) @map("can_apply_job")
+
+  status    Int       @default(0) @db.TinyInt
+  createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+  createdBy Int?      @map("create_by")
+  updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+  updatedBy Int?      @map("update_by")
+
+  user        User        @relation(fields: [userId], references: [id])
+  jobcategory JobCategory @relation(fields: [desiredJobCategoryId], references: [id])
+
+  @@map("candidate_information")
+}
+
+model Job {
+  id            Int @id @default(autoincrement())
+  creatorId     Int @map("creator_id")
+  jobCategoryId Int @map("job_category_id")
+
+  title             String
+  position          String
+  salaryMin         Float?    @map("salary_min")
+  salaryMax         Float?    @map("salary_max")
+  images            Json?
+  hours             Float?
+  workMode          Int      @map("work_mode") @db.TinyInt
+  officeName        String   @map("office_name")
+  city              Json
+  address           Json
+  quantity          Int
+  totalViews        Int      @default(0) @map("total_views")
+  totalCandidate    Int      @default(0) @map("total_candidate")
+  benefits          String
+  description       String
+  requirement       String
+  gender            Int?
+  yearExperienceMin Float?   @map("year_experience_min")
+  yearExperienceMax Float?   @map("year_experience_max")
+  hiringStartDate   DateTime @map("hiring_start_date")
+  hiringEndDate     DateTime @map("hiring_end_date")
+
+  status    Int       @default(0) @db.TinyInt
+  createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+  createdBy Int?      @map("create_by")
+  updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+  updatedBy Int?      @map("update_by")
+
+  creator     User        @relation(fields: [creatorId], references: [id])
+  jobCategory JobCategory @relation(fields: [jobCategoryId], references: [id])
+
+  applications Application[]
+  jobHasTags   JobHasTag[]
+
+  @@map("job")
+}
+
+model Application {
+  id     Int @id @default(autoincrement())
+  userId Int @map("user_id")
+  jobId  Int @map("job_id")
+
+  status            Int      @default(0) @db.TinyInt
+  interviewSchedule DateTime @map("interview_schedule")
+  companyRemark     String?  @map("company_remark")
+
+  createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+  createdBy Int?      @map("create_by")
+  updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+  updatedBy Int?      @map("update_by")
+
+  user User @relation(fields: [userId], references: [id])
+  job  Job  @relation(fields: [jobId], references: [id])
+
+  @@map("application")
+}
+
+model Notification {
+  id                     Int  @id @default(autoincrement())
+  fromUserId             Int? @map("from_user_id")
+  toUserId               Int  @map("to_user_id")
+  notificationTemplateId Int  @map("notification_template_id")
+
+  type Int @default(0) @db.TinyInt
+
+  status    Int       @default(0) @db.TinyInt
+  createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+  createdBy Int?      @map("create_by")
+  updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+  updatedBy Int?      @map("update_by")
+
+  fromUser             User?                @relation(fields: [fromUserId], references: [id], name: "notification_from_user")
+  toUser               User                 @relation(fields: [toUserId], references: [id], name: "notification_to_user")
+  notificationTemplate NotificationTemplate @relation(fields: [notificationTemplateId], references: [id])
+
+  @@map("notification")
+}
+
+model NotificationTemplate {
+  id Int @id @default(autoincrement())
+
+  title   String
+  content String
+  type    Int    @default(0) @db.TinyInt
+
+  status    Int       @default(0) @db.TinyInt
+  createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+  createdBy Int?      @map("create_by")
+  updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+  updatedBy Int?      @map("update_by")
+
+  notifications Notification[]
+
+  @@map("notification_template")
+}
+
+model Conversation {
+  id Int @id @default(autoincrement())
+
+  fromUserId Int @map("from_user_id")
+  toUserId   Int @map("to_user_id")
+
+  fromUser User @relation(fields: [fromUserId], references: [id], name: "conversation_from_user")
+  toUser   User @relation(fields: [toUserId], references: [id], name: "conversation_to_user")
+
+  @@unique([fromUserId, toUserId])
+  @@map("conversation")
+}
+
+model Message {
+  id        Int @id @default(autoincrement())
+  creatorId Int @map("creator_id")
+
+  content String
+
+  status    Int       @default(0) @db.TinyInt
+  createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+  createdBy Int?      @map("create_by")
+  updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+  updatedBy Int?      @map("update_by")
+
+  creator User @relation(fields: [creatorId], references: [id])
+
+  @@map("message")
+}
+
+model JobCategoryParent {
+  id Int @id @default(autoincrement())
+
+  name String
+
+  companies     Company[]
+  jobCategories JobCategory[]
+
+  @@map("job_category_parent")
+}
+
+model JobCategory {
+  id                  Int @id @default(autoincrement())
+  jobCategoryParentId Int @map("job_category_parent_id")
+
+  name String
+
+  jobCategoryParent JobCategoryParent @relation(fields: [jobCategoryParentId], references: [id])
+
+  candidateInformations CandidateInformation[]
+  jobs                  Job[]
+  tags                  Tag[]
+
+  @@map("job_category")
+}
+
+model Blog {
+  id        Int @id @default(autoincrement())
+  creatorId Int @map("creator_id")
+
+  title   String
+  content String
+
+  status    Int       @default(0) @db.TinyInt
+  createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+  createdBy Int?      @map("create_by")
+  updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+  updatedBy Int?      @map("update_by")
+
+  creator User @relation(fields: [creatorId], references: [id])
+
+  @@map("blog")
+}
+
+model Tag {
+  id            Int @id @default(autoincrement())
+  jobCategoryId Int @map("job_category_id")
+
+  name String
+
+  jobcategory JobCategory @relation(fields: [jobCategoryId], references: [id])
+
+  userFollowTags UserFollowTag[]
+  jobHasTags     JobHasTag[]
+
+  @@map("tag")
+}
+
+model UserFollowTag {
+  id Int @id @default(autoincrement())
+
+  tagId  Int @map("tag_id")
+  userId Int @map("user_id")
+
+  tag  Tag  @relation(fields: [tagId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([tagId, userId])
+  @@map("user_follow_tag")
+}
+
+model JobHasTag {
+  id Int @id @default(autoincrement())
+
+  tagId Int @map("tag_id")
+  jobId Int @map("job_id")
+
+  tag Tag @relation(fields: [tagId], references: [id])
+  job Job @relation(fields: [jobId], references: [id])
+
+  @@unique([tagId, jobId])
+  @@map("job_has_tag")
+}
+
+model City {
+  id Int @id @default(autoincrement())
+
+  name String
+
+  districts District[]
+
+  @@map("city")
+}
+
+model District {
+  id     Int @id @default(autoincrement())
+  cityId Int @map("city_id") //TODO
+
+  name String
+
+  city City @relation(fields: [cityId], references: [id])
+
+  @@map("district")
 }

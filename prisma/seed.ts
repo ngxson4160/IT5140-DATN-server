@@ -3,7 +3,7 @@ import { hashPassword } from 'src/_core/helper/utils';
 const prisma = new PrismaClient();
 
 const main = async () => {
-  const password = 'Admin@12345';
+  const password = '12345678';
   const passwordHash = await hashPassword(password);
 
   //** USER */
@@ -11,8 +11,28 @@ const main = async () => {
     {
       id: 1,
       email: 'admin@gmail.com',
-      firstName: 'Root',
+      firstName: '',
       lastName: 'Admin',
+      password: passwordHash,
+      dob: new Date(),
+      gender: 0,
+      status: 1,
+    },
+    {
+      id: 2,
+      email: 'user@gmail.com',
+      firstName: 'Nguyễn',
+      lastName: 'Sơn',
+      password: passwordHash,
+      dob: new Date(),
+      gender: 0,
+      status: 1,
+    },
+    {
+      id: 3,
+      email: 'company@gmail.com',
+      firstName: 'Job',
+      lastName: 'Nest',
       password: passwordHash,
       dob: new Date(),
       gender: 0,
@@ -42,7 +62,7 @@ const main = async () => {
     },
     {
       id: 3,
-      name: 'ENTERPRISE',
+      name: 'COMPANY',
     },
     {
       id: 4,
@@ -59,6 +79,26 @@ const main = async () => {
     });
   });
   await Promise.all(rolePromise);
+
+  //** USER - ROLE */
+  const userRoles = [
+    {
+      userId: 1,
+      roleId: 1,
+    },
+    { userId: 2, roleId: 4 },
+    { userId: 3, roleId: 3 },
+  ];
+  const userRolePromise = userRoles.map((userRole) => {
+    return prisma.userRole.upsert({
+      where: {
+        userId_roleId: { userId: userRole.userId, roleId: userRole.roleId },
+      },
+      create: userRole,
+      update: userRole,
+    });
+  });
+  await Promise.all(userRolePromise);
 
   //** PERMISSION */
   const permissions = [
@@ -88,18 +128,22 @@ const main = async () => {
 
     //FileController
     {
-      id: 7,
+      id: 6,
       action: 'FileController.uploadImagesToS3',
     },
     {
-      id: 8,
+      id: 7,
       action: 'FileController.uploadPdfsToS3',
     },
 
     //UserController
     {
-      id: 9,
+      id: 8,
       action: 'UserController.updateUser',
+    },
+    {
+      id: 9,
+      action: 'CompanyController.getMyCompany',
     },
   ];
   const permissionPromise = permissions.map((permission) => {
@@ -112,24 +156,6 @@ const main = async () => {
     });
   });
   await Promise.all(permissionPromise);
-
-  //** USER - ROLE */
-  const userRoles = [
-    {
-      userId: 1,
-      roleId: 1,
-    },
-  ];
-  const userRolePromise = userRoles.map((userRole) => {
-    return prisma.userRole.upsert({
-      where: {
-        userId_roleId: { userId: userRole.userId, roleId: userRole.roleId },
-      },
-      create: userRole,
-      update: userRole,
-    });
-  });
-  await Promise.all(userRolePromise);
 
   //** ROLE - PERMISSION */
   const roleRootPermission = permissions.map((permission) => ({
@@ -151,6 +177,30 @@ const main = async () => {
       roleId: 3,
       permissionId: 3,
     },
+    {
+      roleId: 3,
+      permissionId: 4,
+    },
+    {
+      roleId: 3,
+      permissionId: 5,
+    },
+    {
+      roleId: 3,
+      permissionId: 6,
+    },
+    {
+      roleId: 3,
+      permissionId: 7,
+    },
+    {
+      roleId: 3,
+      permissionId: 8,
+    },
+    {
+      roleId: 3,
+      permissionId: 9,
+    },
 
     //USER
     {
@@ -171,6 +221,10 @@ const main = async () => {
     },
     {
       roleId: 4,
+      permissionId: 5,
+    },
+    {
+      roleId: 4,
       permissionId: 6,
     },
     {
@@ -181,13 +235,10 @@ const main = async () => {
       roleId: 4,
       permissionId: 8,
     },
-    {
-      roleId: 4,
-      permissionId: 9,
-    },
   ];
 
   rolePermissions = [...rolePermissions, ...roleRootPermission];
+  console.log(rolePermissions);
 
   const rolePermissionPromise = rolePermissions.map((rolePermission) => {
     return prisma.rolePermission.upsert({
