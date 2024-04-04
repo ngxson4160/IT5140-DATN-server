@@ -159,8 +159,8 @@ model Job {
 
   title             String
   position          String
-  salaryMin         Float?    @map("salary_min")
-  salaryMax         Float?    @map("salary_max")
+  salaryMin         Float?   @map("salary_min")
+  salaryMax         Float?   @map("salary_max")
   images            Json?
   hours             Float?
   workMode          Int      @map("work_mode") @db.TinyInt
@@ -199,9 +199,9 @@ model Application {
   userId Int @map("user_id")
   jobId  Int @map("job_id")
 
-  status            Int      @default(0) @db.TinyInt
-  interviewSchedule DateTime @map("interview_schedule")
-  companyRemark     String?  @map("company_remark")
+  status            Int       @default(0) @db.TinyInt
+  interviewSchedule DateTime? @map("interview_schedule")
+  companyRemark     String?   @map("company_remark")
 
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
   createdBy Int?      @map("create_by")
@@ -211,6 +211,7 @@ model Application {
   user User @relation(fields: [userId], references: [id])
   job  Job  @relation(fields: [jobId], references: [id])
 
+  @@unique([userId, jobId])
   @@map("application")
 }
 
