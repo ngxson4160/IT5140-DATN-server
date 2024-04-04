@@ -33,6 +33,7 @@ export class JobService {
       yearExperienceMax,
       hiringStartDate,
       hiringEndDate,
+      tagIds,
     } = data;
 
     //TODO validate min < max, start < end
@@ -61,6 +62,17 @@ export class JobService {
         yearExperienceMax,
         hiringStartDate,
         hiringEndDate,
+        ...(tagIds &&
+          tagIds.length > 0 && {
+            jobHasTags: {
+              createMany: {
+                data: tagIds?.map((tagId) => ({ tagId: tagId })),
+              },
+            },
+          }),
+      },
+      include: {
+        jobHasTags: true,
       },
     });
 
