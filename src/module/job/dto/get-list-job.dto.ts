@@ -11,6 +11,12 @@ export class GetListJobDto extends PaginationDto {
   jobCategoryIds?: number[];
 
   @IsOptional()
+  // @IsArray()
+  // @Type(() => Number)
+  // @IsNumber({}, { each: true })
+  tagIds?: number[];
+
+  @IsOptional()
   @IsNumber()
   @Type(() => Number)
   salary?: number;

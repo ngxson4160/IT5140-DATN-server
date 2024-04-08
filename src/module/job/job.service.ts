@@ -192,6 +192,7 @@ export class JobService {
       cities,
       filter,
       jobCategoryIds,
+      tagIds,
       salary,
       workExperience,
       workMode,
@@ -225,6 +226,15 @@ export class JobService {
               : undefined,
           },
         },
+        ...(tagIds && {
+          jobHasTags: {
+            some: {
+              tagId: {
+                in: tagIds ? JSON.parse(tagIds?.toString()) : undefined,
+              },
+            },
+          },
+        }),
         ...(salary && {
           salaryMax: {
             gte: +salary,
