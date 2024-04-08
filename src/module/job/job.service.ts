@@ -4,7 +4,10 @@ import { CreateJobDto } from './dto/create-job.dto';
 import { CommonException } from 'src/_core/middleware/filter/exception.filter';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
 import { UpdateJobDto } from './dto/update-job.dto';
-import { EJobStatus } from 'src/_core/constant/enum.constant';
+import {
+  EApplicationStatus,
+  EJobStatus,
+} from 'src/_core/constant/enum.constant';
 import { GetListJobDto } from './dto/get-list-job.dto';
 import { EOrderPaging } from 'src/_core/type/order-paging.type';
 
@@ -81,14 +84,32 @@ export class JobService {
     return jobCreated;
   }
 
-  async getJob(id: number) {
+  async getJob(id: number, userId: number) {
     const job = await this.prisma.job.findUnique({
       where: { id, status: EJobStatus.PUBLIC },
+      include: {
+        applications: {
+          select: {
+            userId: true,
+            status: true,
+          },
+        },
+      },
     });
 
     if (!job) {
       throw new CommonException(MessageResponse.JOB.NOT_FOUND(id));
     }
+
+    const userStatusApplication: object | null = { status: null };
+    job['application'] = userStatusApplication;
+    job.applications.forEach((application) => {
+      if (application.userId === userId)
+        userStatusApplication['status'] = application.status;
+
+      job['application'] = userStatusApplication;
+    });
+    delete job.applications;
 
     const creator = await this.prisma.user.findUnique({
       where: { id: job.creatorId },
@@ -187,7 +208,8 @@ export class JobService {
     return;
   }
 
-  async getListJob(query: GetListJobDto) {
+  //TODO filter tag name
+  async getListJob(query: GetListJobDto, userId?: number) {
     const {
       cities,
       filter,
@@ -266,6 +288,14 @@ export class JobService {
       orderBy: {
         createdAt: order,
       },
+      include: {
+        applications: {
+          select: {
+            userId: true,
+            status: true,
+          },
+        },
+      },
     });
 
     if (listJob.length === 0) {
@@ -278,6 +308,18 @@ export class JobService {
     }
 
     let jobFilterCities = [];
+
+    listJob.forEach((job) => {
+      const userStatusApplication: object | null = { status: null };
+      job['application'] = userStatusApplication;
+      job.applications.forEach((application) => {
+        if (application.userId === userId)
+          userStatusApplication['status'] = application.status;
+
+        job['application'] = userStatusApplication;
+      });
+      delete job.applications;
+    });
 
     if (cities) {
       listJob.forEach((job) => {

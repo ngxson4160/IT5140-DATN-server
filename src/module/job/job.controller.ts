@@ -15,6 +15,7 @@ import { IUserData } from 'src/_core/type/user-data.type';
 import { Public } from 'src/auth/decorator/public.decorator';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { GetListJobDto } from './dto/get-list-job.dto';
+import { PublicOrAuth } from 'src/_core/decorator/public-or-auth.decorator';
 
 @Controller('jobs')
 export class JobController {
@@ -25,16 +26,16 @@ export class JobController {
     return this.jobService.createJob(userData.id, body);
   }
 
-  @Public()
+  @PublicOrAuth()
   @Get()
-  getListJob(@Query() query: GetListJobDto) {
-    return this.jobService.getListJob(query);
+  getListJob(@Query() query: GetListJobDto, @UserData() userData: IUserData) {
+    return this.jobService.getListJob(query, userData?.id);
   }
 
-  @Public()
+  @PublicOrAuth()
   @Get(':id')
-  getJob(@Param('id') id: string) {
-    return this.jobService.getJob(+id);
+  getJob(@Param('id') id: string, @UserData() userData: IUserData) {
+    return this.jobService.getJob(+id, userData?.id);
   }
 
   @Put(':id')
