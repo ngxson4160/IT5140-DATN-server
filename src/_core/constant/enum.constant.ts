@@ -26,3 +26,14 @@ export enum EJobStatus {
   PUBLIC,
   DELETED,
 }
+
+export enum EApplicationStatus {
+  WAITING_CV,
+  APPROVE_CV,
+  REJECT_CV,
+  INTERVIEW,
+  PROCESSING,
+  SUCCESS,
+  FAILURE,
+  DELETED,
+}

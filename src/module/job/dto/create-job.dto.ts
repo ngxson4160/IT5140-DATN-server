@@ -57,12 +57,6 @@ export class CreateJobDto {
   @IsEnum(EJobStatus)
   status: EJobStatus;
 
-  //   @IsNumber()
-  //   totalViews: number;
-
-  //   @IsNumber()
-  //   totalCandidate: number;
-
   @IsString()
   benefits: string;
 
@@ -89,4 +83,9 @@ export class CreateJobDto {
 
   @IsDateString()
   hiringEndDate: Date;
+
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  tagIds: number[];
 }

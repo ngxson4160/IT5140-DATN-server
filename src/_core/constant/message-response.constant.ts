@@ -157,7 +157,7 @@ export const MessageResponse = {
   COMPANY: {
     NAME_EXIST: {
       code: 400041,
-      message: `Company name  exist.`,
+      message: `Company name exist.`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
     NOT_FOUND: (id: number) => ({
@@ -173,5 +173,18 @@ export const MessageResponse = {
       message: `Job not found with id = ${id}.`,
       statusCode: HttpStatus.BAD_REQUEST,
     }),
+  },
+
+  APPLICATION: {
+    NOT_FOUND: (id: number) => ({
+      code: 400061,
+      message: `Application not found with id = ${id}.`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    }),
+    ALREADY_APPLICATION: {
+      code: 400081,
+      message: `User has applied for this job.`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
   },
 };

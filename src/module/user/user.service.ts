@@ -3,7 +3,11 @@ import { MessageResponse } from 'src/_core/constant/message-response.constant';
 import { CommonException } from 'src/_core/middleware/filter/exception.filter';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { EUserStatus } from 'src/_core/constant/enum.constant';
+import {
+  EApplicationStatus,
+  EJobStatus,
+  EUserStatus,
+} from 'src/_core/constant/enum.constant';
 
 @Injectable()
 export class UserService {
@@ -114,5 +118,65 @@ export class UserService {
         phoneNumber: userUpdated.phoneNumber,
       },
     };
+  }
+
+  async userApplyJob(userId: number, jobId: number) {
+    const job = await this.prisma.job.findUnique({
+      where: { id: jobId, status: EJobStatus.PUBLIC },
+    });
+
+    if (!job) {
+      throw new CommonException(MessageResponse.JOB.NOT_FOUND(jobId));
+    }
+
+    const application = await this.prisma.application.findUnique({
+      where: {
+        userId_jobId: { userId, jobId },
+      },
+    });
+
+    if (application) {
+      throw new CommonException(
+        MessageResponse.APPLICATION.ALREADY_APPLICATION,
+      );
+    }
+
+    const applicationCreated = await this.prisma.application.create({
+      data: {
+        userId,
+        jobId,
+      },
+    });
+
+    return applicationCreated;
+  }
+
+  async userDeleteApplyJob(userId: number, jobId: number) {
+    const application = await this.prisma.application.findUnique({
+      where: {
+        userId_jobId: { userId, jobId },
+        status: {
+          not: EApplicationStatus.DELETED,
+        },
+      },
+    });
+
+    if (!application) {
+      throw new CommonException(MessageResponse.APPLICATION.NOT_FOUND(jobId));
+    }
+
+    await this.prisma.application.update({
+      where: {
+        userId_jobId: {
+          userId,
+          jobId,
+        },
+      },
+      data: {
+        status: EApplicationStatus.DELETED,
+      },
+    });
+
+    return;
   }
 }

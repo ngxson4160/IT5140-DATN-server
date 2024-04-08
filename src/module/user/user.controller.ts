@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserData } from 'src/auth/decorator/user-data.decorator';
@@ -11,6 +19,19 @@ export class UserController {
   @Get('profile')
   async getUserProfile(@UserData() userData: IUserData) {
     return this.userService.getUserProfile(userData.id);
+  }
+
+  @Post('jobs/:id/applications')
+  userApplyJob(@UserData() userData: IUserData, @Param('id') jobId: string) {
+    return this.userService.userApplyJob(userData.id, +jobId);
+  }
+
+  @Delete('jobs/:id/applications')
+  userDeleteApplyJob(
+    @UserData() userData: IUserData,
+    @Param('id') jobId: string,
+  ) {
+    return this.userService.userDeleteApplyJob(userData.id, +jobId);
   }
 
   @Get(':id')

@@ -251,6 +251,8 @@ export class AuthService {
             roleId: true,
           },
         },
+        firstName: true,
+        lastName: true,
       },
     });
 
@@ -292,8 +294,14 @@ export class AuthService {
     return {
       meta: MessageResponse.AUTH.SIGN_IN_SUCCESS,
       data: {
-        roles,
-        accessToken,
+        user: {
+          id: user.id,
+          email: user.email,
+          roles,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+        token: accessToken,
         refreshToken,
       },
     };
