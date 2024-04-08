@@ -7,6 +7,7 @@ import { ApplicationUpdateDto } from './dto/update-application.dto';
 import { CompanyGetListJobDto } from './dto/get-list-job.dto';
 import { EOrderPaging } from 'src/_core/type/order-paging.type';
 import { EJobType } from 'src/_core/type/common.type';
+import { GetListApplicationJobDto } from './dto/get-list-application.dto';
 
 @Injectable()
 export class CompanyService {
@@ -192,6 +193,64 @@ export class CompanyService {
       pageSize: +take,
       totalPage: Math.ceil(listJob.length / take),
       listJob: listItems,
+    };
+  }
+
+  async getJobsApplication(
+    userId: number,
+    jobId: number,
+    query: GetListApplicationJobDto,
+  ) {
+    const { status } = query;
+
+    let {
+      page,
+      take,
+      // skip,
+      // order,
+    } = query;
+
+    page = page ?? 1;
+    take = take ?? 5;
+
+    const job = await this.prisma.job.findUnique({
+      where: {
+        id: jobId,
+        creatorId: userId,
+      },
+      include: {
+        applications: true,
+      },
+    });
+
+    if (!job) {
+      throw new CommonException(MessageResponse.JOB.NOT_FOUND(jobId));
+    }
+
+    // const listApplication = job.applications;
+    let listApplication = [];
+
+    if (status) {
+      job.applications.forEach((application) => {
+        if (application.status === +status) listApplication.push(application);
+      });
+    } else {
+      listApplication = job.applications;
+    }
+
+    const skipItems = (+page - 1) * +take;
+    const listItems = [];
+    for (let i = skipItems; i < skipItems + +take; i++) {
+      if (listApplication[i]) {
+        listItems.push(listApplication[i]);
+      }
+    }
+
+    return {
+      page: +page,
+      pageSize: +take,
+      totalPage: Math.ceil(listApplication.length / take),
+      listApplications: listItems,
     };
   }
 }
