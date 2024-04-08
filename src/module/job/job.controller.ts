@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { JobService } from './job.service';
 import { CreateJobDto } from './dto/create-job.dto';
@@ -13,6 +14,7 @@ import { UserData } from 'src/auth/decorator/user-data.decorator';
 import { IUserData } from 'src/_core/type/user-data.type';
 import { Public } from 'src/auth/decorator/public.decorator';
 import { UpdateJobDto } from './dto/update-job.dto';
+import { GetListJobDto } from './dto/get-list-job.dto';
 
 @Controller('jobs')
 export class JobController {
@@ -21,6 +23,12 @@ export class JobController {
   @Post()
   createJob(@UserData() userData: IUserData, @Body() body: CreateJobDto) {
     return this.jobService.createJob(userData.id, body);
+  }
+
+  @Public()
+  @Get()
+  getListJob(@Query() query: GetListJobDto) {
+    return this.jobService.getListJob(query);
   }
 
   @Public()

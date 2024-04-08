@@ -12,10 +12,12 @@ import { PrismaModule } from './prisma/prisma.module';
 import { FileModule } from './file-system/file.module';
 import { CompanyModule } from './module/company/company.module';
 import { JobModule } from './module/job/job.module';
+import { ClassTransformer } from 'class-transformer';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ClassTransformer,
     PrismaModule,
     UserModule,
     FileModule,

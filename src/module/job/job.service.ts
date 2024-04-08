@@ -5,6 +5,8 @@ import { CommonException } from 'src/_core/middleware/filter/exception.filter';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { EJobStatus } from 'src/_core/constant/enum.constant';
+import { GetListJobDto } from './dto/get-list-job.dto';
+import { EOrderPaging } from 'src/_core/type/order-paging.type';
 
 @Injectable()
 export class JobService {
@@ -183,5 +185,115 @@ export class JobService {
     //TODO update user apply this job to  FAILURE??? ---> or delete user apply this job?
 
     return;
+  }
+
+  async getListJob(query: GetListJobDto) {
+    const {
+      cities,
+      filter,
+      jobCategoryIds,
+      salary,
+      workExperience,
+      workMode,
+      position,
+    } = query;
+
+    let {
+      page,
+      take,
+      // skip,
+      order,
+    } = query;
+
+    page = page ?? 1;
+    take = take ?? 5;
+    order = order ?? EOrderPaging.DESC;
+
+    const listJob = await this.prisma.job.findMany({
+      where: {
+        ...(filter && {
+          OR: [
+            { title: { contains: filter } },
+            { description: { contains: filter } },
+            { benefits: { contains: filter } },
+          ],
+        }),
+        jobCategory: {
+          id: {
+            in: jobCategoryIds
+              ? JSON.parse(jobCategoryIds?.toString())
+              : undefined,
+          },
+        },
+        ...(salary && {
+          salaryMax: {
+            gte: +salary,
+          },
+          salaryMin: {
+            lte: +salary,
+          },
+        }),
+        workMode: {
+          in: workMode ? JSON.parse(workMode?.toString()) : undefined,
+        },
+        // city: {
+        //   array_contains: cities,
+        // },
+        ...(workExperience && {
+          yearExperienceMin: {
+            lte: +workExperience,
+          },
+          yearExperienceMax: {
+            gte: +workExperience,
+          },
+        }),
+        status: EJobStatus.PUBLIC,
+        position,
+        hiringEndDate: {
+          gte: new Date(),
+        },
+      },
+      orderBy: {
+        createdAt: order,
+      },
+    });
+
+    if (listJob.length === 0) {
+      return {
+        page: +page,
+        pageSize: +take,
+        totalPage: 0,
+        listJob: [],
+      };
+    }
+
+    let jobFilterCities = [];
+
+    if (cities) {
+      listJob.forEach((job) => {
+        const jobCity = job.city as Array<string>;
+        const isMatchFilterCities = jobCity.some((el) => cities.includes(el));
+        if (isMatchFilterCities) {
+          jobFilterCities.push(job);
+        }
+      });
+    } else {
+      jobFilterCities = listJob;
+    }
+
+    const skipItems = (+page - 1) * +take;
+    const listItems = [];
+    for (let i = skipItems; i < skipItems + +take; i++) {
+      if (jobFilterCities[i]) {
+        listItems.push(jobFilterCities[i]);
+      }
+    }
+
+    return {
+      page: +page,
+      pageSize: +take,
+      totalPage: Math.ceil(jobFilterCities.length / take),
+      listJob: listItems,
+    };
   }
 }
