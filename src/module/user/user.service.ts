@@ -8,6 +8,8 @@ import {
   EJobStatus,
   EUserStatus,
 } from 'src/_core/constant/enum.constant';
+import { GetListApplicationDto } from './dto/get-list-applications.dto';
+import { EOrderPaging } from 'src/_core/type/order-paging.type';
 
 @Injectable()
 export class UserService {
@@ -178,5 +180,61 @@ export class UserService {
     });
 
     return;
+  }
+
+  async getListApplications(userId: number, query: GetListApplicationDto) {
+    const { status } = query;
+    let {
+      page,
+      take,
+      // skip,
+      order,
+    } = query;
+
+    page = page ?? 1;
+    take = take ?? 5;
+    order = order ?? EOrderPaging.DESC;
+
+    const listApplications = await this.prisma.application.findMany({
+      where: {
+        userId,
+        status: status ? +status : undefined,
+      },
+      select: {
+        id: true,
+        userId: true,
+        jobId: true,
+        status: true,
+        interviewSchedule: true,
+        createdAt: true,
+        createdBy: true,
+        updatedAt: true,
+        updatedBy: true,
+      },
+    });
+
+    if (listApplications.length === 0) {
+      return {
+        page: +page,
+        pageSize: +take,
+        totalPage: 0,
+        listJob: [],
+      };
+    }
+
+    const skipItems = (+page - 1) * +take;
+    const listItems = [];
+    for (let i = skipItems; i < skipItems + +take; i++) {
+      if (listApplications[i]) {
+        listItems.push(listApplications[i]);
+      }
+    }
+
+    return {
+      page: +page,
+      pageSize: +take,
+      totalPage: Math.ceil(listApplications.length / take),
+      listApplications: listItems,
+    };
   }
 }

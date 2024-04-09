@@ -6,11 +6,13 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserData } from 'src/auth/decorator/user-data.decorator';
 import { IUserData } from 'src/_core/type/user-data.type';
+import { GetListApplicationDto } from './dto/get-list-applications.dto';
 
 @Controller('users')
 export class UserController {
@@ -32,6 +34,14 @@ export class UserController {
     @Param('id') jobId: string,
   ) {
     return this.userService.userDeleteApplyJob(userData.id, +jobId);
+  }
+
+  @Get('applications')
+  async getListApplications(
+    @UserData() userData: IUserData,
+    @Query() query: GetListApplicationDto,
+  ) {
+    return this.userService.getListApplications(userData.id, query);
   }
 
   @Get(':id')
