@@ -100,15 +100,15 @@ model Company {
   primaryEmail       String
   extraEmail         Json?   @map("extra_mail")
   aboutUs            String? @map("about_us")
-  avatar             String
-  coverImage         String  @map("cover_image")
+  avatar             String?
+  coverImage         String?  @map("cover_image")
   homePage           String? @map("home_page")
   socialMedia        Json?   @map("soical_media")
   totalStaff         Int     @map("total_staff")
-  averageAge         Float   @map("average_Age")
+  averageAge         Float?   @map("average_Age")
   primaryCity        String  @map("primary_city")
   extraCity          Json?   @map("extra_city")
-  primaryAddress     String  @map("primary_address")
+  primaryAddress     String?  @map("primary_address")
   extraAddress       Json?   @map("extra_address")
   primaryPhoneNumber Json    @map("phone_number")
   extraPhoneNumber   Json?   @map("extra_phone_number")

@@ -24,6 +24,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { CompanySignUpDto } from './dto/company-sign-up.dto';
+import { CheckEmailDto } from './dto/check-email.dto';
 
 @Injectable()
 export class AuthService {
@@ -32,6 +33,16 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly nodeMailer: NodeMailerService,
   ) {}
+
+  async checkEmail(body: CheckEmailDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: body.email },
+    });
+
+    if (user) {
+      throw new CommonException(MessageResponse.AUTH.EMAIL_EXIST);
+    }
+  }
 
   async userSignUp(body: UserSignUpDto) {
     const {
@@ -103,28 +114,17 @@ export class AuthService {
   }
 
   async companySignUp(body: CompanySignUpDto) {
-    const {
-      email,
-      firstName,
-      lastName,
-      password,
-      avatar: userAvatar,
-      dob,
-      gender,
-      phoneNumber,
-    } = body.user;
+    const { email, firstName, lastName, password, gender } = body.user;
 
     const {
       jobCategoryParentId,
       name,
-      avatar: companyAvatar,
-      coverImage,
       totalStaff,
-      averageAge,
       primaryCity,
-      primaryAddress,
       primaryPhoneNumber,
     } = body.company;
+
+    console.log(typeof jobCategoryParentId);
 
     const user = await this.prisma.user.findUnique({ where: { email } });
 
@@ -142,15 +142,11 @@ export class AuthService {
 
         const companyCreated = await tx.company.create({
           data: {
-            jobCategoryParentId,
+            jobCategoryParentId: +jobCategoryParentId,
             primaryEmail: email,
             name,
-            avatar: companyAvatar,
-            coverImage,
-            totalStaff,
-            averageAge,
+            totalStaff: +totalStaff,
             primaryCity,
-            primaryAddress,
             primaryPhoneNumber,
             canCreateJob: true,
           },
@@ -163,10 +159,7 @@ export class AuthService {
             firstName,
             lastName,
             password: passwordHash,
-            avatar: userAvatar,
-            dob,
             gender,
-            phoneNumber,
             status: EUserStatus.INACTIVE,
             companyId: companyCreated.id,
           },

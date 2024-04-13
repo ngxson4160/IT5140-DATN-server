@@ -13,6 +13,7 @@ import { FileModule } from './file-system/file.module';
 import { CompanyModule } from './module/company/company.module';
 import { JobModule } from './module/job/job.module';
 import { ClassTransformer } from 'class-transformer';
+import { CityModule } from './module/city/city.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ClassTransformer } from 'class-transformer';
     AuthModule,
     CompanyModule,
     JobModule,
+    CityModule,
   ],
   controllers: [AppController],
   providers: [
