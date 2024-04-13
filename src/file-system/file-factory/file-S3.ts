@@ -14,6 +14,7 @@ import * as crypto from 'crypto';
 import { ENV } from 'src/_core/config/env.config';
 import { CommonException } from 'src/_core/middleware/filter/exception.filter';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
+import { ES3Path } from '../enum/S3-path';
 
 @Injectable()
 export class S3Service implements IFileService {
@@ -27,7 +28,7 @@ export class S3Service implements IFileService {
     },
   });
 
-  async uploadFile(file: Express.Multer.File, pathFile?: string) {
+  async uploadFile(file: Express.Multer.File, pathFile?: ES3Path) {
     const pathFileUploadToS3 = pathFile ? `${pathFile}/` : '';
 
     const keyHash = crypto.randomBytes(64).toString('hex');
@@ -38,6 +39,10 @@ export class S3Service implements IFileService {
       Bucket: this.configService.get(ENV.AWS_BUCKET_NAME),
       Key: key,
       Body: file.buffer,
+      ContentType:
+        pathFile === ES3Path.Pdf
+          ? 'application/pdf'
+          : 'application/octet-stream',
     };
 
     try {
@@ -48,6 +53,7 @@ export class S3Service implements IFileService {
       )}.s3.amazonaws.com/${key}`;
 
       return {
+        originalname: file.originalname,
         relativePath: key,
         absolutePath: absolutePath,
       };
