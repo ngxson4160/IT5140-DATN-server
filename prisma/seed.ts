@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { DataCity } from 'src/_core/data/city-district';
+import { JobCategory } from 'src/_core/data/job-category';
 import { hashPassword } from 'src/_core/helper/utils';
 const prisma = new PrismaClient();
 
@@ -329,7 +330,6 @@ const main = async () => {
   ];
 
   rolePermissions = [...rolePermissions, ...roleRootPermission];
-  console.log(rolePermissions);
 
   const rolePermissionPromise = rolePermissions.map((rolePermission) => {
     return prisma.rolePermission.upsert({
@@ -346,8 +346,11 @@ const main = async () => {
   await Promise.all(rolePermissionPromise);
 
   const cityDistrict = DataCity.map((city) => {
-    return prisma.city.create({
-      data: {
+    return prisma.city.upsert({
+      where: {
+        id: city.id,
+      },
+      create: {
         id: city.id,
         name: city.name,
         districts: {
@@ -361,9 +364,82 @@ const main = async () => {
           },
         },
       },
+      update: {
+        id: city.id,
+        name: city.name,
+        districts: {
+          updateMany: {
+            where: {
+              id: { in: city.districts.map((district) => district.id) },
+            },
+            data: city.districts.map((district) => {
+              return {
+                id: district.id,
+                name: district.name,
+              };
+            }),
+          },
+        },
+      },
+      // data: {
+      //   id: city.id,
+      //   name: city.name,
+      //   districts: {
+      //     createMany: {
+      //       data: city.districts.map((district) => {
+      //         return {
+      //           id: district.id,
+      //           name: district.name,
+      //         };
+      //       }),
+      //     },
+      //   },
+      // },
     });
   });
   await Promise.all(cityDistrict);
+
+  const jobCategoryParent = JobCategory.map((jobParent) => {
+    return prisma.jobCategoryParent.upsert({
+      where: {
+        id: jobParent.id,
+      },
+      create: {
+        id: jobParent.id,
+        name: jobParent.name,
+        jobCategories: {
+          createMany: {
+            data: jobParent.jobCategory.map((jobCategory) => {
+              return {
+                id: jobCategory.id,
+                name: jobCategory.name,
+              };
+            }),
+          },
+        },
+      },
+      update: {
+        id: jobParent.id,
+        name: jobParent.name,
+        jobCategories: {
+          updateMany: {
+            where: {
+              id: {
+                in: jobParent.jobCategory.map((jobCategory) => jobCategory.id),
+              },
+            },
+            data: jobParent.jobCategory.map((jobCategory) => {
+              return {
+                id: jobCategory.id,
+                name: jobCategory.name,
+              };
+            }),
+          },
+        },
+      },
+    });
+  });
+  await Promise.all(jobCategoryParent);
 };
 
 main()
