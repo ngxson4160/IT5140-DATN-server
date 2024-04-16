@@ -367,19 +367,19 @@ const main = async () => {
       update: {
         id: city.id,
         name: city.name,
-        districts: {
-          updateMany: {
-            where: {
-              id: { in: city.districts.map((district) => district.id) },
-            },
-            data: city.districts.map((district) => {
-              return {
-                id: district.id,
-                name: district.name,
-              };
-            }),
-          },
-        },
+        // districts: {
+        //   updateMany: {
+        //     where: {
+        //       id: { in: city.districts.map((district) => district.id) },
+        //     },
+        //     data: city.districts.map((district) => {
+        //       return {
+        //         id: district.id,
+        //         name: district.name,
+        //       };
+        //     }),
+        //   },
+        // },
       },
       // data: {
       //   id: city.id,
@@ -421,21 +421,21 @@ const main = async () => {
       update: {
         id: jobParent.id,
         name: jobParent.name,
-        jobCategories: {
-          updateMany: {
-            where: {
-              id: {
-                in: jobParent.jobCategory.map((jobCategory) => jobCategory.id),
-              },
-            },
-            data: jobParent.jobCategory.map((jobCategory) => {
-              return {
-                id: jobCategory.id,
-                name: jobCategory.name,
-              };
-            }),
-          },
-        },
+        // jobCategories: {
+        //   updateMany: {
+        //     where: {
+        //       id: {
+        //         in: jobParent.jobCategory.map((jobCategory) => jobCategory.id),
+        //       },
+        //     },
+        //     data: jobParent.jobCategory.map((jobCategory) => {
+        //       return {
+        //         id: jobCategory.id,
+        //         name: jobCategory.name,
+        //       };
+        //     }),
+        //   },
+        // },
       },
     });
   });
