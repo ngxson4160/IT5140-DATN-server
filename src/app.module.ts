@@ -14,6 +14,7 @@ import { CompanyModule } from './module/company/company.module';
 import { JobModule } from './module/job/job.module';
 import { ClassTransformer } from 'class-transformer';
 import { CityModule } from './module/city/city.module';
+import { JobCategoryParentModule } from './module/job-category-parent/job-category-parent.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CityModule } from './module/city/city.module';
     CompanyModule,
     JobModule,
     CityModule,
+    JobCategoryParentModule,
   ],
   controllers: [AppController],
   providers: [
