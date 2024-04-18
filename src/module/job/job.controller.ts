@@ -32,6 +32,7 @@ export class JobController {
     return this.jobService.getListJob(query, userData?.id);
   }
 
+  //TODO update views and totalApplication
   @PublicOrAuth()
   @Get(':id')
   getJob(@Param('id') id: string, @UserData() userData: IUserData) {

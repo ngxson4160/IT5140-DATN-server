@@ -100,15 +100,15 @@ model Company {
   primaryEmail       String
   extraEmail         Json?   @map("extra_mail")
   aboutUs            String? @map("about_us")
-  avatar             String
-  coverImage         String  @map("cover_image")
+  avatar             String?
+  coverImage         String?  @map("cover_image")
   homePage           String? @map("home_page")
   socialMedia        Json?   @map("soical_media")
   totalStaff         Int     @map("total_staff")
-  averageAge         Float   @map("average_Age")
+  averageAge         Float?   @map("average_Age")
   primaryCity        String  @map("primary_city")
   extraCity          Json?   @map("extra_city")
-  primaryAddress     String  @map("primary_address")
+  primaryAddress     String?  @map("primary_address")
   extraAddress       Json?   @map("extra_address")
   primaryPhoneNumber Json    @map("phone_number")
   extraPhoneNumber   Json?   @map("extra_phone_number")
@@ -154,25 +154,25 @@ model CandidateInformation {
 
 model Job {
   id            Int @id @default(autoincrement())
-  creatorId     Int @map("creator_id")
-  jobCategoryId Int @map("job_category_id")
+  creatorId     Int? @map("creator_id")
+  jobCategoryId Int? @map("job_category_id")
 
-  title             String
-  position          String
+  title             String?
+  position          String?
   salaryMin         Float?   @map("salary_min")
   salaryMax         Float?   @map("salary_max")
   images            Json?
   hours             Float?
-  workMode          Int      @map("work_mode") @db.TinyInt
-  officeName        String   @map("office_name")
-  city              Json
-  address           Json
-  quantity          Int
-  totalViews        Int      @default(0) @map("total_views")
-  totalCandidate    Int      @default(0) @map("total_candidate")
-  benefits          String
-  description       String
-  requirement       String
+  workMode          Int?      @map("work_mode") @db.TinyInt
+  officeName        String?   @map("office_name")
+  city              Json?
+  address           Json?
+  quantity          Int?
+  totalViews        Int?      @default(0) @map("total_views")
+  totalCandidate    Int?      @default(0) @map("total_candidate")
+  benefits          String?
+  description       String?
+  requirement       String?
   gender            Int?
   yearExperienceMin Float?   @map("year_experience_min")
   yearExperienceMax Float?   @map("year_experience_max")
@@ -185,8 +185,8 @@ model Job {
   updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
   updatedBy Int?      @map("update_by")
 
-  creator     User        @relation(fields: [creatorId], references: [id])
-  jobCategory JobCategory @relation(fields: [jobCategoryId], references: [id])
+  creator     User?        @relation(fields: [creatorId], references: [id])
+  jobCategory JobCategory? @relation(fields: [jobCategoryId], references: [id])
 
   applications Application[]
   jobHasTags   JobHasTag[]

@@ -1,8 +1,13 @@
 import { IsNumber, IsString } from 'class-validator';
 import { UserSignUpDto } from './sign-up.dto';
+import { Transform, Type } from 'class-transformer';
 
 export class CompanyInformationSignUpDto {
   @IsNumber()
+  @Type(() => Number)
+  @Transform(({ value }) => {
+    return Number(value);
+  })
   jobCategoryParentId: number;
 
   @IsString()

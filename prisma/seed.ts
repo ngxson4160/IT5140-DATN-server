@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import { DataCity } from 'src/_core/data/city-district';
+import { JobCategory } from 'src/_core/data/job-category';
 import { hashPassword } from 'src/_core/helper/utils';
 const prisma = new PrismaClient();
 
@@ -102,48 +104,94 @@ const main = async () => {
 
   //** PERMISSION */
   const permissions = [
-    //AppController
-    {
-      id: 1,
-      action: 'AppController.getHello',
-    },
-
     //AuthController
     {
+      id: 1,
+      action: 'AuthController.changePassword',
+    },
+    {
       id: 2,
-      action: 'AuthController.userSignUp',
+      action: 'AuthController.userSignIn',
     },
     {
       id: 3,
-      action: 'AuthController.userSignIn',
+      action: 'AuthController.userSignUp',
     },
     {
       id: 4,
       action: 'AuthController.userVerify',
     },
+
+    //CompanyController
     {
       id: 5,
-      action: 'AuthController.changePassword',
+      action: 'CompanyController.getJobsApplication',
+    },
+    {
+      id: 6,
+      action: 'CompanyController.getListJob',
+    },
+    {
+      id: 7,
+      action: 'CompanyController.getMyCompany',
+    },
+    {
+      id: 8,
+      action: 'CompanyController.updateJobApplication',
+    },
+    {
+      id: 9,
+      action: 'CompanyController.updateMyCompany',
     },
 
     //FileController
     {
-      id: 6,
+      id: 10,
       action: 'FileController.uploadImagesToS3',
     },
     {
-      id: 7,
+      id: 11,
       action: 'FileController.uploadPdfsToS3',
+    },
+
+    //JobController
+    {
+      id: 12,
+      action: 'JobController.createJob',
+    },
+    {
+      id: 13,
+      action: 'JobController.deleteJob',
+    },
+    {
+      id: 14,
+      action: 'JobController.getJob',
+    },
+    {
+      id: 15,
+      action: 'JobController.getListJob',
+    },
+    {
+      id: 16,
+      action: 'JobController.updateJob',
     },
 
     //UserController
     {
-      id: 8,
+      id: 17,
+      action: 'UserController.getListApplications',
+    },
+    {
+      id: 18,
       action: 'UserController.updateUser',
     },
     {
-      id: 9,
-      action: 'CompanyController.getMyCompany',
+      id: 19,
+      action: 'UserController.userApplyJob',
+    },
+    {
+      id: 20,
+      action: 'UserController.userDeleteApplyJob',
     },
   ];
   const permissionPromise = permissions.map((permission) => {
@@ -201,6 +249,34 @@ const main = async () => {
       roleId: 3,
       permissionId: 9,
     },
+    {
+      roleId: 3,
+      permissionId: 10,
+    },
+    {
+      roleId: 3,
+      permissionId: 11,
+    },
+    {
+      roleId: 3,
+      permissionId: 12,
+    },
+    {
+      roleId: 3,
+      permissionId: 13,
+    },
+    {
+      roleId: 3,
+      permissionId: 14,
+    },
+    {
+      roleId: 3,
+      permissionId: 15,
+    },
+    {
+      roleId: 3,
+      permissionId: 16,
+    },
 
     //USER
     {
@@ -221,24 +297,39 @@ const main = async () => {
     },
     {
       roleId: 4,
-      permissionId: 5,
+      permissionId: 10,
     },
     {
       roleId: 4,
-      permissionId: 6,
+      permissionId: 11,
     },
     {
       roleId: 4,
-      permissionId: 7,
+      permissionId: 14,
     },
     {
       roleId: 4,
-      permissionId: 8,
+      permissionId: 15,
+    },
+    {
+      roleId: 4,
+      permissionId: 17,
+    },
+    {
+      roleId: 4,
+      permissionId: 18,
+    },
+    {
+      roleId: 4,
+      permissionId: 19,
+    },
+    {
+      roleId: 4,
+      permissionId: 20,
     },
   ];
 
   rolePermissions = [...rolePermissions, ...roleRootPermission];
-  console.log(rolePermissions);
 
   const rolePermissionPromise = rolePermissions.map((rolePermission) => {
     return prisma.rolePermission.upsert({
@@ -253,6 +344,102 @@ const main = async () => {
     });
   });
   await Promise.all(rolePermissionPromise);
+
+  const cityDistrict = DataCity.map((city) => {
+    return prisma.city.upsert({
+      where: {
+        id: city.id,
+      },
+      create: {
+        id: city.id,
+        name: city.name,
+        districts: {
+          createMany: {
+            data: city.districts.map((district) => {
+              return {
+                id: district.id,
+                name: district.name,
+              };
+            }),
+          },
+        },
+      },
+      update: {
+        id: city.id,
+        name: city.name,
+        // districts: {
+        //   updateMany: {
+        //     where: {
+        //       id: { in: city.districts.map((district) => district.id) },
+        //     },
+        //     data: city.districts.map((district) => {
+        //       return {
+        //         id: district.id,
+        //         name: district.name,
+        //       };
+        //     }),
+        //   },
+        // },
+      },
+      // data: {
+      //   id: city.id,
+      //   name: city.name,
+      //   districts: {
+      //     createMany: {
+      //       data: city.districts.map((district) => {
+      //         return {
+      //           id: district.id,
+      //           name: district.name,
+      //         };
+      //       }),
+      //     },
+      //   },
+      // },
+    });
+  });
+  await Promise.all(cityDistrict);
+
+  const jobCategoryParent = JobCategory.map((jobParent) => {
+    return prisma.jobCategoryParent.upsert({
+      where: {
+        id: jobParent.id,
+      },
+      create: {
+        id: jobParent.id,
+        name: jobParent.name,
+        jobCategories: {
+          createMany: {
+            data: jobParent.jobCategory.map((jobCategory) => {
+              return {
+                id: jobCategory.id,
+                name: jobCategory.name,
+              };
+            }),
+          },
+        },
+      },
+      update: {
+        id: jobParent.id,
+        name: jobParent.name,
+        // jobCategories: {
+        //   updateMany: {
+        //     where: {
+        //       id: {
+        //         in: jobParent.jobCategory.map((jobCategory) => jobCategory.id),
+        //       },
+        //     },
+        //     data: jobParent.jobCategory.map((jobCategory) => {
+        //       return {
+        //         id: jobCategory.id,
+        //         name: jobCategory.name,
+        //       };
+        //     }),
+        //   },
+        // },
+      },
+    });
+  });
+  await Promise.all(jobCategoryParent);
 };
 
 main()

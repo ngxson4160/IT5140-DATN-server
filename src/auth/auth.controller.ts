@@ -12,6 +12,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { CompanySignUpDto } from './dto/company-sign-up.dto';
+import { CheckEmailDto } from './dto/check-email.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -19,6 +20,12 @@ export class AuthController {
     private readonly userService: UserService,
     private readonly authService: AuthService,
   ) {}
+
+  @Public()
+  @Post('/check-email')
+  checkEmail(@Body() body: CheckEmailDto) {
+    return this.authService.checkEmail(body);
+  }
 
   @Public()
   @Post('user/sign-up')

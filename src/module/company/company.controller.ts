@@ -6,6 +6,7 @@ import { IUserData } from 'src/_core/type/user-data.type';
 import { CompanyUpdateDto } from './dto/update-company.dto';
 import { ApplicationUpdateDto } from './dto/update-application.dto';
 import { CompanyGetListJobDto } from './dto/get-list-job.dto';
+import { GetListApplicationJobDto } from './dto/get-list-application.dto';
 
 @Controller('companies')
 export class CompanyController {
@@ -45,6 +46,15 @@ export class CompanyController {
       +applicationId,
       applicationUpdateDto,
     );
+  }
+
+  @Get('jobs/:jobId/applications')
+  getJobsApplication(
+    @UserData() userData: IUserData,
+    @Param('jobId') jobId: string,
+    @Query() query: GetListApplicationJobDto,
+  ) {
+    return this.companyService.getJobsApplication(userData.id, +jobId, query);
   }
 
   @Public()
