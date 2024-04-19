@@ -11,6 +11,9 @@ export class CompanyUpdateDto {
   @IsNumber()
   jobCategoryParentId: number;
 
+  @IsNumber()
+  cityId: number;
+
   @IsString()
   name: string;
 
@@ -41,13 +44,6 @@ export class CompanyUpdateDto {
 
   @IsNumber()
   averageAge: number;
-
-  @IsString()
-  primaryCity: string;
-
-  @IsOptional()
-  @IsArray()
-  extraCity?: JsonValue;
 
   @IsString()
   primaryAddress: string;

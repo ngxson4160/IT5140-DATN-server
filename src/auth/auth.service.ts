@@ -120,11 +120,9 @@ export class AuthService {
       jobCategoryParentId,
       name,
       totalStaff,
-      primaryCity,
+      cityId,
       primaryPhoneNumber,
     } = body.company;
-
-    console.log(typeof jobCategoryParentId);
 
     const user = await this.prisma.user.findUnique({ where: { email } });
 
@@ -146,9 +144,15 @@ export class AuthService {
             primaryEmail: email,
             name,
             totalStaff: +totalStaff,
-            primaryCity,
             primaryPhoneNumber,
             canCreateJob: true,
+          },
+        });
+
+        await tx.companyHasCity.create({
+          data: {
+            cityId,
+            companyId: companyCreated.id,
           },
         });
 

@@ -18,6 +18,8 @@ export class JobService {
   async createJob(userId: number, data: CreateJobDto) {
     const {
       jobCategoryId,
+      cityIds,
+      tagIds,
       title,
       position,
       salaryMin,
@@ -26,7 +28,6 @@ export class JobService {
       hours,
       workMode,
       officeName,
-      city,
       address,
       quantity,
       status,
@@ -38,7 +39,6 @@ export class JobService {
       yearExperienceMax,
       hiringStartDate,
       hiringEndDate,
-      tagIds,
     } = data;
 
     //TODO validate min < max, start < end
@@ -55,7 +55,6 @@ export class JobService {
         hours,
         workMode,
         officeName,
-        city,
         address,
         quantity,
         status,
@@ -67,6 +66,14 @@ export class JobService {
         yearExperienceMax,
         hiringStartDate,
         hiringEndDate,
+        ...(cityIds &&
+          cityIds.length > 0 && {
+            jobHasCities: {
+              createMany: {
+                data: cityIds?.map((cityId) => ({ cityId: cityId })),
+              },
+            },
+          }),
         ...(tagIds &&
           tagIds.length > 0 && {
             jobHasTags: {
@@ -127,6 +134,8 @@ export class JobService {
   async updateJob(userId: number, jobId: number, data: UpdateJobDto) {
     const {
       jobCategoryId,
+      cityIds,
+      tagIds,
       title,
       position,
       salaryMin,
@@ -135,7 +144,6 @@ export class JobService {
       hours,
       workMode,
       officeName,
-      city,
       address,
       quantity,
       status,
@@ -157,34 +165,60 @@ export class JobService {
       throw new CommonException(MessageResponse.JOB.NOT_FOUND(jobId));
     }
 
-    const jobUpdated = await this.prisma.job.update({
-      where: { id: jobId },
-      data: {
-        jobCategoryId,
-        title,
-        position,
-        salaryMin,
-        salaryMax,
-        images,
-        hours,
-        workMode,
-        officeName,
-        city,
-        address,
-        quantity,
-        status,
-        benefits,
-        description,
-        requirement,
-        gender,
-        yearExperienceMin,
-        yearExperienceMax,
-        hiringStartDate,
-        hiringEndDate,
-      },
-    });
+    try {
+      const jobUpdated = await this.prisma.$transaction(async (tx) => {
+        await tx.jobHasTag.deleteMany({ where: { jobId } });
+        await tx.jobHasCity.deleteMany({ where: { jobId } });
 
-    return jobUpdated;
+        const jobUpdated = await tx.job.update({
+          where: { id: jobId },
+          data: {
+            jobCategoryId,
+            title,
+            position,
+            salaryMin,
+            salaryMax,
+            images,
+            hours,
+            workMode,
+            officeName,
+            address,
+            quantity,
+            status,
+            benefits,
+            description,
+            requirement,
+            gender,
+            yearExperienceMin,
+            yearExperienceMax,
+            hiringStartDate,
+            hiringEndDate,
+            ...(cityIds &&
+              cityIds.length > 0 && {
+                jobHasCities: {
+                  createMany: {
+                    data: cityIds?.map((cityId) => ({ cityId: cityId })),
+                  },
+                },
+              }),
+            ...(tagIds &&
+              tagIds.length > 0 && {
+                jobHasTags: {
+                  createMany: {
+                    data: tagIds?.map((tagId) => ({ tagId: tagId })),
+                  },
+                },
+              }),
+          },
+        });
+
+        return jobUpdated;
+      });
+
+      return jobUpdated;
+    } catch (e) {
+      throw e;
+    }
   }
 
   async deleteJob(userId: number, jobId: number) {
@@ -211,7 +245,7 @@ export class JobService {
   //TODO filter tag name
   async getListJob(query: GetListJobDto, userId?: number) {
     const {
-      cities,
+      cityIds,
       filter,
       jobCategoryIds,
       tagIds,
@@ -248,6 +282,15 @@ export class JobService {
               : undefined,
           },
         },
+        ...(cityIds && {
+          jobHasCities: {
+            some: {
+              cityId: {
+                in: cityIds ? JSON.parse(cityIds?.toString()) : undefined,
+              },
+            },
+          },
+        }),
         ...(tagIds && {
           jobHasTags: {
             some: {
@@ -268,9 +311,6 @@ export class JobService {
         workMode: {
           in: workMode ? JSON.parse(workMode?.toString()) : undefined,
         },
-        // city: {
-        //   array_contains: cities,
-        // },
         ...(workExperience && {
           yearExperienceMin: {
             lte: +workExperience,
@@ -307,8 +347,6 @@ export class JobService {
       };
     }
 
-    let jobFilterCities = [];
-
     listJob.forEach((job) => {
       const userStatusApplication: object | null = { status: null };
       job['application'] = userStatusApplication;
@@ -321,30 +359,18 @@ export class JobService {
       delete job.applications;
     });
 
-    if (cities) {
-      listJob.forEach((job) => {
-        const jobCity = job.city as Array<string>;
-        const isMatchFilterCities = jobCity.some((el) => cities.includes(el));
-        if (isMatchFilterCities) {
-          jobFilterCities.push(job);
-        }
-      });
-    } else {
-      jobFilterCities = listJob;
-    }
-
     const skipItems = (+page - 1) * +take;
     const listItems = [];
     for (let i = skipItems; i < skipItems + +take; i++) {
-      if (jobFilterCities[i]) {
-        listItems.push(jobFilterCities[i]);
+      if (listJob[i]) {
+        listItems.push(listJob[i]);
       }
     }
 
     return {
       page: +page,
       pageSize: +take,
-      totalPage: Math.ceil(jobFilterCities.length / take),
+      totalPage: Math.ceil(listJob.length / take),
       listJob: listItems,
     };
   }

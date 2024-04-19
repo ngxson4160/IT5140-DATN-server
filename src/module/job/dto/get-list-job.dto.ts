@@ -11,6 +11,10 @@ export class GetListJobDto extends PaginationDto {
   jobCategoryIds?: number[];
 
   @IsOptional()
+  //   @IsNumber()
+  cityIds?: string[];
+
+  @IsOptional()
   // @IsArray()
   // @Type(() => Number)
   // @IsNumber({}, { each: true })
@@ -25,10 +29,6 @@ export class GetListJobDto extends PaginationDto {
   //   @IsArray()
   //   @IsNumber({}, {each: true})
   workMode?: number;
-
-  @IsOptional()
-  //   @IsNumber()
-  cities?: string[];
 
   @IsOptional()
   @IsNumber()
