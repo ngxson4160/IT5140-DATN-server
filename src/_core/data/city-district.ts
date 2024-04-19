@@ -1,7 +1,7 @@
 export const DataCity = [
   {
     id: 1,
-    name: 'Thành phố Hà Nội',
+    name: 'Hà Nội',
     districts: [
       {
         id: 1,
@@ -127,7 +127,7 @@ export const DataCity = [
   },
   {
     id: 2,
-    name: 'Tỉnh Hà Giang',
+    name: 'Hà Giang',
     districts: [
       {
         id: 31,
@@ -177,7 +177,7 @@ export const DataCity = [
   },
   {
     id: 4,
-    name: 'Tỉnh Cao Bằng',
+    name: 'Cao Bằng',
     districts: [
       {
         id: 42,
@@ -223,11 +223,11 @@ export const DataCity = [
   },
   {
     id: 6,
-    name: 'Tỉnh Bắc Kạn',
+    name: 'Bắc Kạn',
     districts: [
       {
         id: 52,
-        name: 'Thành Phố Bắc Kạn',
+        name: 'Thành phố Bắc Kạn',
       },
       {
         id: 53,
@@ -261,7 +261,7 @@ export const DataCity = [
   },
   {
     id: 8,
-    name: 'Tỉnh Tuyên Quang',
+    name: 'Tuyên Quang',
     districts: [
       {
         id: 60,
@@ -295,7 +295,7 @@ export const DataCity = [
   },
   {
     id: 10,
-    name: 'Tỉnh Lào Cai',
+    name: 'Lào Cai',
     districts: [
       {
         id: 67,
@@ -337,7 +337,7 @@ export const DataCity = [
   },
   {
     id: 11,
-    name: 'Tỉnh Điện Biên',
+    name: 'Điện Biên',
     districts: [
       {
         id: 76,
@@ -383,7 +383,7 @@ export const DataCity = [
   },
   {
     id: 12,
-    name: 'Tỉnh Lai Châu',
+    name: 'Lai Châu',
     districts: [
       {
         id: 86,
@@ -421,7 +421,7 @@ export const DataCity = [
   },
   {
     id: 14,
-    name: 'Tỉnh Sơn La',
+    name: 'Sơn La',
     districts: [
       {
         id: 94,
@@ -475,7 +475,7 @@ export const DataCity = [
   },
   {
     id: 15,
-    name: 'Tỉnh Yên Bái',
+    name: 'Yên Bái',
     districts: [
       {
         id: 106,
@@ -517,7 +517,7 @@ export const DataCity = [
   },
   {
     id: 17,
-    name: 'Tỉnh Hoà Bình',
+    name: 'Hoà Bình',
     districts: [
       {
         id: 115,
@@ -563,7 +563,7 @@ export const DataCity = [
   },
   {
     id: 19,
-    name: 'Tỉnh Thái Nguyên',
+    name: 'Thái Nguyên',
     districts: [
       {
         id: 125,
@@ -605,7 +605,7 @@ export const DataCity = [
   },
   {
     id: 20,
-    name: 'Tỉnh Lạng Sơn',
+    name: 'Lạng Sơn',
     districts: [
       {
         id: 134,
@@ -655,7 +655,7 @@ export const DataCity = [
   },
   {
     id: 22,
-    name: 'Tỉnh Quảng Ninh',
+    name: 'Quảng Ninh',
     districts: [
       {
         id: 145,
@@ -713,7 +713,7 @@ export const DataCity = [
   },
   {
     id: 24,
-    name: 'Tỉnh Bắc Giang',
+    name: 'Bắc Giang',
     districts: [
       {
         id: 158,
@@ -759,7 +759,7 @@ export const DataCity = [
   },
   {
     id: 25,
-    name: 'Tỉnh Phú Thọ',
+    name: 'Phú Thọ',
     districts: [
       {
         id: 168,
@@ -817,7 +817,7 @@ export const DataCity = [
   },
   {
     id: 26,
-    name: 'Tỉnh Vĩnh Phúc',
+    name: 'Vĩnh Phúc',
     districts: [
       {
         id: 181,
@@ -859,7 +859,7 @@ export const DataCity = [
   },
   {
     id: 27,
-    name: 'Tỉnh Bắc Ninh',
+    name: 'Bắc Ninh',
     districts: [
       {
         id: 190,
@@ -897,7 +897,7 @@ export const DataCity = [
   },
   {
     id: 30,
-    name: 'Tỉnh Hải Dương',
+    name: 'Hải Dương',
     districts: [
       {
         id: 198,
@@ -951,7 +951,7 @@ export const DataCity = [
   },
   {
     id: 31,
-    name: 'Thành phố Hải Phòng',
+    name: 'Hải Phòng',
     districts: [
       {
         id: 210,
@@ -1017,7 +1017,7 @@ export const DataCity = [
   },
   {
     id: 33,
-    name: 'Tỉnh Hưng Yên',
+    name: 'Hưng Yên',
     districts: [
       {
         id: 225,
@@ -1063,7 +1063,7 @@ export const DataCity = [
   },
   {
     id: 34,
-    name: 'Tỉnh Thái Bình',
+    name: 'Thái Bình',
     districts: [
       {
         id: 235,
@@ -1101,7 +1101,7 @@ export const DataCity = [
   },
   {
     id: 35,
-    name: 'Tỉnh Hà Nam',
+    name: 'Hà Nam',
     districts: [
       {
         id: 243,
@@ -1131,7 +1131,7 @@ export const DataCity = [
   },
   {
     id: 36,
-    name: 'Tỉnh Nam Định',
+    name: 'Nam Định',
     districts: [
       {
         id: 249,
@@ -1177,7 +1177,7 @@ export const DataCity = [
   },
   {
     id: 37,
-    name: 'Tỉnh Ninh Bình',
+    name: 'Ninh Bình',
     districts: [
       {
         id: 259,
@@ -1215,7 +1215,7 @@ export const DataCity = [
   },
   {
     id: 38,
-    name: 'Tỉnh Thanh Hóa',
+    name: 'Thanh Hóa',
     districts: [
       {
         id: 267,
@@ -1329,7 +1329,7 @@ export const DataCity = [
   },
   {
     id: 40,
-    name: 'Tỉnh Nghệ An',
+    name: 'Nghệ An',
     districts: [
       {
         id: 294,
@@ -1419,7 +1419,7 @@ export const DataCity = [
   },
   {
     id: 42,
-    name: 'Tỉnh Hà Tĩnh',
+    name: 'Hà Tĩnh',
     districts: [
       {
         id: 315,
@@ -1477,11 +1477,11 @@ export const DataCity = [
   },
   {
     id: 44,
-    name: 'Tỉnh Quảng Bình',
+    name: 'Quảng Bình',
     districts: [
       {
         id: 328,
-        name: 'Thành Phố Đồng Hới',
+        name: 'Thành phố Đồng Hới',
       },
       {
         id: 329,
@@ -1515,7 +1515,7 @@ export const DataCity = [
   },
   {
     id: 45,
-    name: 'Tỉnh Quảng Trị',
+    name: 'Quảng Trị',
     districts: [
       {
         id: 336,
@@ -1561,7 +1561,7 @@ export const DataCity = [
   },
   {
     id: 46,
-    name: 'Tỉnh Thừa Thiên Huế',
+    name: 'Thừa Thiên Huế',
     districts: [
       {
         id: 346,
@@ -1603,7 +1603,7 @@ export const DataCity = [
   },
   {
     id: 48,
-    name: 'Thành phố Đà Nẵng',
+    name: 'Đà Nẵng',
     districts: [
       {
         id: 355,
@@ -1641,7 +1641,7 @@ export const DataCity = [
   },
   {
     id: 49,
-    name: 'Tỉnh Quảng Nam',
+    name: 'Quảng Nam',
     districts: [
       {
         id: 363,
@@ -1719,7 +1719,7 @@ export const DataCity = [
   },
   {
     id: 51,
-    name: 'Tỉnh Quảng Ngãi',
+    name: 'Quảng Ngãi',
     districts: [
       {
         id: 381,
@@ -1777,7 +1777,7 @@ export const DataCity = [
   },
   {
     id: 52,
-    name: 'Tỉnh Bình Định',
+    name: 'Bình Định',
     districts: [
       {
         id: 394,
@@ -1827,7 +1827,7 @@ export const DataCity = [
   },
   {
     id: 54,
-    name: 'Tỉnh Phú Yên',
+    name: 'Phú Yên',
     districts: [
       {
         id: 405,
@@ -1869,7 +1869,7 @@ export const DataCity = [
   },
   {
     id: 56,
-    name: 'Tỉnh Khánh Hòa',
+    name: 'Khánh Hòa',
     districts: [
       {
         id: 414,
@@ -1911,7 +1911,7 @@ export const DataCity = [
   },
   {
     id: 58,
-    name: 'Tỉnh Ninh Thuận',
+    name: 'Ninh Thuận',
     districts: [
       {
         id: 423,
@@ -1945,7 +1945,7 @@ export const DataCity = [
   },
   {
     id: 60,
-    name: 'Tỉnh Bình Thuận',
+    name: 'Bình Thuận',
     districts: [
       {
         id: 430,
@@ -1991,7 +1991,7 @@ export const DataCity = [
   },
   {
     id: 62,
-    name: 'Tỉnh Kon Tum',
+    name: 'Kon Tum',
     districts: [
       {
         id: 440,
@@ -2037,7 +2037,7 @@ export const DataCity = [
   },
   {
     id: 64,
-    name: 'Tỉnh Gia Lai',
+    name: 'Gia Lai',
     districts: [
       {
         id: 450,
@@ -2111,7 +2111,7 @@ export const DataCity = [
   },
   {
     id: 66,
-    name: 'Tỉnh Đắk Lắk',
+    name: 'Đắk Lắk',
     districts: [
       {
         id: 467,
@@ -2177,7 +2177,7 @@ export const DataCity = [
   },
   {
     id: 67,
-    name: 'Tỉnh Đắk Nông',
+    name: 'Đắk Nông',
     districts: [
       {
         id: 482,
@@ -2215,7 +2215,7 @@ export const DataCity = [
   },
   {
     id: 68,
-    name: 'Tỉnh Lâm Đồng',
+    name: 'Lâm Đồng',
     districts: [
       {
         id: 490,
@@ -2269,7 +2269,7 @@ export const DataCity = [
   },
   {
     id: 70,
-    name: 'Tỉnh Bình Phước',
+    name: 'Bình Phước',
     districts: [
       {
         id: 502,
@@ -2319,7 +2319,7 @@ export const DataCity = [
   },
   {
     id: 72,
-    name: 'Tỉnh Tây Ninh',
+    name: 'Tây Ninh',
     districts: [
       {
         id: 513,
@@ -2361,7 +2361,7 @@ export const DataCity = [
   },
   {
     id: 74,
-    name: 'Tỉnh Bình Dương',
+    name: 'Bình Dương',
     districts: [
       {
         id: 522,
@@ -2403,7 +2403,7 @@ export const DataCity = [
   },
   {
     id: 75,
-    name: 'Tỉnh Đồng Nai',
+    name: 'Đồng Nai',
     districts: [
       {
         id: 531,
@@ -2453,7 +2453,7 @@ export const DataCity = [
   },
   {
     id: 77,
-    name: 'Tỉnh Bà Rịa - Vũng Tàu',
+    name: 'Bà Rịa - Vũng Tàu',
     districts: [
       {
         id: 542,
@@ -2491,7 +2491,7 @@ export const DataCity = [
   },
   {
     id: 79,
-    name: 'Thành phố Hồ Chí Minh',
+    name: 'Hồ Chí Minh',
     districts: [
       {
         id: 550,
@@ -2593,7 +2593,7 @@ export const DataCity = [
   },
   {
     id: 80,
-    name: 'Tỉnh Long An',
+    name: 'Long An',
     districts: [
       {
         id: 574,
@@ -2659,7 +2659,7 @@ export const DataCity = [
   },
   {
     id: 82,
-    name: 'Tỉnh Tiền Giang',
+    name: 'Tiền Giang',
     districts: [
       {
         id: 589,
@@ -2709,7 +2709,7 @@ export const DataCity = [
   },
   {
     id: 83,
-    name: 'Tỉnh Bến Tre',
+    name: 'Bến Tre',
     districts: [
       {
         id: 600,
@@ -2751,7 +2751,7 @@ export const DataCity = [
   },
   {
     id: 84,
-    name: 'Tỉnh Trà Vinh',
+    name: 'Trà Vinh',
     districts: [
       {
         id: 609,
@@ -2793,7 +2793,7 @@ export const DataCity = [
   },
   {
     id: 86,
-    name: 'Tỉnh Vĩnh Long',
+    name: 'Vĩnh Long',
     districts: [
       {
         id: 618,
@@ -2831,7 +2831,7 @@ export const DataCity = [
   },
   {
     id: 87,
-    name: 'Tỉnh Đồng Tháp',
+    name: 'Đồng Tháp',
     districts: [
       {
         id: 626,
@@ -2885,7 +2885,7 @@ export const DataCity = [
   },
   {
     id: 89,
-    name: 'Tỉnh An Giang',
+    name: 'An Giang',
     districts: [
       {
         id: 638,
@@ -2935,7 +2935,7 @@ export const DataCity = [
   },
   {
     id: 91,
-    name: 'Tỉnh Kiên Giang',
+    name: 'Kiên Giang',
     districts: [
       {
         id: 649,
@@ -3001,7 +3001,7 @@ export const DataCity = [
   },
   {
     id: 92,
-    name: 'Thành phố Cần Thơ',
+    name: 'Cần Thơ',
     districts: [
       {
         id: 664,
@@ -3043,7 +3043,7 @@ export const DataCity = [
   },
   {
     id: 93,
-    name: 'Tỉnh Hậu Giang',
+    name: 'Hậu Giang',
     districts: [
       {
         id: 673,
@@ -3081,7 +3081,7 @@ export const DataCity = [
   },
   {
     id: 94,
-    name: 'Tỉnh Sóc Trăng',
+    name: 'Sóc Trăng',
     districts: [
       {
         id: 681,
@@ -3131,7 +3131,7 @@ export const DataCity = [
   },
   {
     id: 95,
-    name: 'Tỉnh Bạc Liêu',
+    name: 'Bạc Liêu',
     districts: [
       {
         id: 692,
@@ -3165,7 +3165,7 @@ export const DataCity = [
   },
   {
     id: 96,
-    name: 'Tỉnh Cà Mau',
+    name: 'Cà Mau',
     districts: [
       {
         id: 699,

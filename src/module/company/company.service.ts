@@ -44,8 +44,7 @@ export class CompanyService {
       socialMedia,
       totalStaff,
       averageAge,
-      primaryCity,
-      extraCity,
+      cityId,
       primaryAddress,
       extraAddress,
       primaryPhoneNumber,
@@ -67,29 +66,44 @@ export class CompanyService {
       throw new CommonException(MessageResponse.COMPANY.NAME_EXIST);
     }
 
-    const companyUpdated = await this.prisma.company.update({
-      where: { id: user.company.id },
-      data: {
-        jobCategoryParentId,
-        name,
-        extraEmail,
-        aboutUs,
-        avatar,
-        coverImage,
-        homePage,
-        socialMedia,
-        totalStaff,
-        averageAge,
-        primaryCity,
-        extraCity,
-        primaryAddress,
-        extraAddress,
-        primaryPhoneNumber,
-        extraPhoneNumber,
-      },
-    });
+    try {
+      const companyUpdated = await this.prisma.$transaction(async (tx) => {
+        const companyUpdated = await tx.company.update({
+          where: { id: user.company.id },
+          data: {
+            jobCategoryParentId,
+            name,
+            extraEmail,
+            aboutUs,
+            avatar,
+            coverImage,
+            homePage,
+            socialMedia,
+            totalStaff,
+            averageAge,
+            primaryAddress,
+            extraAddress,
+            primaryPhoneNumber,
+            extraPhoneNumber,
+          },
+        });
 
-    return companyUpdated;
+        await tx.companyHasCity.updateMany({
+          where: {
+            companyId: user.company.id,
+          },
+          data: {
+            cityId,
+          },
+        });
+
+        return companyUpdated;
+      });
+
+      return companyUpdated;
+    } catch (e) {
+      throw e;
+    }
   }
 
   async updateJobApplication(

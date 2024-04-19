@@ -17,6 +17,15 @@ export class UpdateJobDto {
   @IsNumber()
   jobCategoryId: number;
 
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  tagIds: number[];
+
+  @IsArray()
+  @IsNumber({}, { each: true })
+  cityIds: number[];
+
   @IsString()
   title: string;
 
@@ -44,9 +53,6 @@ export class UpdateJobDto {
 
   @IsString()
   officeName: string;
-
-  @IsArray()
-  city: JsonValue;
 
   @IsArray()
   address: JsonValue;

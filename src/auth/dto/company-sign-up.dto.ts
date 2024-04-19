@@ -10,6 +10,13 @@ export class CompanyInformationSignUpDto {
   })
   jobCategoryParentId: number;
 
+  @IsNumber()
+  @Type(() => Number)
+  @Transform(({ value }) => {
+    return Number(value);
+  })
+  cityId: number;
+
   @IsString()
   name: string;
 
@@ -24,9 +31,6 @@ export class CompanyInformationSignUpDto {
 
   @IsNumber()
   averageAge: number;
-
-  @IsString()
-  primaryCity: string;
 
   @IsString()
   primaryAddress: string;
