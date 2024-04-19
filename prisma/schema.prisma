@@ -101,14 +101,12 @@ model Company {
   extraEmail         Json?   @map("extra_mail")
   aboutUs            String? @map("about_us")
   avatar             String?
-  coverImage         String?  @map("cover_image")
+  coverImage         String? @map("cover_image")
   homePage           String? @map("home_page")
   socialMedia        Json?   @map("soical_media")
   totalStaff         Int     @map("total_staff")
-  averageAge         Float?   @map("average_Age")
-  primaryCity        String  @map("primary_city")
-  extraCity          Json?   @map("extra_city")
-  primaryAddress     String?  @map("primary_address")
+  averageAge         Float?  @map("average_Age")
+  primaryAddress     String? @map("primary_address")
   extraAddress       Json?   @map("extra_address")
   primaryPhoneNumber Json    @map("phone_number")
   extraPhoneNumber   Json?   @map("extra_phone_number")
@@ -122,7 +120,8 @@ model Company {
 
   jobCategoryParent JobCategoryParent @relation(fields: [jobCategoryParentId], references: [id])
 
-  users User[]
+  users            User[]
+  companyHasCities CompanyHasCity[]
 
   @@map("company")
 }
@@ -131,9 +130,9 @@ model CandidateInformation {
   id                   Int @id @default(autoincrement())
   userId               Int @unique @map("user_id")
   desiredJobCategoryId Int @map("desired_job_category_id")
+  cityId               Int @map("city_id")
 
   cv             Json
-  city           String
   address        String? @map("address")
   desiredCity    String? @map("desired_city")
   desiredSalary  Int?    @map("desired_salary")
@@ -148,12 +147,13 @@ model CandidateInformation {
 
   user        User        @relation(fields: [userId], references: [id])
   jobcategory JobCategory @relation(fields: [desiredJobCategoryId], references: [id])
+  city        City        @relation(fields: [cityId], references: [id])
 
   @@map("candidate_information")
 }
 
 model Job {
-  id            Int @id @default(autoincrement())
+  id            Int  @id @default(autoincrement())
   creatorId     Int? @map("creator_id")
   jobCategoryId Int? @map("job_category_id")
 
@@ -163,13 +163,12 @@ model Job {
   salaryMax         Float?   @map("salary_max")
   images            Json?
   hours             Float?
-  workMode          Int?      @map("work_mode") @db.TinyInt
-  officeName        String?   @map("office_name")
-  city              Json?
+  workMode          Int?     @map("work_mode") @db.TinyInt
+  officeName        String?  @map("office_name")
   address           Json?
   quantity          Int?
-  totalViews        Int?      @default(0) @map("total_views")
-  totalCandidate    Int?      @default(0) @map("total_candidate")
+  totalViews        Int?     @default(0) @map("total_views")
+  totalCandidate    Int?     @default(0) @map("total_candidate")
   benefits          String?
   description       String?
   requirement       String?
@@ -190,6 +189,7 @@ model Job {
 
   applications Application[]
   jobHasTags   JobHasTag[]
+  jobHasCities JobHasCity[]
 
   @@map("job")
 }
@@ -373,18 +373,43 @@ model City {
 
   name String
 
-  districts District[]
+  districts             District[]
+  candidateInformations CandidateInformation[]
+  jobHasCities          JobHasCity[]
+  companyHasCities      CompanyHasCity[]
 
   @@map("city")
 }
 
 model District {
   id     Int @id @default(autoincrement())
-  cityId Int @map("city_id") //TODO
+  cityId Int @map("city_id")
 
   name String
 
   city City @relation(fields: [cityId], references: [id])
 
   @@map("district")
+}
+
+model JobHasCity {
+  id     Int @id @default(autoincrement())
+  jobId  Int @map("job_id")
+  cityId Int @map("city_id")
+
+  job  Job  @relation(fields: [jobId], references: [id])
+  city City @relation(fields: [cityId], references: [id])
+
+  @@map("job_has_city")
+}
+
+model CompanyHasCity {
+  id        Int @id @default(autoincrement())
+  companyId Int @map("company_id")
+  cityId    Int @map("city_id")
+
+  job  Company @relation(fields: [companyId], references: [id])
+  city City    @relation(fields: [cityId], references: [id])
+
+  @@map("company_has_city")
 }

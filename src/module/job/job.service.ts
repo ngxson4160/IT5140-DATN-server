@@ -121,7 +121,7 @@ export class JobService {
       data: { totalViews: ++job.totalViews },
     });
 
-    return { company: creator.company, job };
+    return { job, company: creator.company };
   }
 
   async updateJob(userId: number, jobId: number, data: UpdateJobDto) {

@@ -24,7 +24,7 @@ export class GetListJobDto extends PaginationDto {
   @IsOptional()
   //   @IsArray()
   //   @IsNumber({}, {each: true})
-  workMode?: number[];
+  workMode?: number;
 
   @IsOptional()
   //   @IsNumber()
