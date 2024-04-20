@@ -1,4 +1,5 @@
 import { JsonValue } from '@prisma/client/runtime/library';
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsDateString,
@@ -10,6 +11,7 @@ import {
 import {
   EGender,
   EJobStatus,
+  EJobLevel,
   EWorkMode,
 } from 'src/_core/constant/enum.constant';
 
@@ -51,6 +53,9 @@ export class CreateJobDto {
   @IsEnum(EWorkMode)
   workMode: EWorkMode;
 
+  @IsEnum(EJobLevel)
+  level: EJobLevel;
+
   @IsString()
   officeName: string;
 
@@ -78,11 +83,8 @@ export class CreateJobDto {
 
   @IsOptional()
   @IsNumber()
-  yearExperienceMin: number;
-
-  @IsOptional()
-  @IsNumber()
-  yearExperienceMax: number;
+  @Type(() => Number)
+  yearExperience?: number;
 
   @IsDateString()
   hiringStartDate: Date;

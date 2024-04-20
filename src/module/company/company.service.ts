@@ -150,13 +150,13 @@ export class CompanyService {
 
     let {
       page,
-      take,
+      limit,
       // skip,
       order,
     } = query;
 
     page = page ?? 1;
-    take = take ?? 5;
+    limit = limit ?? 5;
     order = order ?? EOrderPaging.DESC;
 
     let filterDate: object;
@@ -194,9 +194,9 @@ export class CompanyService {
       },
     });
 
-    const skipItems = (+page - 1) * +take;
+    const skipItems = (+page - 1) * +limit;
     const listItems = [];
-    for (let i = skipItems; i < skipItems + +take; i++) {
+    for (let i = skipItems; i < skipItems + +limit; i++) {
       if (listJob[i]) {
         listItems.push(listJob[i]);
       }
@@ -204,8 +204,8 @@ export class CompanyService {
 
     return {
       page: +page,
-      pageSize: +take,
-      totalPage: Math.ceil(listJob.length / take),
+      pageSize: +limit,
+      totalPage: Math.ceil(listJob.length / limit),
       listJob: listItems,
     };
   }
@@ -219,13 +219,13 @@ export class CompanyService {
 
     let {
       page,
-      take,
+      limit,
       // skip,
       // order,
     } = query;
 
     page = page ?? 1;
-    take = take ?? 5;
+    limit = limit ?? 5;
 
     const job = await this.prisma.job.findUnique({
       where: {
@@ -252,9 +252,9 @@ export class CompanyService {
       listApplication = job.applications;
     }
 
-    const skipItems = (+page - 1) * +take;
+    const skipItems = (+page - 1) * +limit;
     const listItems = [];
-    for (let i = skipItems; i < skipItems + +take; i++) {
+    for (let i = skipItems; i < skipItems + +limit; i++) {
       if (listApplication[i]) {
         listItems.push(listApplication[i]);
       }
@@ -262,8 +262,8 @@ export class CompanyService {
 
     return {
       page: +page,
-      pageSize: +take,
-      totalPage: Math.ceil(listApplication.length / take),
+      pageSize: +limit,
+      totalPage: Math.ceil(listApplication.length / limit),
       listApplications: listItems,
     };
   }

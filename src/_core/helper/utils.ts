@@ -29,3 +29,9 @@ export const verifyToken = async (token: string, privateKey: string) => {
     throw new CommonException(MessageResponse.COMMON.INVALID_TOKEN);
   }
 };
+
+export const FormatQueryArray = (data: string) => {
+  const arr = data.split(',');
+
+  return arr.map((el) => +el);
+};

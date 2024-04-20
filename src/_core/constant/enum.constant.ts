@@ -21,6 +21,17 @@ export enum EWorkMode {
   FULL_TIME,
 }
 
+export enum EJobLevel {
+  INTERN,
+  STAFF,
+  LEADER,
+  HEAD_OR_DEPUTY_DEPARTMENT,
+  MANAGER,
+  HEAD_BRANCH,
+  VICE_DIRECTOR,
+  DIRECTOR,
+}
+
 export enum EJobStatus {
   DRAFT,
   PUBLIC,
