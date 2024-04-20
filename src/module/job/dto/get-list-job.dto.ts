@@ -6,7 +6,7 @@ import {
   IsString,
   IsEnum,
 } from 'class-validator';
-import { EJobLevel, EWorkMode } from 'src/_core/constant/enum.constant';
+import { EJobLevel, EJobMode } from 'src/_core/constant/enum.constant';
 import { PaginationDto } from 'src/_core/dto/query-paging.dto';
 
 // TODO Validate
@@ -28,15 +28,10 @@ export class GetListJobDto extends PaginationDto {
   tagIds?: string;
 
   @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  salary?: number;
-
-  @IsOptional()
-  @IsEnum(EWorkMode)
+  @IsEnum(EJobMode)
   //   @IsArray()
   //   @IsNumber({}, {each: true})
-  workMode?: EWorkMode;
+  jobMode?: EJobMode;
 
   @IsOptional()
   @IsEnum(EJobLevel)

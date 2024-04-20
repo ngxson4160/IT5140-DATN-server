@@ -16,7 +16,7 @@ export enum EGender {
   OTHER,
 }
 
-export enum EWorkMode {
+export enum EJobMode {
   PART_TIME,
   FULL_TIME,
 }

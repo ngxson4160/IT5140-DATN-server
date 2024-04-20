@@ -12,7 +12,7 @@ import {
   EGender,
   EJobStatus,
   EJobLevel,
-  EWorkMode,
+  EJobMode,
 } from 'src/_core/constant/enum.constant';
 
 export class CreateJobDto {
@@ -50,8 +50,8 @@ export class CreateJobDto {
   @IsNumber()
   hours: number;
 
-  @IsEnum(EWorkMode)
-  workMode: EWorkMode;
+  @IsEnum(EJobMode)
+  jobMode: EJobMode;
 
   @IsEnum(EJobLevel)
   level: EJobLevel;

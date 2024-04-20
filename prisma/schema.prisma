@@ -163,7 +163,7 @@ model Job {
   salaryMax       Float?   @map("salary_max")
   images          Json?
   hours           Float?
-  workMode        Int?     @map("work_mode") @db.TinyInt
+  jobMode        Int?     @map("job_mode") @db.TinyInt
   level           Int?     @db.TinyInt
   officeName      String?  @map("office_name")
   address         Json?
