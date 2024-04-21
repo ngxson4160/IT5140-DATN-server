@@ -263,6 +263,32 @@ export class JobService {
     limit = limit ?? 5;
     order = order ?? EOrderPaging.DESC;
 
+    let whereSalary: object;
+
+    if (salaryMin && salaryMax) {
+      whereSalary = {
+        salaryMax: {
+          lte: +salaryMax,
+        },
+        salaryMin: {
+          gte: +salaryMin,
+        },
+      };
+    } else if (!salaryMin && salaryMax) {
+      whereSalary = {
+        salaryMin: {
+          lte: +salaryMax,
+        },
+      };
+    } else if (salaryMin && !salaryMax) {
+      whereSalary = {
+        OR: [
+          { salaryMax: { gte: +salaryMin } },
+          { salaryMin: { gte: +salaryMin } },
+        ],
+      };
+    }
+
     const listJob = await this.prisma.job.findMany({
       where: {
         ...(filter && {
@@ -281,37 +307,27 @@ export class JobService {
           jobHasCities: {
             some: {
               cityId: {
-                // in: cityIds ? JSON.parse(cityIds?.toString()) : undefined,
                 in: cityIds ? FormatQueryArray(cityIds) : undefined,
               },
             },
           },
         }),
-        ...(tagIds && {
-          jobHasTags: {
-            some: {
-              tagId: {
-                in: tagIds ? FormatQueryArray(tagIds) : undefined,
-              },
-            },
-          },
-        }),
-        ...(salaryMax && {
-          salaryMax: {
-            lte: +salaryMax,
-          },
-        }),
-        ...(salaryMin && {
-          salaryMin: {
-            gte: +salaryMin,
-          },
-        }),
+        // ...(tagIds && {
+        //   jobHasTags: {
+        //     some: {
+        //       tagId: {
+        //         in: tagIds ? FormatQueryArray(tagIds) : undefined,
+        //       },
+        //     },
+        //   },
+        // }),
+        ...whereSalary,
         yearExperience: {
           gte: yearExperienceMin ? +yearExperienceMin : undefined,
           lte: yearExperienceMax ? +yearExperienceMax : undefined,
         },
-        jobMode,
-        level,
+        jobMode: jobMode ? +jobMode : undefined,
+        level: level ? +level : undefined,
         status: EJobStatus.PUBLIC,
         hiringEndDate: {
           gte: new Date(),
@@ -323,7 +339,22 @@ export class JobService {
       include: {
         jobHasCities: {
           select: {
-            cityId: true,
+            city: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        jobHasTags: {
+          select: {
+            tag: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
           },
         },
         applications: {
@@ -380,9 +411,19 @@ export class JobService {
         delete listJob[i].creator.company;
         listJob[i]['company'] = company;
 
-        const cityIds = listJob[i].jobHasCities.map((el) => el.cityId);
+        const cities = listJob[i].jobHasCities.map((el) => ({
+          id: el.city.id,
+          name: el.city.name,
+        }));
         delete listJob[i].jobHasCities;
-        listJob[i]['cityIds'] = cityIds;
+        listJob[i]['cities'] = cities;
+
+        const tags = listJob[i].jobHasTags.map((el) => ({
+          id: el.tag.id,
+          name: el.tag.name,
+        }));
+        delete listJob[i].jobHasTags;
+        listJob[i]['tags'] = tags;
 
         listItems.push(listJob[i]);
       }
