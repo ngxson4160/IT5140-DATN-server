@@ -16,9 +16,20 @@ export enum EGender {
   OTHER,
 }
 
-export enum EWorkMode {
+export enum EJobMode {
   PART_TIME,
   FULL_TIME,
+}
+
+export enum EJobLevel {
+  INTERN,
+  STAFF,
+  LEADER,
+  HEAD_OR_DEPUTY_DEPARTMENT,
+  MANAGER,
+  HEAD_BRANCH,
+  VICE_DIRECTOR,
+  DIRECTOR,
 }
 
 export enum EJobStatus {

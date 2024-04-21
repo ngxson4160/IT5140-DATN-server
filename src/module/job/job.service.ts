@@ -10,6 +10,7 @@ import {
 } from 'src/_core/constant/enum.constant';
 import { GetListJobDto } from './dto/get-list-job.dto';
 import { EOrderPaging } from 'src/_core/type/order-paging.type';
+import { FormatQueryArray } from 'src/_core/helper/utils';
 
 @Injectable()
 export class JobService {
@@ -26,7 +27,8 @@ export class JobService {
       salaryMax,
       images,
       hours,
-      workMode,
+      jobMode,
+      level,
       officeName,
       address,
       quantity,
@@ -35,8 +37,7 @@ export class JobService {
       description,
       requirement,
       gender,
-      yearExperienceMin,
-      yearExperienceMax,
+      yearExperience,
       hiringStartDate,
       hiringEndDate,
     } = data;
@@ -53,7 +54,8 @@ export class JobService {
         salaryMax,
         images,
         hours,
-        workMode,
+        jobMode,
+        level,
         officeName,
         address,
         quantity,
@@ -62,8 +64,7 @@ export class JobService {
         description,
         requirement,
         gender,
-        yearExperienceMin,
-        yearExperienceMax,
+        yearExperience,
         hiringStartDate,
         hiringEndDate,
         ...(cityIds &&
@@ -142,7 +143,8 @@ export class JobService {
       salaryMax,
       images,
       hours,
-      workMode,
+      jobMode,
+      level,
       officeName,
       address,
       quantity,
@@ -151,8 +153,7 @@ export class JobService {
       description,
       requirement,
       gender,
-      yearExperienceMin,
-      yearExperienceMax,
+      yearExperience,
       hiringStartDate,
       hiringEndDate,
     } = data;
@@ -180,7 +181,8 @@ export class JobService {
             salaryMax,
             images,
             hours,
-            workMode,
+            jobMode,
+            level,
             officeName,
             address,
             quantity,
@@ -189,8 +191,7 @@ export class JobService {
             description,
             requirement,
             gender,
-            yearExperienceMin,
-            yearExperienceMax,
+            yearExperience,
             hiringStartDate,
             hiringEndDate,
             ...(cityIds &&
@@ -242,29 +243,51 @@ export class JobService {
     return;
   }
 
-  //TODO filter tag name
   async getListJob(query: GetListJobDto, userId?: number) {
     const {
       cityIds,
       filter,
       jobCategoryIds,
       tagIds,
-      salary,
-      workExperience,
-      workMode,
-      position,
+      jobMode,
+      yearExperienceMin,
+      yearExperienceMax,
+      level,
+      salaryMin,
+      salaryMax,
     } = query;
 
-    let {
-      page,
-      take,
-      // skip,
-      order,
-    } = query;
+    let { page, limit, order } = query;
 
     page = page ?? 1;
-    take = take ?? 5;
+    limit = limit ?? 5;
     order = order ?? EOrderPaging.DESC;
+
+    let whereSalary: object;
+
+    if (salaryMin && salaryMax) {
+      whereSalary = {
+        salaryMax: {
+          lte: +salaryMax,
+        },
+        salaryMin: {
+          gte: +salaryMin,
+        },
+      };
+    } else if (!salaryMin && salaryMax) {
+      whereSalary = {
+        salaryMin: {
+          lte: +salaryMax,
+        },
+      };
+    } else if (salaryMin && !salaryMax) {
+      whereSalary = {
+        OR: [
+          { salaryMax: { gte: +salaryMin } },
+          { salaryMin: { gte: +salaryMin } },
+        ],
+      };
+    }
 
     const listJob = await this.prisma.job.findMany({
       where: {
@@ -277,50 +300,35 @@ export class JobService {
         }),
         jobCategory: {
           id: {
-            in: jobCategoryIds
-              ? JSON.parse(jobCategoryIds?.toString())
-              : undefined,
+            in: jobCategoryIds ? FormatQueryArray(jobCategoryIds) : undefined,
           },
         },
         ...(cityIds && {
           jobHasCities: {
             some: {
               cityId: {
-                in: cityIds ? JSON.parse(cityIds?.toString()) : undefined,
+                in: cityIds ? FormatQueryArray(cityIds) : undefined,
               },
             },
           },
         }),
-        ...(tagIds && {
-          jobHasTags: {
-            some: {
-              tagId: {
-                in: tagIds ? JSON.parse(tagIds?.toString()) : undefined,
-              },
-            },
-          },
-        }),
-        ...(salary && {
-          salaryMax: {
-            gte: +salary,
-          },
-          salaryMin: {
-            lte: +salary,
-          },
-        }),
-        workMode: {
-          in: workMode ? JSON.parse(workMode?.toString()) : undefined,
+        // ...(tagIds && {
+        //   jobHasTags: {
+        //     some: {
+        //       tagId: {
+        //         in: tagIds ? FormatQueryArray(tagIds) : undefined,
+        //       },
+        //     },
+        //   },
+        // }),
+        ...whereSalary,
+        yearExperience: {
+          gte: yearExperienceMin ? +yearExperienceMin : undefined,
+          lte: yearExperienceMax ? +yearExperienceMax : undefined,
         },
-        ...(workExperience && {
-          yearExperienceMin: {
-            lte: +workExperience,
-          },
-          yearExperienceMax: {
-            gte: +workExperience,
-          },
-        }),
+        jobMode: jobMode ? +jobMode : undefined,
+        level: level ? +level : undefined,
         status: EJobStatus.PUBLIC,
-        position,
         hiringEndDate: {
           gte: new Date(),
         },
@@ -329,10 +337,42 @@ export class JobService {
         createdAt: order,
       },
       include: {
+        jobHasCities: {
+          select: {
+            city: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        jobHasTags: {
+          select: {
+            tag: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
         applications: {
           select: {
             userId: true,
             status: true,
+          },
+        },
+        creator: {
+          select: {
+            company: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+                coverImage: true,
+              },
+            },
           },
         },
       },
@@ -340,10 +380,14 @@ export class JobService {
 
     if (listJob.length === 0) {
       return {
-        page: +page,
-        pageSize: +take,
-        totalPage: 0,
-        listJob: [],
+        meta: {
+          pagination: {
+            page: +page,
+            pageSize: +limit,
+            totalPage: 0,
+          },
+        },
+        data: [],
       };
     }
 
@@ -359,19 +403,42 @@ export class JobService {
       delete job.applications;
     });
 
-    const skipItems = (+page - 1) * +take;
+    const skipItems = (+page - 1) * +limit;
     const listItems = [];
-    for (let i = skipItems; i < skipItems + +take; i++) {
+    for (let i = skipItems; i < skipItems + +limit; i++) {
       if (listJob[i]) {
+        const company = listJob[i].creator.company;
+        delete listJob[i].creator.company;
+        listJob[i]['company'] = company;
+
+        const cities = listJob[i].jobHasCities.map((el) => ({
+          id: el.city.id,
+          name: el.city.name,
+        }));
+        delete listJob[i].jobHasCities;
+        listJob[i]['cities'] = cities;
+
+        const tags = listJob[i].jobHasTags.map((el) => ({
+          id: el.tag.id,
+          name: el.tag.name,
+        }));
+        delete listJob[i].jobHasTags;
+        listJob[i]['tags'] = tags;
+
         listItems.push(listJob[i]);
       }
     }
 
     return {
-      page: +page,
-      pageSize: +take,
-      totalPage: Math.ceil(listJob.length / take),
-      listJob: listItems,
+      meta: {
+        pagination: {
+          page: +page,
+          pageSize: +limit,
+          totalPage: Math.ceil(listJob.length / limit),
+        },
+      },
+      data: listItems,
+      // listJob: listItems,
     };
   }
 }

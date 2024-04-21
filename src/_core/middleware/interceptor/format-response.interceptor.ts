@@ -38,7 +38,6 @@ export class FormatResponseInterceptor implements NestInterceptor {
               code: MessageResponse.COMMON.OK.code,
               statusCode: MessageResponse.COMMON.OK.statusCode,
               message: MessageResponse.COMMON.OK.message,
-              extraMeta: {},
             },
             data: data ? data : null,
           };
@@ -55,7 +54,6 @@ export class FormatResponseInterceptor implements NestInterceptor {
               code: MessageResponse.COMMON.OK.code,
               statusCode: MessageResponse.COMMON.OK.statusCode,
               message: MessageResponse.COMMON.OK.message,
-              extraMeta: {},
             },
             data: data,
           };
@@ -65,7 +63,7 @@ export class FormatResponseInterceptor implements NestInterceptor {
               code: data.meta?.code ?? MessageResponse.COMMON.OK.code,
               statusCode: res.statusCode,
               message: data.meta?.message ?? MessageResponse.COMMON.OK.message,
-              extraMeta: data.meta?.extraMeta ?? {},
+              ...data.meta,
             },
             data: data.data ? data.data : null,
           };

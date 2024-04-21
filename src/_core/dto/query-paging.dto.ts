@@ -12,7 +12,7 @@ export class PaginationDto {
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  take?: number;
+  limit?: number;
 
   // @IsOptional()
   // @IsNumber()

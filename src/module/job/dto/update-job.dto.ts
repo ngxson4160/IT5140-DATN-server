@@ -10,7 +10,8 @@ import {
 import {
   EGender,
   EJobStatus,
-  EWorkMode,
+  EJobLevel,
+  EJobMode,
 } from 'src/_core/constant/enum.constant';
 
 export class UpdateJobDto {
@@ -48,8 +49,11 @@ export class UpdateJobDto {
   @IsNumber()
   hours: number;
 
-  @IsEnum(EWorkMode)
-  workMode: EWorkMode;
+  @IsEnum(EJobMode)
+  jobMode: EJobMode;
+
+  @IsEnum(EJobLevel)
+  level: EJobLevel;
 
   @IsString()
   officeName: string;
@@ -84,11 +88,7 @@ export class UpdateJobDto {
 
   @IsOptional()
   @IsNumber()
-  yearExperienceMin: number;
-
-  @IsOptional()
-  @IsNumber()
-  yearExperienceMax: number;
+  yearExperience: number;
 
   @IsDateString()
   hiringStartDate: Date;

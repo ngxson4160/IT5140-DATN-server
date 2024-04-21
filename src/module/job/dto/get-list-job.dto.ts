@@ -1,5 +1,12 @@
 import { Type } from 'class-transformer';
-import { IsNumber, IsOptional, IsArray, IsString } from 'class-validator';
+import {
+  IsNumber,
+  IsOptional,
+  IsArray,
+  IsString,
+  IsEnum,
+} from 'class-validator';
+import { EJobLevel, EJobMode } from 'src/_core/constant/enum.constant';
 import { PaginationDto } from 'src/_core/dto/query-paging.dto';
 
 // TODO Validate
@@ -8,34 +15,49 @@ export class GetListJobDto extends PaginationDto {
   // @IsArray()
   // @Type(() => Number)
   // @IsNumber({}, { each: true })
-  jobCategoryIds?: number[];
+  jobCategoryIds?: string;
 
   @IsOptional()
   //   @IsNumber()
-  cityIds?: string[];
+  cityIds?: string;
 
   @IsOptional()
   // @IsArray()
   // @Type(() => Number)
   // @IsNumber({}, { each: true })
-  tagIds?: number[];
+  tagIds?: string;
 
   @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  salary?: number;
-
-  @IsOptional()
+  @IsEnum(EJobMode)
   //   @IsArray()
   //   @IsNumber({}, {each: true})
-  workMode?: number;
+  @Type(() => Number)
+  jobMode?: EJobMode;
+
+  @IsOptional()
+  @IsEnum(EJobLevel)
+  //   @IsArray()
+  //   @IsNumber({}, {each: true})
+  @Type(() => Number)
+  level?: EJobLevel;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  workExperience?: number;
+  yearExperienceMin?: number;
 
   @IsOptional()
-  @IsString()
-  position?: string;
+  @IsNumber()
+  @Type(() => Number)
+  yearExperienceMax?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  salaryMin?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  salaryMax?: number;
 }

@@ -186,13 +186,13 @@ export class UserService {
     const { status } = query;
     let {
       page,
-      take,
+      limit,
       // skip,
       order,
     } = query;
 
     page = page ?? 1;
-    take = take ?? 5;
+    limit = limit ?? 5;
     order = order ?? EOrderPaging.DESC;
 
     const listApplications = await this.prisma.application.findMany({
@@ -215,16 +215,20 @@ export class UserService {
 
     if (listApplications.length === 0) {
       return {
-        page: +page,
-        pageSize: +take,
-        totalPage: 0,
-        listJob: [],
+        meta: {
+          pagination: {
+            page: +page,
+            pageSize: +limit,
+            totalPage: 0,
+          },
+        },
+        data: [],
       };
     }
 
-    const skipItems = (+page - 1) * +take;
+    const skipItems = (+page - 1) * +limit;
     const listItems = [];
-    for (let i = skipItems; i < skipItems + +take; i++) {
+    for (let i = skipItems; i < skipItems + +limit; i++) {
       if (listApplications[i]) {
         listItems.push(listApplications[i]);
       }
@@ -232,8 +236,8 @@ export class UserService {
 
     return {
       page: +page,
-      pageSize: +take,
-      totalPage: Math.ceil(listApplications.length / take),
+      pageSize: +limit,
+      totalPage: Math.ceil(listApplications.length / limit),
       listApplications: listItems,
     };
   }

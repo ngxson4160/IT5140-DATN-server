@@ -157,26 +157,26 @@ model Job {
   creatorId     Int? @map("creator_id")
   jobCategoryId Int? @map("job_category_id")
 
-  title             String?
-  position          String?
-  salaryMin         Float?   @map("salary_min")
-  salaryMax         Float?   @map("salary_max")
-  images            Json?
-  hours             Float?
-  workMode          Int?     @map("work_mode") @db.TinyInt
-  officeName        String?  @map("office_name")
-  address           Json?
-  quantity          Int?
-  totalViews        Int?     @default(0) @map("total_views")
-  totalCandidate    Int?     @default(0) @map("total_candidate")
-  benefits          String?
-  description       String?
-  requirement       String?
-  gender            Int?
-  yearExperienceMin Float?   @map("year_experience_min")
-  yearExperienceMax Float?   @map("year_experience_max")
-  hiringStartDate   DateTime @map("hiring_start_date")
-  hiringEndDate     DateTime @map("hiring_end_date")
+  title           String?
+  position        String?
+  salaryMin       Float?   @map("salary_min")
+  salaryMax       Float?   @map("salary_max")
+  images          Json?
+  hours           Float?
+  jobMode        Int?     @map("job_mode") @db.TinyInt
+  level           Int?     @db.TinyInt
+  officeName      String?  @map("office_name")
+  address         Json?
+  quantity        Int?
+  totalViews      Int?     @default(0) @map("total_views")
+  totalCandidate  Int?     @default(0) @map("total_candidate")
+  benefits        String?
+  description     String?
+  requirement     String?
+  gender          Int?
+  yearExperience  Float?   @map("year_experience")
+  hiringStartDate DateTime @map("hiring_start_date")
+  hiringEndDate   DateTime @map("hiring_end_date")
 
   status    Int       @default(0) @db.TinyInt
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
