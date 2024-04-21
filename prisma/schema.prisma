@@ -108,7 +108,7 @@ model Company {
   averageAge         Float?  @map("average_Age")
   primaryAddress     String? @map("primary_address")
   extraAddress       Json?   @map("extra_address")
-  primaryPhoneNumber Json    @map("phone_number")
+  primaryPhoneNumber String    @map("phone_number")
   extraPhoneNumber   Json?   @map("extra_phone_number")
   canCreateJob       Boolean @default(false)
 
@@ -162,17 +162,17 @@ model Job {
   salaryMin       Float?   @map("salary_min")
   salaryMax       Float?   @map("salary_max")
   images          Json?
-  hours           Float?
-  jobMode        Int?     @map("job_mode") @db.TinyInt
+  jobMode         Int?     @map("job_mode") @db.TinyInt
   level           Int?     @db.TinyInt
   officeName      String?  @map("office_name")
   address         Json?
   quantity        Int?
   totalViews      Int?     @default(0) @map("total_views")
   totalCandidate  Int?     @default(0) @map("total_candidate")
-  benefits        String?
-  description     String?
-  requirement     String?
+  benefits        String?  @db.Text
+  description     String?  @db.Text
+  requirement     String?  @db.Text
+  time            String?  @db.Text
   gender          Int?
   yearExperience  Float?   @map("year_experience")
   hiringStartDate DateTime @map("hiring_start_date")
