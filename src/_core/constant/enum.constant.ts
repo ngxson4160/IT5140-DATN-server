@@ -48,3 +48,19 @@ export enum EApplicationStatus {
   FAILURE,
   DELETED,
 }
+
+export enum EMaritalStatus {
+  SINGLE,
+  MARRIED,
+}
+
+export enum EEducationLevel {
+  ELEMENTARY,
+  JUNIOR_HIGHT_SCHOOL,
+  HIGHT_SCHOOL,
+  COLLEGE,
+  BACHELOR,
+  ENGINEER,
+  MASTER,
+  DOCTOR,
+}

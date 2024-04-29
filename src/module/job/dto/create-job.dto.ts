@@ -31,8 +31,13 @@ export class CreateJobDto {
   @IsString()
   title: string;
 
+  @IsOptional()
   @IsString()
   position: string;
+
+  @IsOptional()
+  @IsString()
+  time: string;
 
   @IsOptional()
   @IsNumber()
@@ -56,6 +61,7 @@ export class CreateJobDto {
   @IsEnum(EJobLevel)
   level: EJobLevel;
 
+  @IsOptional()
   @IsString()
   officeName: string;
 
@@ -81,7 +87,6 @@ export class CreateJobDto {
   @IsEnum(EGender)
   gender: EGender;
 
-  @IsOptional()
   @IsNumber()
   @Type(() => Number)
   yearExperience?: number;

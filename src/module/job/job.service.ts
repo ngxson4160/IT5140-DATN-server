@@ -40,6 +40,7 @@ export class JobService {
       yearExperience,
       hiringStartDate,
       hiringEndDate,
+      time,
     } = data;
 
     //TODO validate min < max, start < end
@@ -49,11 +50,9 @@ export class JobService {
         creatorId: userId,
         jobCategoryId,
         title,
-        position,
         salaryMin,
         salaryMax,
         images,
-        hours,
         jobMode,
         level,
         officeName,
@@ -67,6 +66,7 @@ export class JobService {
         yearExperience,
         hiringStartDate,
         hiringEndDate,
+        time,
         ...(cityIds &&
           cityIds.length > 0 && {
             jobHasCities: {
@@ -221,11 +221,9 @@ export class JobService {
           data: {
             jobCategoryId,
             title,
-            position,
             salaryMin,
             salaryMax,
             images,
-            hours,
             jobMode,
             level,
             officeName,

@@ -147,6 +147,11 @@ export const MessageResponse = {
       message: `User not found with id = ${id}.`,
       statusCode: HttpStatus.BAD_REQUEST,
     }),
+    CANDIDATE_NOT_FOUND: (id: number) => ({
+      code: 400023,
+      message: `Candidate not found with id = ${id}.`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    }),
     NOT_EXIST: {
       code: 400022,
       message: `User does not exist.`,
