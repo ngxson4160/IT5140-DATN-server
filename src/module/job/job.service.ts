@@ -40,6 +40,7 @@ export class JobService {
       yearExperience,
       hiringStartDate,
       hiringEndDate,
+      time,
     } = data;
 
     //TODO validate min < max, start < end
@@ -49,11 +50,9 @@ export class JobService {
         creatorId: userId,
         jobCategoryId,
         title,
-        position,
         salaryMin,
         salaryMax,
         images,
-        hours,
         jobMode,
         level,
         officeName,
@@ -67,6 +66,7 @@ export class JobService {
         yearExperience,
         hiringStartDate,
         hiringEndDate,
+        time,
         ...(cityIds &&
           cityIds.length > 0 && {
             jobHasCities: {
@@ -102,6 +102,26 @@ export class JobService {
             status: true,
           },
         },
+        jobHasCities: {
+          select: {
+            city: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        jobHasTags: {
+          select: {
+            tag: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -119,9 +139,34 @@ export class JobService {
     });
     delete job.applications;
 
+    const cities = job.jobHasCities.map((el) => ({
+      id: el.city.id,
+      name: el.city.name,
+    }));
+    delete job.jobHasCities;
+    job['cities'] = cities;
+
+    const tags = job.jobHasTags.map((el) => ({
+      id: el.tag.id,
+      name: el.tag.name,
+    }));
+    delete job.jobHasTags;
+    job['tags'] = tags;
+
     const creator = await this.prisma.user.findUnique({
       where: { id: job.creatorId },
-      include: { company: true },
+      include: {
+        company: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+            coverImage: true,
+            primaryAddress: true,
+            totalStaff: true,
+          },
+        },
+      },
     });
 
     await this.prisma.job.update({
@@ -176,11 +221,9 @@ export class JobService {
           data: {
             jobCategoryId,
             title,
-            position,
             salaryMin,
             salaryMax,
             images,
-            hours,
             jobMode,
             level,
             officeName,
@@ -312,15 +355,15 @@ export class JobService {
             },
           },
         }),
-        // ...(tagIds && {
-        //   jobHasTags: {
-        //     some: {
-        //       tagId: {
-        //         in: tagIds ? FormatQueryArray(tagIds) : undefined,
-        //       },
-        //     },
-        //   },
-        // }),
+        ...(tagIds && {
+          jobHasTags: {
+            some: {
+              tagId: {
+                in: tagIds ? FormatQueryArray(tagIds) : undefined,
+              },
+            },
+          },
+        }),
         ...whereSalary,
         yearExperience: {
           gte: yearExperienceMin ? +yearExperienceMin : undefined,

@@ -16,15 +16,20 @@ datasource db {
 model User {
   id        Int  @id @default(autoincrement())
   companyId Int? @map("company_id")
+  cityId    Int? @map("city_id")
 
-  email       String    @unique
-  firstName   String    @map("first_name")
-  lastName    String    @map("last_name")
-  password    String    @db.VarChar(255)
-  avatar      String?
-  dob         DateTime?
-  gender      Int?
-  phoneNumber String?   @map("phone_number") @db.VarChar(255)
+  email            String    @unique
+  firstName        String    @map("first_name")
+  lastName         String    @map("last_name")
+  password         String    @db.VarChar(255)
+  avatar           String?
+  dob              DateTime?
+  gender           Int?
+  phoneNumber      String?   @map("phone_number") @db.VarChar(255)
+  district         String?
+  maritalStatus    Int?      @map("marital_status")
+  address          String?
+  educationalLevel Int?      @map("education_level")
 
   status    Int       @default(0) @db.TinyInt
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
@@ -33,6 +38,7 @@ model User {
   updatedBy Int?      @map("update_by")
 
   company Company? @relation(fields: [companyId], references: [id])
+  city    City?    @relation(fields: [cityId], references: [id])
 
   candidateInformation CandidateInformation?
   userRoles            UserRole[]
@@ -108,7 +114,7 @@ model Company {
   averageAge         Float?  @map("average_Age")
   primaryAddress     String? @map("primary_address")
   extraAddress       Json?   @map("extra_address")
-  primaryPhoneNumber Json    @map("phone_number")
+  primaryPhoneNumber String  @map("phone_number")
   extraPhoneNumber   Json?   @map("extra_phone_number")
   canCreateJob       Boolean @default(false)
 
@@ -127,17 +133,22 @@ model Company {
 }
 
 model CandidateInformation {
-  id                   Int @id @default(autoincrement())
-  userId               Int @unique @map("user_id")
-  desiredJobCategoryId Int @map("desired_job_category_id")
-  cityId               Int @map("city_id")
+  id                   Int  @id @default(autoincrement())
+  userId               Int  @unique @map("user_id")
+  desiredJobCategoryId Int? @map("desired_job_category_id")
+  desiredCityId        Int? @map("desired_city_id")
 
-  cv             Json
-  address        String? @map("address")
-  desiredCity    String? @map("desired_city")
-  desiredSalary  Int?    @map("desired_salary")
-  yearExperience Float   @map("year_experience")
-  canApplyJob    Boolean @default(false) @map("can_apply_job")
+  target          String?
+  cv              Json?
+  yearExperience  Float?  @map("year_experience")
+  workExperience  Json?   @map("work_experience")
+  education       Json?
+  certificate     Json?
+  advancedSkill   Json?   @map("advanced_skill")
+  languageSkill   Json?   @map("language_skill")
+  desiredSalary   Int?    @map("desired_salary")
+  desiredJobLevel Int?    @map("desired_job_level")
+  desiredMode     Int?    @map("desired_job_mode")
 
   status    Int       @default(0) @db.TinyInt
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
@@ -145,9 +156,9 @@ model CandidateInformation {
   updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
   updatedBy Int?      @map("update_by")
 
-  user        User        @relation(fields: [userId], references: [id])
-  jobcategory JobCategory @relation(fields: [desiredJobCategoryId], references: [id])
-  city        City        @relation(fields: [cityId], references: [id])
+  user               User         @relation(fields: [userId], references: [id])
+  desiredJobCategory JobCategory? @relation(fields: [desiredJobCategoryId], references: [id])
+  desiredCity        City?        @relation(fields: [desiredCityId], references: [id])
 
   @@map("candidate_information")
 }
@@ -158,21 +169,20 @@ model Job {
   jobCategoryId Int? @map("job_category_id")
 
   title           String?
-  position        String?
   salaryMin       Float?   @map("salary_min")
   salaryMax       Float?   @map("salary_max")
   images          Json?
-  hours           Float?
-  jobMode        Int?     @map("job_mode") @db.TinyInt
+  jobMode         Int?     @map("job_mode") @db.TinyInt
   level           Int?     @db.TinyInt
   officeName      String?  @map("office_name")
   address         Json?
   quantity        Int?
   totalViews      Int?     @default(0) @map("total_views")
   totalCandidate  Int?     @default(0) @map("total_candidate")
-  benefits        String?
-  description     String?
-  requirement     String?
+  benefits        String?  @db.Text
+  description     String?  @db.Text
+  requirement     String?  @db.Text
+  time            String?  @db.Text
   gender          Int?
   yearExperience  Float?   @map("year_experience")
   hiringStartDate DateTime @map("hiring_start_date")
@@ -374,9 +384,10 @@ model City {
   name String
 
   districts             District[]
-  candidateInformations CandidateInformation[]
+  users                 User[]
   jobHasCities          JobHasCity[]
   companyHasCities      CompanyHasCity[]
+  candidateInformations CandidateInformation[]
 
   @@map("city")
 }

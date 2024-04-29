@@ -6,10 +6,12 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import {
   EApplicationStatus,
   EJobStatus,
+  ERole,
   EUserStatus,
 } from 'src/_core/constant/enum.constant';
 import { GetListApplicationDto } from './dto/get-list-applications.dto';
 import { EOrderPaging } from 'src/_core/type/order-paging.type';
+import { UpdateUserProfileDto } from './dto/update-candidate-profile.dto';
 
 @Injectable()
 export class UserService {
@@ -17,109 +19,132 @@ export class UserService {
 
   async getUserProfile(id: number) {
     const user = await this.prisma.user.findUnique({
-      where: { id },
+      where: {
+        id,
+        userRoles: {
+          some: {
+            role: {
+              name: ERole.USER,
+            },
+          },
+        },
+      },
+      include: {
+        city: true,
+        candidateInformation: {
+          include: {
+            desiredJobCategory: true,
+            desiredCity: true,
+          },
+        },
+      },
     });
 
     if (!user) throw new CommonException(MessageResponse.USER.NOT_FOUND(id));
 
-    return {
-      message: MessageResponse.USER.GET_USER_DETAIL,
-      data: {
-        id: user.id,
-        email: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        avatar: user.avatar,
-        dob: user.dob,
-        gender: user.gender,
-        phoneNumber: user.phoneNumber,
-        // cv: user.cv,
-        // city: user.city,
-        // canApplyJob: user.canApplyJob,
-        // desiredSalary: user.desiredSalary,
-        // yearExperience: user.yearExperience,
-      },
-    };
+    delete user.password;
+    delete user.cityId;
+    delete user.candidateInformation.desiredCityId;
+    delete user.candidateInformation.desiredJobCategoryId;
+    return user;
   }
 
-  async getDetailUser(id: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-    });
-
-    if (!user) throw new CommonException(MessageResponse.USER.NOT_FOUND(id));
-
-    return {
-      message: MessageResponse.USER.GET_USER_DETAIL,
-      data: {
-        id: user.id,
-        email: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        avatar: user.avatar,
-        dob: user.dob,
-        gender: user.gender,
-        phoneNumber: user.phoneNumber,
-        // cv: user.cv,
-        // city: user.city,
-      },
-    };
-  }
-
-  async updateUser(id: number, body: UpdateUserDto) {
+  async updateUserProfile(id: number, body: UpdateUserProfileDto) {
     const {
+      cityId,
       firstName,
       lastName,
       avatar,
       dob,
       gender,
       phoneNumber,
+      district,
+      maritalStatus,
+      address,
+
+      //candidate information
+      desiredJobCategoryId,
+      desiredCityId,
       cv,
-      city,
-      desiredSalary,
       yearExperience,
+      workExperience,
+      education,
+      certificate,
+      advancedSkill,
+      languageSkill,
+      desiredSalary,
+      desiredJobLevel,
+      desiredMode,
     } = body;
 
-    const user = await this.prisma.user.findUnique({ where: { id } });
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id,
+        userRoles: {
+          some: {
+            role: {
+              name: ERole.USER,
+            },
+          },
+        },
+      },
+    });
 
-    if (!user) {
-      throw new CommonException(MessageResponse.USER.NOT_EXIST);
-    }
-
-    if (user.status === EUserStatus.INACTIVE) {
-      throw new CommonException(MessageResponse.AUTH.ACTIVE_ACCOUNT);
-    }
+    if (!user) throw new CommonException(MessageResponse.USER.NOT_FOUND(id));
 
     const userUpdated = await this.prisma.user.update({
-      where: { id },
+      where: {
+        id,
+        userRoles: {
+          some: {
+            role: {
+              name: ERole.USER,
+            },
+          },
+        },
+      },
       data: {
+        cityId,
         firstName,
         lastName,
         avatar,
         dob,
         gender,
         phoneNumber,
-        // cv,
-        // city,
-        // desiredSalary,
-        // yearExperience,
-        // canApplyJob: true,
+        district,
+        maritalStatus,
+        address,
+        candidateInformation: {
+          update: {
+            desiredJobCategoryId,
+            desiredCityId,
+            cv,
+            yearExperience,
+            workExperience,
+            education,
+            certificate,
+            advancedSkill,
+            languageSkill,
+            desiredSalary,
+            desiredJobLevel,
+            desiredMode,
+          },
+        },
+      },
+      include: {
+        city: true,
+        candidateInformation: {
+          include: {
+            desiredCity: true,
+          },
+        },
       },
     });
 
-    return {
-      meta: MessageResponse.USER.UPDATE_SUCCESS,
-      data: {
-        id: userUpdated.id,
-        email: userUpdated.email,
-        firstName: userUpdated.firstName,
-        lastName: userUpdated.lastName,
-        avatar: userUpdated.avatar,
-        dob: userUpdated.dob,
-        gender: userUpdated.gender,
-        phoneNumber: userUpdated.phoneNumber,
-      },
-    };
+    delete userUpdated.password;
+    delete userUpdated.cityId;
+    delete userUpdated.candidateInformation.desiredCityId;
+    return userUpdated;
   }
 
   async userApplyJob(userId: number, jobId: number) {

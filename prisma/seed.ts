@@ -8,6 +8,101 @@ const main = async () => {
   const password = '12345678';
   const passwordHash = await hashPassword(password);
 
+  //**City */
+  const cityDistrict = DataCity.map((city) => {
+    return prisma.city.upsert({
+      where: {
+        id: city.id,
+      },
+      create: {
+        id: city.id,
+        name: city.name,
+        districts: {
+          createMany: {
+            data: city.districts.map((district) => {
+              return {
+                id: district.id,
+                name: district.name,
+              };
+            }),
+          },
+        },
+      },
+      update: {
+        id: city.id,
+        name: city.name,
+      },
+    });
+  });
+  await Promise.all(cityDistrict);
+
+  const jobCategoryParent = JobCategory.map((jobParent) => {
+    return prisma.jobCategoryParent.upsert({
+      where: {
+        id: jobParent.id,
+      },
+      create: {
+        id: jobParent.id,
+        name: jobParent.name,
+        jobCategories: {
+          createMany: {
+            data: jobParent.jobCategory.map((jobCategory) => {
+              return {
+                id: jobCategory.id,
+                name: jobCategory.name,
+              };
+            }),
+          },
+        },
+      },
+      update: {
+        id: jobParent.id,
+        name: jobParent.name,
+        // jobCategories: {
+        //   updateMany: {
+        //     where: {
+        //       id: {
+        //         in: jobParent.jobCategory.map((jobCategory) => jobCategory.id),
+        //       },
+        //     },
+        //     data: jobParent.jobCategory.map((jobCategory) => {
+        //       return {
+        //         id: jobCategory.id,
+        //         name: jobCategory.name,
+        //       };
+        //     }),
+        //   },
+        // },
+      },
+    });
+  });
+  await Promise.all(jobCategoryParent);
+
+  const companies = [
+    {
+      id: 1,
+      jobCategoryParentId: 1,
+      primaryEmail: 'company@gmail.com',
+      name: 'ABCxyz',
+      primaryAddress: 'Đông Anh, Hà Nội',
+      aboutUs: 'About us',
+      totalStaff: 10,
+      primaryPhoneNumber: '0987654329',
+      status: 1,
+      canCreateJob: true,
+    },
+  ];
+  const companyPromise = companies.map((company) => {
+    return prisma.company.upsert({
+      where: {
+        id: company.id,
+      },
+      create: company,
+      update: company,
+    });
+  });
+  await Promise.all(companyPromise);
+
   //** USER */
   const users = [
     {
@@ -29,6 +124,12 @@ const main = async () => {
       dob: new Date(),
       gender: 0,
       status: 1,
+      cityId: 1,
+      phoneNumber: '0987654321',
+      district: 'Đông Anh',
+      maritalStatus: 0,
+      address: 'Vĩnh Ngọc',
+      educationalLevel: 4,
     },
     {
       id: 3,
@@ -39,6 +140,7 @@ const main = async () => {
       dob: new Date(),
       gender: 0,
       status: 1,
+      companyId: 1,
     },
   ];
   const userPromise = users.map((user) => {
@@ -193,7 +295,16 @@ const main = async () => {
       id: 20,
       action: 'UserController.userDeleteApplyJob',
     },
+    {
+      id: 21,
+      action: 'UserController.getMyProfile',
+    },
+    {
+      id: 22,
+      action: 'UserController.updateMyProfile',
+    },
   ];
+
   const permissionPromise = permissions.map((permission) => {
     return prisma.permission.upsert({
       where: {
@@ -327,6 +438,14 @@ const main = async () => {
       roleId: 4,
       permissionId: 20,
     },
+    {
+      roleId: 4,
+      permissionId: 21,
+    },
+    {
+      roleId: 4,
+      permissionId: 22,
+    },
   ];
 
   rolePermissions = [...rolePermissions, ...roleRootPermission];
@@ -345,101 +464,168 @@ const main = async () => {
   });
   await Promise.all(rolePermissionPromise);
 
-  const cityDistrict = DataCity.map((city) => {
-    return prisma.city.upsert({
-      where: {
-        id: city.id,
-      },
-      create: {
-        id: city.id,
-        name: city.name,
-        districts: {
-          createMany: {
-            data: city.districts.map((district) => {
-              return {
-                id: district.id,
-                name: district.name,
-              };
-            }),
-          },
+  const candidateInformation = [
+    {
+      id: 1,
+      userId: 2,
+      desiredJobCategoryId: 1,
+      desiredCityId: 4,
+      target: 'Đi làm kiếm tiền',
+      cv: [
+        'https://job-nest.s3.ap-southeast-1.amazonaws.com/pdfs/037ba06b25150a28a174d7bd4fcf4a63e40edca35b29c315cc1bd50cfa31357bb1b0925c4e5a9e6acdbaa7f877899613f67dbe6a5d2ff82aab0b506b82d27a3f.pdf',
+        'https://job-nest.s3.ap-southeast-1.amazonaws.com/pdfs/1d9f4f50e00c33b8867529d2bece5496ea949d949f0c0f011c8ef260301abd784af6b76509fb070c024417f601f943397196fae5eb71003599b260f42c15c1fa.pdf',
+      ],
+      yearExperience: 10,
+      workExperience: [
+        {
+          position: 'Thực tập',
+          companyName: 'Openway',
+          start: '2023-07-27T19:36:59.680Z',
+          end: '2023-09-30T19:36:59.680Z',
+          description: 'Description',
         },
-      },
-      update: {
-        id: city.id,
-        name: city.name,
-        // districts: {
-        //   updateMany: {
-        //     where: {
-        //       id: { in: city.districts.map((district) => district.id) },
-        //     },
-        //     data: city.districts.map((district) => {
-        //       return {
-        //         id: district.id,
-        //         name: district.name,
-        //       };
-        //     }),
-        //   },
-        // },
-      },
-      // data: {
-      //   id: city.id,
-      //   name: city.name,
-      //   districts: {
-      //     createMany: {
-      //       data: city.districts.map((district) => {
-      //         return {
-      //           id: district.id,
-      //           name: district.name,
-      //         };
-      //       }),
-      //     },
-      //   },
-      // },
-    });
-  });
-  await Promise.all(cityDistrict);
+        {
+          position: 'Thực tập',
+          companyName: 'WanoSoft',
+          start: '2023-10-27T19:36:59.680Z',
+          end: '',
+          description: 'Description',
+        },
+      ],
+      education: [
+        {
+          name: 'Cử nhân',
+          major: 'Khoa học máy tính',
+          organization: 'Trường CNTT&TT, Đại học Bách Khoa Hà Nội',
+          start: '2019-09-05T00:00:00.000Z',
+          end: '2023-09-05T00:00:00.000Z',
+          description: 'Description',
+        },
+        {
+          name: 'Kỹ Sư',
+          major: 'Khoa học máy tính',
+          organization: 'Trường CNTT&TT, Đại học Bách Khoa Hà Nội',
+          start: '2023-09-05T00:00:00.000Z',
+          end: '2024-09-05T00:00:00.000Z',
+          description: 'Description',
+        },
+      ],
+      certificate: [
+        {
+          name: 'Linux',
+          major: 'Công nghệ thông tin',
+          organization: 'Organization',
+          start: '2023-09-05T00:00:00.000Z',
+          end: '2024-09-05T00:00:00.000Z',
+          description: 'Description',
+        },
+        {
+          name: 'Kafka',
+          major: 'Công nghệ thông tin',
+          organization: 'Organization',
+          start: '2023-09-05T00:00:00.000Z',
+          end: '2024-09-05T00:00:00.000Z',
+          description: 'Description',
+        },
+      ],
+      advancedSkill: [
+        {
+          name: 'NodeJS',
+          level: 50,
+        },
+        {
+          name: 'VueJS',
+          level: 40,
+        },
+        {
+          name: 'SQL',
+          level: 30,
+        },
+        {
+          name: 'Java',
+          level: 60,
+        },
+      ],
+      languageSkill: [
+        {
+          name: 'Anh',
+          level: 30,
+        },
+        {
+          name: 'Việt',
+          level: 90,
+        },
+      ],
+      desiredSalary: 100000000,
+      desiredJobLevel: 1,
+      desiredMode: 1,
+      status: 1,
+    },
+  ];
 
-  const jobCategoryParent = JobCategory.map((jobParent) => {
-    return prisma.jobCategoryParent.upsert({
-      where: {
-        id: jobParent.id,
-      },
-      create: {
-        id: jobParent.id,
-        name: jobParent.name,
-        jobCategories: {
-          createMany: {
-            data: jobParent.jobCategory.map((jobCategory) => {
-              return {
-                id: jobCategory.id,
-                name: jobCategory.name,
-              };
-            }),
-          },
+  const candidateInformationPromise = candidateInformation.map(
+    (information) => {
+      return prisma.candidateInformation.upsert({
+        where: {
+          id: information.id,
         },
+        create: information,
+        update: information,
+      });
+    },
+  );
+  await Promise.all(candidateInformationPromise);
+
+  const jobs = [
+    {
+      id: 1,
+      creatorId: 3,
+      jobCategoryId: 1,
+      title: 'Tuyển intern NodeJS/ReactJS',
+      salaryMin: 4000000,
+      salaryMax: 6000000,
+      jobMode: 0,
+      level: 0,
+      address: [
+        { data: '123 BD, Quận Ba Đình, Hà Nội', cityId: 1, cityName: 'Hà Nội' },
+        {
+          data: '123 HK, Quận Hoàn Kiếm, Hà Nội',
+          cityId: 1,
+          cityName: 'Hà Nội',
+        },
+        {
+          data: '123 DA, Huyện Đông Anh, Hà Nội',
+          cityId: 1,
+          cityName: 'Hà Nội',
+        },
+        {
+          data: '123 Q1, Quận 1, Hồ Chí Minh',
+          cityId: 79,
+          cityName: 'Hồ Chí Minh',
+        },
+      ],
+      quantity: 3,
+      benefits: 'Benefit',
+      description: 'Description',
+      requirement: 'Requirement',
+      time: 'T2-T6 8:30 A.M to 18:00 P.M',
+      yearExperience: 1,
+      hiringStartDate: new Date(),
+      hiringEndDate: new Date('2025-04-27T19:15:47.347Z'),
+      status: 1,
+    },
+  ];
+
+  const job = jobs.map((job) => {
+    return prisma.job.upsert({
+      where: {
+        id: job.id,
       },
-      update: {
-        id: jobParent.id,
-        name: jobParent.name,
-        // jobCategories: {
-        //   updateMany: {
-        //     where: {
-        //       id: {
-        //         in: jobParent.jobCategory.map((jobCategory) => jobCategory.id),
-        //       },
-        //     },
-        //     data: jobParent.jobCategory.map((jobCategory) => {
-        //       return {
-        //         id: jobCategory.id,
-        //         name: jobCategory.name,
-        //       };
-        //     }),
-        //   },
-        // },
-      },
+      create: job,
+      update: job,
     });
   });
-  await Promise.all(jobCategoryParent);
+  await Promise.all(job);
 };
 
 main()

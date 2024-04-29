@@ -13,14 +13,23 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserData } from 'src/auth/decorator/user-data.decorator';
 import { IUserData } from 'src/_core/type/user-data.type';
 import { GetListApplicationDto } from './dto/get-list-applications.dto';
+import { UpdateUserProfileDto } from './dto/update-candidate-profile.dto';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('profile')
-  async getUserProfile(@UserData() userData: IUserData) {
+  @Get('my-profile')
+  async getMyProfile(@UserData() userData: IUserData) {
     return this.userService.getUserProfile(userData.id);
+  }
+
+  @Put('my-profile')
+  async updateMyProfile(
+    @UserData() userData: IUserData,
+    @Body() body: UpdateUserProfileDto,
+  ) {
+    return this.userService.updateUserProfile(userData.id, body);
   }
 
   @Post('jobs/:id/applications')
@@ -42,15 +51,5 @@ export class UserController {
     @Query() query: GetListApplicationDto,
   ) {
     return this.userService.getListApplications(userData.id, query);
-  }
-
-  @Get(':id')
-  async getDetailUser(@Param('id') id: string) {
-    return this.userService.getDetailUser(+id);
-  }
-
-  @Put(':id')
-  async updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
-    return this.userService.updateUser(+id, body);
   }
 }
