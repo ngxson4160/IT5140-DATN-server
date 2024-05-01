@@ -258,6 +258,38 @@ export class UserService {
         createdBy: true,
         updatedAt: true,
         updatedBy: true,
+        candidateCv: true,
+        job: {
+          select: {
+            id: true,
+            title: true,
+            salaryMin: true,
+            salaryMax: true,
+            hiringEndDate: true,
+            jobHasCities: {
+              select: {
+                city: true,
+              },
+            },
+            jobHasTags: {
+              select: {
+                tag: true,
+              },
+            },
+            creator: {
+              select: {
+                company: {
+                  select: {
+                    id: true,
+                    name: true,
+                    avatar: true,
+                    coverImage: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
 
@@ -278,15 +310,36 @@ export class UserService {
     const listItems = [];
     for (let i = skipItems; i < skipItems + +limit; i++) {
       if (listApplications[i]) {
+        const company = listApplications[i].job.creator.company;
+        delete listApplications[i].job.creator.company;
+        listApplications[i].job['company'] = company;
+
+        const cities = listApplications[i].job.jobHasCities.map((el) => ({
+          id: el.city.id,
+          name: el.city.name,
+        }));
+        delete listApplications[i].job.jobHasCities;
+        listApplications[i].job['cities'] = cities;
+
+        const tags = listApplications[i].job.jobHasTags.map((el) => ({
+          id: el.tag.id,
+          name: el.tag.name,
+        }));
+        delete listApplications[i].job.jobHasTags;
+        listApplications[i].job['tags'] = tags;
         listItems.push(listApplications[i]);
       }
     }
 
     return {
-      page: +page,
-      pageSize: +limit,
-      totalPage: Math.ceil(listApplications.length / limit),
-      listApplications: listItems,
+      meta: {
+        pagination: {
+          page: +page,
+          pageSize: +limit,
+          totalPage: Math.ceil(listApplications.length / limit),
+        },
+      },
+      data: listItems,
     };
   }
 }

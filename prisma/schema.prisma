@@ -209,7 +209,7 @@ model Application {
   userId Int @map("user_id")
   jobId  Int @map("job_id")
 
-  status               Int       @default(1) @db.TinyInt
+  status               Int       @default(0) @db.TinyInt
   interviewSchedule    DateTime? @map("interview_schedule")
   companyRemark        String?   @map("company_remark")
   candidateCv          String    @map("candidate_cv")
