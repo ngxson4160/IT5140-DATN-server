@@ -14,6 +14,7 @@ import { UserData } from 'src/auth/decorator/user-data.decorator';
 import { IUserData } from 'src/_core/type/user-data.type';
 import { GetListApplicationDto } from './dto/get-list-applications.dto';
 import { UpdateUserProfileDto } from './dto/update-candidate-profile.dto';
+import { UserApplyJobDto } from './dto/user-apply-job.dto';
 
 @Controller('users')
 export class UserController {
@@ -33,8 +34,12 @@ export class UserController {
   }
 
   @Post('jobs/:id/applications')
-  userApplyJob(@UserData() userData: IUserData, @Param('id') jobId: string) {
-    return this.userService.userApplyJob(userData.id, +jobId);
+  userApplyJob(
+    @UserData() userData: IUserData,
+    @Param('id') jobId: string,
+    @Body() body: UserApplyJobDto,
+  ) {
+    return this.userService.userApplyJob(userData.id, +jobId, body);
   }
 
   @Delete('jobs/:id/applications')

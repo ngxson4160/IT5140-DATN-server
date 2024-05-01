@@ -558,7 +558,7 @@ const main = async () => {
       ],
       desiredSalary: 100000000,
       desiredJobLevel: 1,
-      desiredMode: 1,
+      desiredJobMode: 1,
       status: 1,
     },
   ];

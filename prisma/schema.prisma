@@ -148,7 +148,7 @@ model CandidateInformation {
   languageSkill   Json?   @map("language_skill")
   desiredSalary   Int?    @map("desired_salary")
   desiredJobLevel Int?    @map("desired_job_level")
-  desiredMode     Int?    @map("desired_job_mode")
+  desiredJobMode  Int?    @map("desired_job_mode")
 
   status    Int       @default(0) @db.TinyInt
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
@@ -188,7 +188,7 @@ model Job {
   hiringStartDate DateTime @map("hiring_start_date")
   hiringEndDate   DateTime @map("hiring_end_date")
 
-  status    Int       @default(0) @db.TinyInt
+  status    Int       @default(1) @db.TinyInt
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
   createdBy Int?      @map("create_by")
   updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
@@ -209,9 +209,14 @@ model Application {
   userId Int @map("user_id")
   jobId  Int @map("job_id")
 
-  status            Int       @default(0) @db.TinyInt
-  interviewSchedule DateTime? @map("interview_schedule")
-  companyRemark     String?   @map("company_remark")
+  status               Int       @default(1) @db.TinyInt
+  interviewSchedule    DateTime? @map("interview_schedule")
+  companyRemark        String?   @map("company_remark")
+  candidateCv          String    @map("candidate_cv")
+  candidateFirstName   String    @map("candidate_first_name")
+  candidateLastName    String    @map("candidate_last_name")
+  candidateEmail       String    @map("candidate_email")
+  candidatePhoneNumber String    @map("candidate_phone_number")
 
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
   createdBy Int?      @map("create_by")
@@ -233,7 +238,7 @@ model Notification {
 
   type Int @default(0) @db.TinyInt
 
-  status    Int       @default(0) @db.TinyInt
+  status    Int       @default(1) @db.TinyInt
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
   createdBy Int?      @map("create_by")
   updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
@@ -253,7 +258,7 @@ model NotificationTemplate {
   content String
   type    Int    @default(0) @db.TinyInt
 
-  status    Int       @default(0) @db.TinyInt
+  status    Int       @default(1) @db.TinyInt
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
   createdBy Int?      @map("create_by")
   updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
@@ -283,7 +288,7 @@ model Message {
 
   content String
 
-  status    Int       @default(0) @db.TinyInt
+  status    Int       @default(1) @db.TinyInt
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
   createdBy Int?      @map("create_by")
   updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
@@ -327,7 +332,7 @@ model Blog {
   title   String
   content String
 
-  status    Int       @default(0) @db.TinyInt
+  status    Int       @default(1) @db.TinyInt
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
   createdBy Int?      @map("create_by")
   updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)

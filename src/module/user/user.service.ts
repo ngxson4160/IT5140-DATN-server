@@ -12,6 +12,7 @@ import {
 import { GetListApplicationDto } from './dto/get-list-applications.dto';
 import { EOrderPaging } from 'src/_core/type/order-paging.type';
 import { UpdateUserProfileDto } from './dto/update-candidate-profile.dto';
+import { UserApplyJobDto } from './dto/user-apply-job.dto';
 
 @Injectable()
 export class UserService {
@@ -43,9 +44,6 @@ export class UserService {
     if (!user) throw new CommonException(MessageResponse.USER.NOT_FOUND(id));
 
     delete user.password;
-    delete user.cityId;
-    delete user.candidateInformation.desiredCityId;
-    delete user.candidateInformation.desiredJobCategoryId;
     return user;
   }
 
@@ -61,8 +59,10 @@ export class UserService {
       district,
       maritalStatus,
       address,
+      educationalLevel,
 
       //candidate information
+      target,
       desiredJobCategoryId,
       desiredCityId,
       cv,
@@ -74,7 +74,7 @@ export class UserService {
       languageSkill,
       desiredSalary,
       desiredJobLevel,
-      desiredMode,
+      desiredJobMode,
     } = body;
 
     const user = await this.prisma.user.findUnique({
@@ -114,8 +114,10 @@ export class UserService {
         district,
         maritalStatus,
         address,
+        educationalLevel,
         candidateInformation: {
           update: {
+            target,
             desiredJobCategoryId,
             desiredCityId,
             cv,
@@ -127,7 +129,7 @@ export class UserService {
             languageSkill,
             desiredSalary,
             desiredJobLevel,
-            desiredMode,
+            desiredJobMode,
           },
         },
       },
@@ -135,6 +137,7 @@ export class UserService {
         city: true,
         candidateInformation: {
           include: {
+            desiredJobCategory: true,
             desiredCity: true,
           },
         },
@@ -142,12 +145,10 @@ export class UserService {
     });
 
     delete userUpdated.password;
-    delete userUpdated.cityId;
-    delete userUpdated.candidateInformation.desiredCityId;
     return userUpdated;
   }
 
-  async userApplyJob(userId: number, jobId: number) {
+  async userApplyJob(userId: number, jobId: number, data: UserApplyJobDto) {
     const job = await this.prisma.job.findUnique({
       where: { id: jobId, status: EJobStatus.PUBLIC },
     });
@@ -168,14 +169,36 @@ export class UserService {
       );
     }
 
-    const applicationCreated = await this.prisma.application.create({
-      data: {
-        userId,
-        jobId,
-      },
-    });
+    try {
+      const applicationCreated = await this.prisma.$transaction(async (tx) => {
+        const applicationCreated = await tx.application.create({
+          data: {
+            userId,
+            jobId,
+            candidateCv: data.candidateCv,
+            candidateFirstName: data.candidateFirstName,
+            candidateLastName: data.candidateLastName,
+            candidatePhoneNumber: data.candidatePhoneNumber,
+            candidateEmail: data.candidateEmail,
+          },
+        });
 
-    return applicationCreated;
+        await tx.job.update({
+          where: {
+            id: jobId,
+          },
+          data: {
+            totalCandidate: job.totalCandidate + 1,
+          },
+        });
+
+        return applicationCreated;
+      });
+
+      return applicationCreated;
+    } catch (e) {
+      throw e;
+    }
   }
 
   async userDeleteApplyJob(userId: number, jobId: number) {
