@@ -5,8 +5,9 @@ import {
   IsArray,
   IsString,
   IsEnum,
+  IsBoolean,
 } from 'class-validator';
-import { EJobLevel, EJobMode } from 'src/_core/constant/enum.constant';
+import { EJobLevel, EJobMode, ESort } from 'src/_core/constant/enum.constant';
 import { PaginationDto } from 'src/_core/dto/query-paging.dto';
 
 // TODO Validate
@@ -60,4 +61,18 @@ export class GetListJobDto extends PaginationDto {
   @IsNumber()
   @Type(() => Number)
   salaryMax?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  companyId: number;
+
+  @IsOptional()
+  @IsEnum(ESort)
+  sortCreatedAt?: ESort;
+
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  all?: boolean;
 }

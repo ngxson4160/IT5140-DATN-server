@@ -4,7 +4,7 @@ global.__rootDir = path.resolve(__dirname, '../..');
 
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
@@ -22,6 +22,16 @@ async function bootstrap() {
   app.setGlobalPrefix(prefix);
 
   app.useStaticAssets(path.join(__dirname, '../public'));
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      disableErrorMessages: false,
+      whitelist: false,
+      transform: true,
+      transformOptions: {},
+      validateCustomDecorators: true,
+    }),
+  );
 
   await app.listen(port || 3000, () => {
     logger.log(`🚀🚀🚀 Server start at ${url}/${prefix}/${port}`);

@@ -7,6 +7,7 @@ import {
   EApplicationStatus,
   EJobStatus,
   ERole,
+  ESort,
   EUserStatus,
 } from 'src/_core/constant/enum.constant';
 import { GetListApplicationDto } from './dto/get-list-applications.dto';
@@ -248,6 +249,7 @@ export class UserService {
         userId,
         status: status ? +status : undefined,
       },
+      orderBy: [{ createdAt: ESort.DESC }],
       select: {
         id: true,
         userId: true,

@@ -86,7 +86,7 @@ const main = async () => {
       name: 'ABCxyz',
       primaryAddress: 'Đông Anh, Hà Nội',
       aboutUs: 'About us',
-      totalStaff: 10,
+      sizeType: 10,
       primaryPhoneNumber: '0987654329',
       status: 1,
       canCreateJob: true,

@@ -7,6 +7,7 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import {
   EApplicationStatus,
   EJobStatus,
+  ESort,
 } from 'src/_core/constant/enum.constant';
 import { GetListJobDto } from './dto/get-list-job.dto';
 import { EOrderPaging } from 'src/_core/type/order-paging.type';
@@ -22,11 +23,9 @@ export class JobService {
       cityIds,
       tagIds,
       title,
-      position,
       salaryMin,
       salaryMax,
       images,
-      hours,
       jobMode,
       level,
       officeName,
@@ -163,7 +162,7 @@ export class JobService {
             avatar: true,
             coverImage: true,
             primaryAddress: true,
-            totalStaff: true,
+            sizeType: true,
           },
         },
       },
@@ -183,11 +182,9 @@ export class JobService {
       cityIds,
       tagIds,
       title,
-      position,
       salaryMin,
       salaryMax,
       images,
-      hours,
       jobMode,
       level,
       officeName,
@@ -201,6 +198,7 @@ export class JobService {
       yearExperience,
       hiringStartDate,
       hiringEndDate,
+      time,
     } = data;
 
     const job = await this.prisma.job.findUnique({
@@ -237,6 +235,7 @@ export class JobService {
             yearExperience,
             hiringStartDate,
             hiringEndDate,
+            time,
             ...(cityIds &&
               cityIds.length > 0 && {
                 jobHasCities: {
@@ -298,13 +297,12 @@ export class JobService {
       level,
       salaryMin,
       salaryMax,
+      companyId,
+      page,
+      limit,
+      sortCreatedAt,
+      all,
     } = query;
-
-    let { page, limit, order } = query;
-
-    page = page ?? 1;
-    limit = limit ?? 5;
-    order = order ?? EOrderPaging.DESC;
 
     let whereSalary: object;
 
@@ -332,53 +330,70 @@ export class JobService {
       };
     }
 
-    const listJob = await this.prisma.job.findMany({
-      where: {
-        ...(filter && {
-          OR: [
-            { title: { contains: filter } },
-            { description: { contains: filter } },
-            { benefits: { contains: filter } },
-          ],
-        }),
-        jobCategory: {
-          id: {
-            in: jobCategoryIds ? FormatQueryArray(jobCategoryIds) : undefined,
-          },
+    const whereQuery = {
+      ...(filter && {
+        OR: [
+          { title: { contains: filter } },
+          { description: { contains: filter } },
+          { benefits: { contains: filter } },
+        ],
+      }),
+      jobCategory: {
+        id: {
+          in: jobCategoryIds ? FormatQueryArray(jobCategoryIds) : undefined,
         },
-        ...(cityIds && {
-          jobHasCities: {
-            some: {
-              cityId: {
-                in: cityIds ? FormatQueryArray(cityIds) : undefined,
-              },
+      },
+      ...(cityIds && {
+        jobHasCities: {
+          some: {
+            cityId: {
+              in: cityIds ? FormatQueryArray(cityIds) : undefined,
             },
           },
-        }),
-        ...(tagIds && {
-          jobHasTags: {
-            some: {
-              tagId: {
-                in: tagIds ? FormatQueryArray(tagIds) : undefined,
-              },
+        },
+      }),
+      ...(tagIds && {
+        jobHasTags: {
+          some: {
+            tagId: {
+              in: tagIds ? FormatQueryArray(tagIds) : undefined,
             },
           },
-        }),
-        ...whereSalary,
-        yearExperience: {
-          gte: yearExperienceMin ? +yearExperienceMin : undefined,
-          lte: yearExperienceMax ? +yearExperienceMax : undefined,
         },
-        jobMode: jobMode ? +jobMode : undefined,
-        level: level ? +level : undefined,
-        status: EJobStatus.PUBLIC,
+      }),
+      ...whereSalary,
+      yearExperience: {
+        gte: yearExperienceMin ? +yearExperienceMin : undefined,
+        lte: yearExperienceMax ? +yearExperienceMax : undefined,
+      },
+      jobMode: jobMode ? +jobMode : undefined,
+      level: level ? +level : undefined,
+      status: EJobStatus.PUBLIC,
+      ...(!all && {
         hiringEndDate: {
           gte: new Date(),
         },
-      },
-      orderBy: {
-        createdAt: order,
-      },
+      }),
+      ...(companyId && {
+        creator: {
+          companyId: companyId,
+        },
+      }),
+    };
+
+    const totalApplications = await this.prisma.job.count({
+      where: whereQuery,
+    });
+
+    const listJob = await this.prisma.job.findMany({
+      where: whereQuery,
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: [
+        {
+          createdAt: sortCreatedAt || ESort.DESC,
+        },
+      ],
       include: {
         jobHasCities: {
           select: {
@@ -421,19 +436,6 @@ export class JobService {
       },
     });
 
-    if (listJob.length === 0) {
-      return {
-        meta: {
-          pagination: {
-            page: +page,
-            pageSize: +limit,
-            totalPage: 0,
-          },
-        },
-        data: [],
-      };
-    }
-
     listJob.forEach((job) => {
       const userStatusApplication: object | null = { status: null };
       job['application'] = userStatusApplication;
@@ -446,9 +448,7 @@ export class JobService {
       delete job.applications;
     });
 
-    const skipItems = (+page - 1) * +limit;
-    const listItems = [];
-    for (let i = skipItems; i < skipItems + +limit; i++) {
+    for (let i = 0; i < limit; i++) {
       if (listJob[i]) {
         const company = listJob[i].creator.company;
         delete listJob[i].creator.company;
@@ -467,21 +467,19 @@ export class JobService {
         }));
         delete listJob[i].jobHasTags;
         listJob[i]['tags'] = tags;
-
-        listItems.push(listJob[i]);
       }
     }
 
     return {
       meta: {
         pagination: {
-          page: +page,
-          pageSize: +limit,
-          totalPage: Math.ceil(listJob.length / limit),
+          page: page,
+          pageSize: limit,
+          totalPage: Math.ceil(totalApplications / limit),
+          totalItem: totalApplications,
         },
       },
-      data: listItems,
-      // listJob: listItems,
+      data: listJob,
     };
   }
 }

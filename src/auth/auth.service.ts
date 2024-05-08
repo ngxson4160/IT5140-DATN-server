@@ -116,13 +116,8 @@ export class AuthService {
   async companySignUp(body: CompanySignUpDto) {
     const { email, firstName, lastName, password, gender } = body.user;
 
-    const {
-      jobCategoryParentId,
-      name,
-      totalStaff,
-      cityId,
-      primaryPhoneNumber,
-    } = body.company;
+    const { jobCategoryParentId, name, sizeType, cityId, primaryPhoneNumber } =
+      body.company;
 
     const user = await this.prisma.user.findUnique({ where: { email } });
 
@@ -143,7 +138,7 @@ export class AuthService {
             jobCategoryParentId: +jobCategoryParentId,
             primaryEmail: email,
             name,
-            totalStaff: +totalStaff,
+            sizeType: +sizeType,
             primaryPhoneNumber,
             canCreateJob: true,
           },

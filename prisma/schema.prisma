@@ -105,12 +105,13 @@ model Company {
   name               String  @unique
   primaryEmail       String
   extraEmail         Json?   @map("extra_mail")
-  aboutUs            String? @map("about_us")
+  aboutUs            String? @map("about_us") @db.Text
   avatar             String?
   coverImage         String? @map("cover_image")
-  homePage           String? @map("home_page")
+  website            String? @map("website")
   socialMedia        Json?   @map("soical_media")
-  totalStaff         Int     @map("total_staff")
+  sizeType           Int?    @map("size_type")
+  taxCode            String? @map("tax_code")
   averageAge         Float?  @map("average_Age")
   primaryAddress     String? @map("primary_address")
   extraAddress       Json?   @map("extra_address")

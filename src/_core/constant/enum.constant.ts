@@ -1,3 +1,8 @@
+export enum ESort {
+  ASC = 'asc',
+  DESC = 'desc',
+}
+
 export enum ERole {
   ROOT = 'ROOT',
   ADMIN = 'ADMIN',
@@ -63,4 +68,13 @@ export enum EEducationLevel {
   ENGINEER,
   MASTER,
   DOCTOR,
+}
+
+export enum ECompanySizeType {
+  TINY,
+  SMALL,
+  LITTLE,
+  FAT,
+  LARGE,
+  BIG,
 }
