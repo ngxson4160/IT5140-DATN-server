@@ -15,10 +15,24 @@ import { IUserData } from 'src/_core/type/user-data.type';
 import { GetListApplicationDto } from './dto/get-list-applications.dto';
 import { UpdateUserProfileDto } from './dto/update-candidate-profile.dto';
 import { UserApplyJobDto } from './dto/user-apply-job.dto';
+import { UpdateAccountInfoDto } from './dto/update-user-profile';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Get('account-info')
+  async getAccountInfo(@UserData() userData: IUserData) {
+    return this.userService.getAccountInfo(userData.id);
+  }
+
+  @Put('account-info')
+  async updateAccountInfo(
+    @UserData() userData: IUserData,
+    @Body() body: UpdateAccountInfoDto,
+  ) {
+    return this.userService.updateAccountInfo(userData.id, body);
+  }
 
   @Get('my-profile')
   async getMyProfile(@UserData() userData: IUserData) {

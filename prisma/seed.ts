@@ -303,6 +303,18 @@ const main = async () => {
       id: 22,
       action: 'UserController.updateMyProfile',
     },
+    {
+      id: 23,
+      action: 'CompanyController.getListCandidate',
+    },
+    {
+      id: 24,
+      action: 'UserController.getAccountInfo',
+    },
+    {
+      id: 25,
+      action: 'UserController.updateAccountInfo',
+    },
   ];
 
   const permissionPromise = permissions.map((permission) => {
@@ -388,6 +400,18 @@ const main = async () => {
       roleId: 3,
       permissionId: 16,
     },
+    {
+      roleId: 3,
+      permissionId: 23,
+    },
+    {
+      roleId: 3,
+      permissionId: 24,
+    },
+    {
+      roleId: 3,
+      permissionId: 25,
+    },
 
     //USER
     {
@@ -445,6 +469,14 @@ const main = async () => {
     {
       roleId: 4,
       permissionId: 22,
+    },
+    {
+      roleId: 4,
+      permissionId: 24,
+    },
+    {
+      roleId: 4,
+      permissionId: 25,
     },
   ];
 

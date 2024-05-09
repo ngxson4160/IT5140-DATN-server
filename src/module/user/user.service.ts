@@ -14,10 +14,49 @@ import { GetListApplicationDto } from './dto/get-list-applications.dto';
 import { EOrderPaging } from 'src/_core/type/order-paging.type';
 import { UpdateUserProfileDto } from './dto/update-candidate-profile.dto';
 import { UserApplyJobDto } from './dto/user-apply-job.dto';
+import { UpdateAccountInfoDto } from './dto/update-user-profile';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async getAccountInfo(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        avatar: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+      },
+    });
+
+    if (!user) throw new CommonException(MessageResponse.USER.NOT_FOUND(id));
+
+    return user;
+  }
+
+  async updateAccountInfo(id: number, data: UpdateAccountInfoDto) {
+    const { firstName, lastName, avatar } = data;
+
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new CommonException(MessageResponse.USER.NOT_FOUND(id));
+
+    const userUpdated = await this.prisma.user.update({
+      where: { id },
+      data: { firstName, lastName, avatar },
+      select: {
+        avatar: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+      },
+    });
+
+    return userUpdated;
+  }
 
   async getUserProfile(id: number) {
     const user = await this.prisma.user.findUnique({
