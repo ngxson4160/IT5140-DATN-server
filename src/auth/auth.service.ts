@@ -345,8 +345,8 @@ export class AuthService {
 
     //TODO change url to Reset password page
     const urlReset = `${this.configService.get(
-      ENV.DOMAIN,
-    )}/auth/verify-account?email=${email}&token=${token}`;
+      ENV.DOMAIN_CLIENT,
+    )}/forgot-password/reset?token=${token}`;
 
     const context = {
       email,
@@ -377,7 +377,7 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-      throw new CommonException(MessageResponse.USER.NOT_EXIST);
+      throw new CommonException(MessageResponse.AUTH.RESET_PASSWORD_FAIL);
     }
 
     if (email === payload.data.email && user.id === payload.data.id) {
