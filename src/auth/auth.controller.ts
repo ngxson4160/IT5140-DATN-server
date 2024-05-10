@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Post, Put, Query, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UserService } from 'src/module/user/user.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { UserSignUpDto } from './dto/sign-up.dto';
 import { Public } from './decorator/public.decorator';
@@ -13,11 +12,13 @@ import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { CompanySignUpDto } from './dto/company-sign-up.dto';
 import { CheckEmailDto } from './dto/check-email.dto';
+import { ENV } from 'src/_core/config/env.config';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
   constructor(
-    private readonly userService: UserService,
+    private readonly configService: ConfigService,
     private readonly authService: AuthService,
   ) {}
 
@@ -49,7 +50,7 @@ export class AuthController {
   @Get('verify-account')
   async verifyAccount(@Query() query: UserActiveDto, @Res() res: Response) {
     await this.authService.verifyAccount(query);
-    res.redirect('https://www.facebook.com/'); //TODO redirect Login Page
+    res.redirect(`${this.configService.get(ENV.DOMAIN_CLIENT)}/login`);
   }
 
   @Put('change-password')

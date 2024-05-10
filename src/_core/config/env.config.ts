@@ -1,5 +1,6 @@
 export const ENV = {
   DOMAIN: 'DOMAIN',
+  DOMAIN_CLIENT: 'DOMAIN_CLIENT',
 
   DATABASE_URL: 'DATABASE_URL',
 

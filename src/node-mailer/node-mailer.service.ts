@@ -5,6 +5,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 export class NodeMailerService {
   private readonly logger = new Logger(NodeMailerService.name);
   constructor(private readonly mailerService: MailerService) {}
+
   public async sendEmail(
     receivers: Array<string>,
     subject: string,

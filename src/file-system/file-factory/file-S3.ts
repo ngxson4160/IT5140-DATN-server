@@ -1,7 +1,6 @@
 import {
   DeleteObjectCommand,
   DeleteObjectCommandInput,
-  ListObjectsV2Command,
   PutObjectCommand,
   PutObjectCommandInput,
   S3Client,
@@ -34,6 +33,7 @@ export class S3Service implements IFileService {
     const keyHash = crypto.randomBytes(64).toString('hex');
     const extname = path.extname(file.originalname);
     const key = `${pathFileUploadToS3}${keyHash}${extname}`;
+    const baseName = path.basename(file.originalname, extname);
 
     const createParams: PutObjectCommandInput = {
       Bucket: this.configService.get(ENV.AWS_BUCKET_NAME),
@@ -53,6 +53,7 @@ export class S3Service implements IFileService {
       )}.s3.amazonaws.com/${key}`;
 
       return {
+        baseName,
         originalname: file.originalname,
         relativePath: key,
         absolutePath: absolutePath,

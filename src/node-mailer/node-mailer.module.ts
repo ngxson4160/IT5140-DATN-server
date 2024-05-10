@@ -20,7 +20,7 @@ import { ENV } from 'src/_core/config/env.config';
           },
         },
         defaults: {
-          from: 'Job Nest',
+          from: `"Job Nest" <${configService.get(ENV.MAIL_USERNAME)}>`,
         },
         template: {
           dir: process.cwd() + '/dist/templates',

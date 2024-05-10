@@ -1,61 +1,51 @@
-import { JsonValue } from '@prisma/client/runtime/library';
-import {
-  IsArray,
-  IsNumber,
-  IsObject,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { ECompanySizeType } from 'src/_core/constant/enum.constant';
 
 export class CompanyUpdateDto {
-  @IsNumber()
-  jobCategoryParentId: number;
-
-  @IsNumber()
-  cityId: number;
-
+  @IsOptional()
   @IsString()
   name: string;
 
   @IsOptional()
-  @IsArray()
-  extraEmail?: JsonValue;
+  @IsString()
+  primaryEmail: string;
 
   @IsOptional()
   @IsString()
-  aboutUs?: string;
-
-  @IsString()
-  avatar: string;
-
-  @IsString()
-  coverImage: string;
+  taxCode: string;
 
   @IsOptional()
   @IsString()
-  homePage?: string;
+  website: string;
 
   @IsOptional()
-  @IsObject()
-  socialMedia?: JsonValue;
-
+  @Type(() => Number)
   @IsNumber()
-  totalStaff: number;
+  jobCategoryParentId: number;
 
-  @IsNumber()
-  averageAge: number;
+  @IsOptional()
+  @Type(() => Number)
+  @IsEnum(ECompanySizeType)
+  sizeType: ECompanySizeType;
 
+  @IsOptional()
   @IsString()
   primaryAddress: string;
 
   @IsOptional()
-  @IsArray()
-  extraAddress?: JsonValue;
-
   @IsString()
   primaryPhoneNumber: string;
 
   @IsOptional()
-  @IsArray()
-  extraPhoneNumber?: JsonValue;
+  @IsString()
+  aboutUs: string;
+
+  @IsOptional()
+  @IsString()
+  avatar: string;
+
+  @IsOptional()
+  @IsString()
+  coverImage: string;
 }

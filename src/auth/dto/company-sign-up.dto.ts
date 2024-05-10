@@ -27,7 +27,7 @@ export class CompanyInformationSignUpDto {
   coverImage: string;
 
   @IsNumber()
-  totalStaff: number;
+  sizeType: number;
 
   @IsNumber()
   averageAge: number;

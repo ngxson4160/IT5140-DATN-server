@@ -7,15 +7,56 @@ import {
   EApplicationStatus,
   EJobStatus,
   ERole,
+  ESort,
   EUserStatus,
 } from 'src/_core/constant/enum.constant';
 import { GetListApplicationDto } from './dto/get-list-applications.dto';
 import { EOrderPaging } from 'src/_core/type/order-paging.type';
 import { UpdateUserProfileDto } from './dto/update-candidate-profile.dto';
+import { UserApplyJobDto } from './dto/user-apply-job.dto';
+import { UpdateAccountInfoDto } from './dto/update-user-profile';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async getAccountInfo(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        avatar: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+      },
+    });
+
+    if (!user) throw new CommonException(MessageResponse.USER.NOT_FOUND(id));
+
+    return user;
+  }
+
+  async updateAccountInfo(id: number, data: UpdateAccountInfoDto) {
+    const { firstName, lastName, avatar } = data;
+
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new CommonException(MessageResponse.USER.NOT_FOUND(id));
+
+    const userUpdated = await this.prisma.user.update({
+      where: { id },
+      data: { firstName, lastName, avatar },
+      select: {
+        avatar: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+      },
+    });
+
+    return userUpdated;
+  }
 
   async getUserProfile(id: number) {
     const user = await this.prisma.user.findUnique({
@@ -43,9 +84,6 @@ export class UserService {
     if (!user) throw new CommonException(MessageResponse.USER.NOT_FOUND(id));
 
     delete user.password;
-    delete user.cityId;
-    delete user.candidateInformation.desiredCityId;
-    delete user.candidateInformation.desiredJobCategoryId;
     return user;
   }
 
@@ -61,8 +99,10 @@ export class UserService {
       district,
       maritalStatus,
       address,
+      educationalLevel,
 
       //candidate information
+      target,
       desiredJobCategoryId,
       desiredCityId,
       cv,
@@ -74,7 +114,7 @@ export class UserService {
       languageSkill,
       desiredSalary,
       desiredJobLevel,
-      desiredMode,
+      desiredJobMode,
     } = body;
 
     const user = await this.prisma.user.findUnique({
@@ -114,8 +154,10 @@ export class UserService {
         district,
         maritalStatus,
         address,
+        educationalLevel,
         candidateInformation: {
           update: {
+            target,
             desiredJobCategoryId,
             desiredCityId,
             cv,
@@ -127,7 +169,7 @@ export class UserService {
             languageSkill,
             desiredSalary,
             desiredJobLevel,
-            desiredMode,
+            desiredJobMode,
           },
         },
       },
@@ -135,6 +177,7 @@ export class UserService {
         city: true,
         candidateInformation: {
           include: {
+            desiredJobCategory: true,
             desiredCity: true,
           },
         },
@@ -142,12 +185,10 @@ export class UserService {
     });
 
     delete userUpdated.password;
-    delete userUpdated.cityId;
-    delete userUpdated.candidateInformation.desiredCityId;
     return userUpdated;
   }
 
-  async userApplyJob(userId: number, jobId: number) {
+  async userApplyJob(userId: number, jobId: number, data: UserApplyJobDto) {
     const job = await this.prisma.job.findUnique({
       where: { id: jobId, status: EJobStatus.PUBLIC },
     });
@@ -168,14 +209,36 @@ export class UserService {
       );
     }
 
-    const applicationCreated = await this.prisma.application.create({
-      data: {
-        userId,
-        jobId,
-      },
-    });
+    try {
+      const applicationCreated = await this.prisma.$transaction(async (tx) => {
+        const applicationCreated = await tx.application.create({
+          data: {
+            userId,
+            jobId,
+            candidateCv: data.candidateCv,
+            candidateFirstName: data.candidateFirstName,
+            candidateLastName: data.candidateLastName,
+            candidatePhoneNumber: data.candidatePhoneNumber,
+            candidateEmail: data.candidateEmail,
+          },
+        });
 
-    return applicationCreated;
+        await tx.job.update({
+          where: {
+            id: jobId,
+          },
+          data: {
+            totalCandidate: job.totalCandidate + 1,
+          },
+        });
+
+        return applicationCreated;
+      });
+
+      return applicationCreated;
+    } catch (e) {
+      throw e;
+    }
   }
 
   async userDeleteApplyJob(userId: number, jobId: number) {
@@ -225,6 +288,7 @@ export class UserService {
         userId,
         status: status ? +status : undefined,
       },
+      orderBy: [{ createdAt: ESort.DESC }],
       select: {
         id: true,
         userId: true,
@@ -235,6 +299,38 @@ export class UserService {
         createdBy: true,
         updatedAt: true,
         updatedBy: true,
+        candidateCv: true,
+        job: {
+          select: {
+            id: true,
+            title: true,
+            salaryMin: true,
+            salaryMax: true,
+            hiringEndDate: true,
+            jobHasCities: {
+              select: {
+                city: true,
+              },
+            },
+            jobHasTags: {
+              select: {
+                tag: true,
+              },
+            },
+            creator: {
+              select: {
+                company: {
+                  select: {
+                    id: true,
+                    name: true,
+                    avatar: true,
+                    coverImage: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
 
@@ -255,15 +351,36 @@ export class UserService {
     const listItems = [];
     for (let i = skipItems; i < skipItems + +limit; i++) {
       if (listApplications[i]) {
+        const company = listApplications[i].job.creator.company;
+        delete listApplications[i].job.creator.company;
+        listApplications[i].job['company'] = company;
+
+        const cities = listApplications[i].job.jobHasCities.map((el) => ({
+          id: el.city.id,
+          name: el.city.name,
+        }));
+        delete listApplications[i].job.jobHasCities;
+        listApplications[i].job['cities'] = cities;
+
+        const tags = listApplications[i].job.jobHasTags.map((el) => ({
+          id: el.tag.id,
+          name: el.tag.name,
+        }));
+        delete listApplications[i].job.jobHasTags;
+        listApplications[i].job['tags'] = tags;
         listItems.push(listApplications[i]);
       }
     }
 
     return {
-      page: +page,
-      pageSize: +limit,
-      totalPage: Math.ceil(listApplications.length / limit),
-      listApplications: listItems,
+      meta: {
+        pagination: {
+          page: +page,
+          pageSize: +limit,
+          totalPage: Math.ceil(listApplications.length / limit),
+        },
+      },
+      data: listItems,
     };
   }
 }

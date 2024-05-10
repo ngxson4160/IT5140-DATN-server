@@ -7,6 +7,7 @@ import { CompanyUpdateDto } from './dto/update-company.dto';
 import { ApplicationUpdateDto } from './dto/update-application.dto';
 import { CompanyGetListJobDto } from './dto/get-list-job.dto';
 import { GetListApplicationJobDto } from './dto/get-list-application.dto';
+import { GetListCandidateDto } from './dto/get-list-candidate.dto';
 
 @Controller('companies')
 export class CompanyController {
@@ -55,6 +56,14 @@ export class CompanyController {
     @Query() query: GetListApplicationJobDto,
   ) {
     return this.companyService.getJobsApplication(userData.id, +jobId, query);
+  }
+
+  @Get('candidates')
+  getListCandidate(
+    @UserData() userData: IUserData,
+    @Query() query: GetListCandidateDto,
+  ) {
+    return this.companyService.getListCandidate(userData.id, query);
   }
 
   @Public()

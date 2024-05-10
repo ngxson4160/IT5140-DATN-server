@@ -8,19 +8,44 @@ import { CompanyGetListJobDto } from './dto/get-list-job.dto';
 import { EOrderPaging } from 'src/_core/type/order-paging.type';
 import { EJobType } from 'src/_core/type/common.type';
 import { GetListApplicationJobDto } from './dto/get-list-application.dto';
+import { ESort } from 'src/_core/constant/enum.constant';
+import { GetListCandidateDto } from './dto/get-list-candidate.dto';
 
 @Injectable()
 export class CompanyService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getCompany(id: number) {
-    const company = await this.prisma.company.findUnique({ where: { id } });
+    const company = await this.prisma.company.findUnique({
+      where: { id },
+      include: {
+        jobCategoryParent: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
 
     if (!company) {
       throw new CommonException(MessageResponse.COMPANY.NOT_FOUND(id));
     }
 
-    return company;
+    return {
+      id: company.id,
+      name: company.name,
+      aboutUs: company.aboutUs,
+      avatar: company.avatar,
+      coverImage: company.coverImage,
+      sizeType: company.sizeType,
+      jobCategoryParent: company.jobCategoryParent,
+      primaryAddress: company.primaryAddress,
+      primaryEmail: company.primaryEmail,
+      primaryPhoneNumber: company.primaryPhoneNumber,
+      website: company.website,
+      socialMedia: company.socialMedia,
+    };
   }
 
   async getMyCompany(userId: number) {
@@ -34,21 +59,17 @@ export class CompanyService {
 
   async updateCompany(userId: number, data: CompanyUpdateDto) {
     const {
-      jobCategoryParentId,
       name,
-      extraEmail,
+      primaryEmail,
+      taxCode,
+      website,
+      jobCategoryParentId,
+      sizeType,
+      primaryAddress,
+      primaryPhoneNumber,
       aboutUs,
       avatar,
       coverImage,
-      homePage,
-      socialMedia,
-      totalStaff,
-      averageAge,
-      cityId,
-      primaryAddress,
-      extraAddress,
-      primaryPhoneNumber,
-      extraPhoneNumber,
     } = data;
 
     const user = await this.prisma.user.findUnique({
@@ -60,7 +81,9 @@ export class CompanyService {
       },
     });
 
-    const company = await this.prisma.company.findUnique({ where: { name } });
+    const company = await this.prisma.company.findUnique({
+      where: { id: user.company.id },
+    });
 
     if (company && company.id !== user.company.id) {
       throw new CommonException(MessageResponse.COMPANY.NAME_EXIST);
@@ -71,29 +94,17 @@ export class CompanyService {
         const companyUpdated = await tx.company.update({
           where: { id: user.company.id },
           data: {
-            jobCategoryParentId,
             name,
-            extraEmail,
+            primaryEmail,
+            taxCode,
+            website,
+            jobCategoryParentId,
+            sizeType,
+            primaryAddress,
+            primaryPhoneNumber,
             aboutUs,
             avatar,
             coverImage,
-            homePage,
-            socialMedia,
-            totalStaff,
-            averageAge,
-            primaryAddress,
-            extraAddress,
-            primaryPhoneNumber,
-            extraPhoneNumber,
-          },
-        });
-
-        await tx.companyHasCity.updateMany({
-          where: {
-            companyId: user.company.id,
-          },
-          data: {
-            cityId,
           },
         });
 
@@ -146,7 +157,7 @@ export class CompanyService {
   }
 
   async getListJob(creatorId: number, query: CompanyGetListJobDto) {
-    const { status, type } = query;
+    const { title, type, status, sortCreatedAt } = query;
 
     let {
       page,
@@ -160,7 +171,8 @@ export class CompanyService {
     order = order ?? EOrderPaging.DESC;
 
     let filterDate: object;
-    if (+type === EJobType.NOT_YET) {
+
+    if (type?.toString() !== '' && +type === EJobType.NOT_YET) {
       filterDate = {
         hiringStartDate: {
           gt: new Date(),
@@ -186,11 +198,12 @@ export class CompanyService {
     const listJob = await this.prisma.job.findMany({
       where: {
         creatorId,
+        title: { contains: title },
         status: status ? +status : undefined,
         ...filterDate,
       },
       orderBy: {
-        createdAt: order,
+        createdAt: sortCreatedAt || ESort.DESC,
       },
     });
 
@@ -203,13 +216,18 @@ export class CompanyService {
     }
 
     return {
-      page: +page,
-      pageSize: +limit,
-      totalPage: Math.ceil(listJob.length / limit),
-      listJob: listItems,
+      meta: {
+        pagination: {
+          page: +page,
+          pageSize: +limit,
+          totalPage: Math.ceil(listJob.length / limit),
+        },
+      },
+      data: listItems,
     };
   }
 
+  //TODO: Refactor query pagination
   async getJobsApplication(
     userId: number,
     jobId: number,
@@ -261,10 +279,64 @@ export class CompanyService {
     }
 
     return {
-      page: +page,
-      pageSize: +limit,
-      totalPage: Math.ceil(listApplication.length / limit),
-      listApplications: listItems,
+      meta: {
+        pagination: {
+          page: +page,
+          pageSize: +limit,
+          totalPage: Math.ceil(listApplication.length / limit),
+        },
+      },
+      data: listItems,
+    };
+  }
+
+  async getListCandidate(userId: number, query: GetListCandidateDto) {
+    const { jobId, status, sortCreatedAt, limit, page } = query;
+
+    const totalApplications = await this.prisma.application.count({
+      where: {
+        status,
+        job: {
+          id: jobId,
+          creatorId: userId,
+        },
+      },
+    });
+
+    const listApplication = await this.prisma.application.findMany({
+      where: {
+        status,
+        job: {
+          id: jobId,
+          creatorId: userId,
+        },
+      },
+      include: {
+        job: {
+          select: {
+            title: true,
+          },
+        },
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: [
+        {
+          createdAt: sortCreatedAt || ESort.DESC,
+        },
+      ],
+    });
+
+    return {
+      meta: {
+        pagination: {
+          page: page,
+          pageSize: limit,
+          totalPage: Math.ceil(totalApplications / limit),
+          totalItem: totalApplications,
+        },
+      },
+      data: listApplication,
     };
   }
 }

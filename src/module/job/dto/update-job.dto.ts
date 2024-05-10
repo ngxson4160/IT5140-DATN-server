@@ -30,9 +30,6 @@ export class UpdateJobDto {
   @IsString()
   title: string;
 
-  @IsString()
-  position: string;
-
   @IsOptional()
   @IsNumber()
   salaryMin: number;
@@ -67,11 +64,9 @@ export class UpdateJobDto {
   @IsEnum(EJobStatus)
   status: EJobStatus;
 
-  //   @IsNumber()
-  //   totalViews: number;
-
-  //   @IsNumber()
-  //   totalCandidate: number;
+  @IsOptional()
+  @IsString()
+  time: string;
 
   @IsString()
   benefits: string;

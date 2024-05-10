@@ -62,9 +62,13 @@ export class UpdateUserProfileDto {
 
   @IsOptional()
   @IsEnum(EEducationLevel)
-  educationLevel: EEducationLevel;
+  educationalLevel: EEducationLevel;
 
   //candidate information
+  @IsOptional()
+  @IsString()
+  target?: string;
+
   @IsOptional()
   @IsNumber()
   desiredJobCategoryId?: number;
@@ -111,5 +115,5 @@ export class UpdateUserProfileDto {
 
   @IsOptional()
   @IsEnum(EJobMode)
-  desiredMode?: EJobMode;
+  desiredJobMode?: EJobMode;
 }

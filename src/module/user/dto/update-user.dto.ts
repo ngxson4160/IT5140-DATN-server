@@ -4,7 +4,6 @@ import {
   IsArray,
   IsDateString,
   IsEnum,
-  IsJSON,
   IsNotEmpty,
   IsNumber,
   IsString,
