@@ -116,8 +116,13 @@ export class AuthService {
   async companySignUp(body: CompanySignUpDto) {
     const { email, firstName, lastName, password, gender } = body.user;
 
-    const { jobCategoryParentId, name, sizeType, cityId, primaryPhoneNumber } =
-      body.company;
+    const {
+      jobCategoryParentId,
+      name,
+      sizeType,
+      primaryPhoneNumber,
+      primaryAddress,
+    } = body.company;
 
     const user = await this.prisma.user.findUnique({ where: { email } });
 
@@ -140,16 +145,17 @@ export class AuthService {
             name,
             sizeType: +sizeType,
             primaryPhoneNumber,
+            primaryAddress,
             canCreateJob: true,
           },
         });
 
-        await tx.companyHasCity.create({
-          data: {
-            cityId,
-            companyId: companyCreated.id,
-          },
-        });
+        // await tx.companyHasCity.create({
+        //   data: {
+        //     cityId,
+        //     companyId: companyCreated.id,
+        //   },
+        // });
 
         const passwordHash = await hashPassword(password);
         const userCreated = await tx.user.create({

@@ -1,44 +1,29 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsString } from 'class-validator';
 import { UserSignUpDto } from './sign-up.dto';
 import { Transform, Type } from 'class-transformer';
+import { ECompanySizeType } from 'src/_core/constant/enum.constant';
 
 export class CompanyInformationSignUpDto {
-  @IsNumber()
-  @Type(() => Number)
-  @Transform(({ value }) => {
-    return Number(value);
-  })
-  jobCategoryParentId: number;
-
-  @IsNumber()
-  @Type(() => Number)
-  @Transform(({ value }) => {
-    return Number(value);
-  })
-  cityId: number;
-
   @IsString()
   name: string;
 
-  @IsString()
-  avatar: string;
-
-  @IsString()
-  coverImage: string;
-
   @IsNumber()
-  sizeType: number;
+  @Type(() => Number)
+  jobCategoryParentId: number;
 
-  @IsNumber()
-  averageAge: number;
+  @IsString()
+  primaryPhoneNumber: string;
 
   @IsString()
   primaryAddress: string;
 
-  @IsString()
-  primaryPhoneNumber: string;
-}
+  @IsEnum(ECompanySizeType)
+  sizeType: ECompanySizeType;
 
+  // @IsNumber()
+  // @Type(() => Number)
+  // cityId: number;
+}
 export class CompanySignUpDto {
   user: UserSignUpDto;
   company: CompanyInformationSignUpDto;
