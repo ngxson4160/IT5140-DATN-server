@@ -63,61 +63,132 @@ export class AuthService {
     }
 
     const passwordHash = await hashPassword(password);
+    try {
+      const urlActive = await this.prisma.$transaction(async (tx) => {
+        const userCreated = await tx.user.create({
+          data: {
+            email,
+            firstName,
+            lastName,
+            password: passwordHash,
+            avatar,
+            dob,
+            gender,
+            phoneNumber,
+            status: EUserStatus.INACTIVE,
+          },
+        });
 
-    const userCreated = await this.prisma.user.create({
-      data: {
-        email,
-        firstName,
-        lastName,
-        password: passwordHash,
-        avatar,
-        dob,
-        gender,
-        phoneNumber,
-        status: EUserStatus.INACTIVE,
-      },
-    });
+        const role = await tx.role.findUnique({
+          where: { name: ERole.USER },
+        });
 
-    const role = await this.prisma.role.findUnique({
-      where: { name: ERole.USER },
-    });
+        await tx.userRole.create({
+          data: { userId: userCreated.id, roleId: role.id },
+        });
 
-    await this.prisma.userRole.create({
-      data: { userId: userCreated.id, roleId: role.id },
-    });
+        await tx.candidateInformation.create({
+          data: {
+            userId: userCreated.id,
+            cv: [],
+            certificate: [],
+            education: [],
+            workExperience: [],
+            advancedSkill: [],
+            languageSkill: [],
+          },
+        });
 
-    const token = await createToken(
-      { email },
-      this.configService.get(ENV.COMMON_TOKEN_SECRET),
-      this.configService.get(ENV.ACCESS_TOKEN_LIFE),
-    );
+        const token = await createToken(
+          { email },
+          this.configService.get(ENV.COMMON_TOKEN_SECRET),
+          this.configService.get(ENV.ACCESS_TOKEN_LIFE),
+        );
 
-    const urlActive = `${this.configService.get(
-      ENV.DOMAIN,
-    )}/auth/verify-account?email=${email}&token=${token}`;
+        const urlActive = `${this.configService.get(
+          ENV.DOMAIN,
+        )}/auth/verify-account?email=${email}&token=${token}`;
 
-    const context = {
-      name: `${firstName} ${lastName}`,
-      urlActive,
-    };
+        const context = {
+          name: `${firstName} ${lastName}`,
+          urlActive,
+        };
 
-    await this.nodeMailer.sendEmail(
-      [email],
-      COMMON_CONSTANT.VERIFY_ACCOUNT,
-      HANDLEBARS_TEMPLATE_MAIL.USER_SIGN_UP,
-      context,
-    );
+        await this.nodeMailer.sendEmail(
+          [email],
+          COMMON_CONSTANT.VERIFY_ACCOUNT,
+          HANDLEBARS_TEMPLATE_MAIL.USER_SIGN_UP,
+          context,
+        );
 
-    return {
-      meta: MessageResponse.AUTH.USER_SIGN_UP_SUCCESS(urlActive),
-    };
+        return urlActive;
+      });
+
+      return {
+        meta: MessageResponse.AUTH.USER_SIGN_UP_SUCCESS(urlActive),
+      };
+    } catch (e) {
+      throw e;
+    }
+    // const userCreated = await this.prisma.user.create({
+    //   data: {
+    //     email,
+    //     firstName,
+    //     lastName,
+    //     password: passwordHash,
+    //     avatar,
+    //     dob,
+    //     gender,
+    //     phoneNumber,
+    //     status: EUserStatus.INACTIVE,
+    //   },
+    // });
+
+    // const role = await this.prisma.role.findUnique({
+    //   where: { name: ERole.USER },
+    // });
+
+    // await this.prisma.userRole.create({
+    //   data: { userId: userCreated.id, roleId: role.id },
+    // });
+
+    // const token = await createToken(
+    //   { email },
+    //   this.configService.get(ENV.COMMON_TOKEN_SECRET),
+    //   this.configService.get(ENV.ACCESS_TOKEN_LIFE),
+    // );
+
+    // const urlActive = `${this.configService.get(
+    //   ENV.DOMAIN,
+    // )}/auth/verify-account?email=${email}&token=${token}`;
+
+    // const context = {
+    //   name: `${firstName} ${lastName}`,
+    //   urlActive,
+    // };
+
+    // await this.nodeMailer.sendEmail(
+    //   [email],
+    //   COMMON_CONSTANT.VERIFY_ACCOUNT,
+    //   HANDLEBARS_TEMPLATE_MAIL.USER_SIGN_UP,
+    //   context,
+    // );
+
+    // return {
+    //   meta: MessageResponse.AUTH.USER_SIGN_UP_SUCCESS(urlActive),
+    // };
   }
 
   async companySignUp(body: CompanySignUpDto) {
     const { email, firstName, lastName, password, gender } = body.user;
 
-    const { jobCategoryParentId, name, sizeType, cityId, primaryPhoneNumber } =
-      body.company;
+    const {
+      jobCategoryParentId,
+      name,
+      sizeType,
+      primaryPhoneNumber,
+      primaryAddress,
+    } = body.company;
 
     const user = await this.prisma.user.findUnique({ where: { email } });
 
@@ -140,16 +211,17 @@ export class AuthService {
             name,
             sizeType: +sizeType,
             primaryPhoneNumber,
+            primaryAddress,
             canCreateJob: true,
           },
         });
 
-        await tx.companyHasCity.create({
-          data: {
-            cityId,
-            companyId: companyCreated.id,
-          },
-        });
+        // await tx.companyHasCity.create({
+        //   data: {
+        //     cityId,
+        //     companyId: companyCreated.id,
+        //   },
+        // });
 
         const passwordHash = await hashPassword(password);
         const userCreated = await tx.user.create({
