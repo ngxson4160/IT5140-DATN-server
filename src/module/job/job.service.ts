@@ -308,25 +308,30 @@ export class JobService {
 
     if (salaryMin && salaryMax) {
       whereSalary = {
-        salaryMax: {
-          lte: +salaryMax,
-        },
-        salaryMin: {
-          gte: +salaryMin,
-        },
+        OR: [
+          { salaryMin: { gte: salaryMin }, salaryMax: { lte: salaryMax } },
+          { salaryMin: 0, salaryMax: { gte: salaryMin, lte: salaryMax } },
+          { salaryMin: { gte: salaryMin, lte: salaryMax }, salaryMax: 0 },
+        ],
       };
     } else if (!salaryMin && salaryMax) {
       whereSalary = {
-        salaryMin: {
-          lte: +salaryMax,
-        },
+        OR: [
+          { salaryMax: { lte: salaryMax } },
+          { salaryMin: { lte: salaryMax }, salaryMax: 0 },
+        ],
       };
     } else if (salaryMin && !salaryMax) {
       whereSalary = {
         OR: [
-          { salaryMax: { gte: +salaryMin } },
-          { salaryMin: { gte: +salaryMin } },
+          { salaryMax: { gte: salaryMin } },
+          { salaryMin: { gte: salaryMin } },
         ],
+      };
+    } else if (salaryMin === 0 && salaryMax === 0) {
+      whereSalary = {
+        salaryMax: 0,
+        salaryMin: 0,
       };
     }
 
@@ -363,11 +368,11 @@ export class JobService {
       }),
       ...whereSalary,
       yearExperience: {
-        gte: yearExperienceMin ? +yearExperienceMin : undefined,
-        lte: yearExperienceMax ? +yearExperienceMax : undefined,
+        gte: yearExperienceMin,
+        lte: yearExperienceMax,
       },
-      jobMode: jobMode ? +jobMode : undefined,
-      level: level ? +level : undefined,
+      jobMode,
+      level,
       status: EJobStatus.PUBLIC,
       ...(!all && {
         hiringEndDate: {

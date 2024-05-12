@@ -30,15 +30,11 @@ export class GetListJobDto extends PaginationDto {
 
   @IsOptional()
   @IsEnum(EJobMode)
-  //   @IsArray()
-  //   @IsNumber({}, {each: true})
   @Type(() => Number)
   jobMode?: EJobMode;
 
   @IsOptional()
   @IsEnum(EJobLevel)
-  //   @IsArray()
-  //   @IsNumber({}, {each: true})
   @Type(() => Number)
   level?: EJobLevel;
 
