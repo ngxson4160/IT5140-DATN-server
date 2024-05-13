@@ -8,10 +8,17 @@ import { ApplicationUpdateDto } from './dto/update-application.dto';
 import { CompanyGetListJobDto } from './dto/get-list-job.dto';
 import { GetListApplicationJobDto } from './dto/get-list-application.dto';
 import { GetListCandidateDto } from './dto/get-list-candidate.dto';
+import { GetListCompanyDto } from './dto/get-list-company.dto';
 
 @Controller('companies')
 export class CompanyController {
   constructor(private readonly companyService: CompanyService) {}
+
+  @Public()
+  @Get()
+  getListCompany(@Query() query: GetListCompanyDto) {
+    return this.companyService.getListCompany(query);
+  }
 
   @Get('my-company')
   getMyCompany(@UserData() userData: IUserData) {

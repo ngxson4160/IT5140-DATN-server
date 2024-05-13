@@ -10,6 +10,7 @@ import { EJobType } from 'src/_core/type/common.type';
 import { GetListApplicationJobDto } from './dto/get-list-application.dto';
 import { ESort } from 'src/_core/constant/enum.constant';
 import { GetListCandidateDto } from './dto/get-list-candidate.dto';
+import { GetListCompanyDto } from './dto/get-list-company.dto';
 
 @Injectable()
 export class CompanyService {
@@ -45,6 +46,37 @@ export class CompanyService {
       primaryPhoneNumber: company.primaryPhoneNumber,
       website: company.website,
       socialMedia: company.socialMedia,
+    };
+  }
+
+  async getListCompany(query: GetListCompanyDto) {
+    const { name, sortCreatedAt, page, limit } = query;
+
+    const totalCompany = await this.prisma.company.count({
+      where: {
+        name: { contains: name },
+      },
+    });
+
+    const listCompany = await this.prisma.company.findMany({
+      where: {
+        name: { contains: name },
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: [{ createdAt: sortCreatedAt || ESort.DESC }],
+    });
+
+    return {
+      meta: {
+        pagination: {
+          page: page,
+          pageSize: limit,
+          totalPage: Math.ceil(totalCompany / limit),
+          totalItem: totalCompany,
+        },
+      },
+      data: listCompany,
     };
   }
 
