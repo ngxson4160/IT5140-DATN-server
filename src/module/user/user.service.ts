@@ -6,6 +6,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import {
   EApplicationStatus,
   EJobStatus,
+  EPublicCVType,
   ERole,
   ESort,
   EUserStatus,
@@ -15,6 +16,7 @@ import { EOrderPaging } from 'src/_core/type/order-paging.type';
 import { UpdateUserProfileDto } from './dto/update-candidate-profile.dto';
 import { UserApplyJobDto } from './dto/user-apply-job.dto';
 import { UpdateAccountInfoDto } from './dto/update-user-profile';
+import { GetListCandidateDto } from './dto/get-list-candidate.dto';
 
 @Injectable()
 export class UserService {
@@ -115,7 +117,23 @@ export class UserService {
       desiredSalary,
       desiredJobLevel,
       desiredJobMode,
+      publicCVType,
+      project,
     } = body;
+
+    let { publicAttachmentCV } = body;
+
+    if (
+      publicCVType === EPublicCVType.NOT_PUBLIC ||
+      publicCVType === EPublicCVType.SYSTEM_CV
+    ) {
+      publicAttachmentCV = null;
+    } else if (
+      publicCVType === EPublicCVType.ATTACHMENT_CV &&
+      !publicAttachmentCV
+    ) {
+      throw new CommonException(MessageResponse.USER.ATTACHMENT_CV_REQUIRED);
+    }
 
     const user = await this.prisma.user.findUnique({
       where: {
@@ -167,9 +185,12 @@ export class UserService {
             certificate,
             advancedSkill,
             languageSkill,
+            project,
             desiredSalary,
             desiredJobLevel,
             desiredJobMode,
+            publicCVType,
+            publicAttachmentCV,
           },
         },
       },
@@ -381,6 +402,134 @@ export class UserService {
         },
       },
       data: listItems,
+    };
+  }
+
+  async getListCandidate(query?: GetListCandidateDto) {
+    const {
+      filter,
+      cityId,
+      yearExperienceMin,
+      yearExperienceMax,
+      desiredJobCategoryId,
+      gender,
+      desiredJobLevel,
+      desiredJobMode,
+      maritalStatus,
+      educationalLevel,
+
+      page,
+      limit,
+    } = query;
+
+    const totalCandidate = await this.prisma.user.count({
+      where: {
+        candidateInformation: {
+          publicCVType: {
+            not: EPublicCVType.NOT_PUBLIC,
+          },
+          desiredCityId: cityId,
+          yearExperience: {
+            lte: yearExperienceMax,
+            gte: yearExperienceMin,
+          },
+          desiredJobCategoryId,
+          desiredJobLevel,
+          desiredJobMode,
+        },
+        gender,
+        maritalStatus,
+        educationalLevel,
+      },
+    });
+
+    const listCandidate = await this.prisma.user.findMany({
+      where: {
+        candidateInformation: {
+          publicCVType: {
+            not: EPublicCVType.NOT_PUBLIC,
+          },
+          desiredCityId: cityId,
+          yearExperience: {
+            lte: yearExperienceMax,
+            gte: yearExperienceMin,
+          },
+          desiredJobCategoryId,
+          desiredJobLevel,
+          desiredJobMode,
+        },
+        gender,
+        maritalStatus,
+        educationalLevel,
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      select: {
+        id: true,
+        cityId: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        avatar: true,
+        dob: true,
+        gender: true,
+        phoneNumber: true,
+        district: true,
+        maritalStatus: true,
+        address: true,
+        educationalLevel: true,
+        status: true,
+        candidateInformation: {
+          select: {
+            desiredJobCategoryId: true,
+            desiredCityId: true,
+            target: true,
+            cv: true,
+            yearExperience: true,
+            workExperience: true,
+            project: true,
+            education: true,
+            certificate: true,
+            advancedSkill: true,
+            languageSkill: true,
+            desiredSalary: true,
+            desiredJobLevel: true,
+            desiredJobMode: true,
+            publicCVType: true,
+            publicAttachmentCV: true,
+            status: true,
+          },
+        },
+      },
+    });
+
+    const listCandidateConvert = listCandidate.map((el) => {
+      if (
+        el.candidateInformation.publicCVType === EPublicCVType.ATTACHMENT_CV
+      ) {
+        const candidate = {
+          ...el,
+          candidateInformation: {
+            publicCVType: el.candidateInformation.publicCVType,
+            publicAttachmentCV: el.candidateInformation.publicAttachmentCV,
+          },
+        };
+        return candidate;
+      } else {
+        return el;
+      }
+    });
+
+    return {
+      meta: {
+        pagination: {
+          page: page,
+          pageSize: limit,
+          totalPage: Math.ceil(totalCandidate / limit),
+          totalItem: totalCandidate,
+        },
+      },
+      data: listCandidateConvert,
     };
   }
 }

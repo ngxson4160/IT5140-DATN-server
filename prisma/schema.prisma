@@ -139,17 +139,20 @@ model CandidateInformation {
   desiredJobCategoryId Int? @map("desired_job_category_id")
   desiredCityId        Int? @map("desired_city_id")
 
-  target          String?
-  cv              Json?
-  yearExperience  Float?  @map("year_experience")
-  workExperience  Json?   @map("work_experience")
-  education       Json?
-  certificate     Json?
-  advancedSkill   Json?   @map("advanced_skill")
-  languageSkill   Json?   @map("language_skill")
-  desiredSalary   Int?    @map("desired_salary")
-  desiredJobLevel Int?    @map("desired_job_level")
-  desiredJobMode  Int?    @map("desired_job_mode")
+  target             String?
+  cv                 Json?
+  yearExperience     Float?  @map("year_experience")
+  workExperience     Json?   @map("work_experience")
+  project            Json?   @map("project")
+  education          Json?
+  certificate        Json?
+  advancedSkill      Json?   @map("advanced_skill")
+  languageSkill      Json?   @map("language_skill")
+  desiredSalary      Int?    @map("desired_salary")
+  desiredJobLevel    Int?    @map("desired_job_level")
+  desiredJobMode     Int?    @map("desired_job_mode")
+  publicCVType       Int     @default(0) @map("public_cv_type")
+  publicAttachmentCV String? @map("public_attachment_cv")
 
   status    Int       @default(0) @db.TinyInt
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)

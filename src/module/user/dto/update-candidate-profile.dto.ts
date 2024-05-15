@@ -15,6 +15,7 @@ import {
   EJobLevel,
   EJobMode,
   EMaritalStatus,
+  EPublicCVType,
 } from 'src/_core/constant/enum.constant';
 
 export class UpdateUserProfileDto {
@@ -106,6 +107,10 @@ export class UpdateUserProfileDto {
   languageSkill?: JsonValue;
 
   @IsOptional()
+  @IsArray()
+  project?: JsonValue;
+
+  @IsOptional()
   @IsNumber()
   desiredSalary?: number;
 
@@ -116,4 +121,12 @@ export class UpdateUserProfileDto {
   @IsOptional()
   @IsEnum(EJobMode)
   desiredJobMode?: EJobMode;
+
+  @IsOptional()
+  @IsEnum(EPublicCVType)
+  publicCVType?: EPublicCVType;
+
+  @IsOptional()
+  @IsString()
+  publicAttachmentCV?: string;
 }

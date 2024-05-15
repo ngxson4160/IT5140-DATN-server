@@ -157,6 +157,11 @@ export const MessageResponse = {
       message: `User does not exist.`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
+    ATTACHMENT_CV_REQUIRED: {
+      code: 400024,
+      message: `Require publicAttachmentCV when publicCVType = 2.`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
   },
 
   COMPANY: {
