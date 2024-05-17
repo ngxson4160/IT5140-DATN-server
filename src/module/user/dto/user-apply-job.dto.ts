@@ -1,7 +1,6 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { EApplicationStatus } from 'src/_core/constant/enum.constant';
-import { PaginationDto } from 'src/_core/dto/query-paging.dto';
+import { IsEnum, IsString } from 'class-validator';
+import { EPublicCVType } from 'src/_core/constant/enum.constant';
 
 export class UserApplyJobDto {
   @IsString()
@@ -18,4 +17,8 @@ export class UserApplyJobDto {
 
   @IsString()
   candidatePhoneNumber: string;
+
+  @IsEnum(EPublicCVType)
+  @Type(() => Number)
+  cvType: EPublicCVType;
 }

@@ -17,6 +17,7 @@ import { UpdateUserProfileDto } from './dto/update-candidate-profile.dto';
 import { UserApplyJobDto } from './dto/user-apply-job.dto';
 import { UpdateAccountInfoDto } from './dto/update-user-profile';
 import { GetListCandidateDto } from './dto/get-list-candidate.dto';
+import { FormatQueryArray } from 'src/_core/helper/utils';
 
 @Injectable()
 export class UserService {
@@ -74,6 +75,7 @@ export class UserService {
       },
       include: {
         city: true,
+        district: true,
         candidateInformation: {
           include: {
             desiredJobCategory: true,
@@ -98,7 +100,7 @@ export class UserService {
       dob,
       gender,
       phoneNumber,
-      district,
+      districtId,
       maritalStatus,
       address,
       educationalLevel,
@@ -117,20 +119,20 @@ export class UserService {
       desiredSalary,
       desiredJobLevel,
       desiredJobMode,
-      publicCVType,
+      publicCvType,
       project,
     } = body;
 
-    let { publicAttachmentCV } = body;
+    let { publicAttachmentCv } = body;
 
     if (
-      publicCVType === EPublicCVType.NOT_PUBLIC ||
-      publicCVType === EPublicCVType.SYSTEM_CV
+      publicCvType === EPublicCVType.NOT_PUBLIC ||
+      publicCvType === EPublicCVType.SYSTEM_CV
     ) {
-      publicAttachmentCV = null;
+      publicAttachmentCv = null;
     } else if (
-      publicCVType === EPublicCVType.ATTACHMENT_CV &&
-      !publicAttachmentCV
+      publicCvType === EPublicCVType.ATTACHMENT_CV &&
+      !publicAttachmentCv
     ) {
       throw new CommonException(MessageResponse.USER.ATTACHMENT_CV_REQUIRED);
     }
@@ -169,7 +171,7 @@ export class UserService {
         dob,
         gender,
         phoneNumber,
-        district,
+        districtId,
         maritalStatus,
         address,
         educationalLevel,
@@ -189,13 +191,14 @@ export class UserService {
             desiredSalary,
             desiredJobLevel,
             desiredJobMode,
-            publicCVType,
-            publicAttachmentCV,
+            publicCvType,
+            publicAttachmentCv,
           },
         },
       },
       include: {
         city: true,
+        district: true,
         candidateInformation: {
           include: {
             desiredJobCategory: true,
@@ -241,6 +244,7 @@ export class UserService {
             candidateLastName: data.candidateLastName,
             candidatePhoneNumber: data.candidatePhoneNumber,
             candidateEmail: data.candidateEmail,
+            cvType: data.cvType,
           },
         });
 
@@ -411,7 +415,7 @@ export class UserService {
       cityId,
       yearExperienceMin,
       yearExperienceMax,
-      desiredJobCategoryId,
+      desiredJobCategoryIds,
       gender,
       desiredJobLevel,
       desiredJobMode,
@@ -425,48 +429,59 @@ export class UserService {
     const totalCandidate = await this.prisma.user.count({
       where: {
         candidateInformation: {
-          publicCVType: {
+          publicCvType: {
             not: EPublicCVType.NOT_PUBLIC,
           },
-          desiredCityId: cityId,
           yearExperience: {
             lte: yearExperienceMax,
             gte: yearExperienceMin,
           },
-          desiredJobCategoryId,
+          desiredJobCategory: {
+            id: {
+              in: desiredJobCategoryIds
+                ? FormatQueryArray(desiredJobCategoryIds)
+                : undefined,
+            },
+          },
           desiredJobLevel,
           desiredJobMode,
         },
         gender,
         maritalStatus,
         educationalLevel,
+        cityId,
       },
     });
 
     const listCandidate = await this.prisma.user.findMany({
       where: {
         candidateInformation: {
-          publicCVType: {
+          publicCvType: {
             not: EPublicCVType.NOT_PUBLIC,
           },
-          desiredCityId: cityId,
           yearExperience: {
             lte: yearExperienceMax,
             gte: yearExperienceMin,
           },
-          desiredJobCategoryId,
+          desiredJobCategory: {
+            id: {
+              in: desiredJobCategoryIds
+                ? FormatQueryArray(desiredJobCategoryIds)
+                : undefined,
+            },
+          },
           desiredJobLevel,
           desiredJobMode,
         },
         gender,
         maritalStatus,
         educationalLevel,
+        cityId,
       },
       skip: (page - 1) * limit,
       take: limit,
       select: {
         id: true,
-        cityId: true,
         email: true,
         firstName: true,
         lastName: true,
@@ -479,9 +494,20 @@ export class UserService {
         address: true,
         educationalLevel: true,
         status: true,
+        city: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         candidateInformation: {
           select: {
-            desiredJobCategoryId: true,
+            desiredJobCategory: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
             desiredCityId: true,
             target: true,
             cv: true,
@@ -495,8 +521,8 @@ export class UserService {
             desiredSalary: true,
             desiredJobLevel: true,
             desiredJobMode: true,
-            publicCVType: true,
-            publicAttachmentCV: true,
+            publicCvType: true,
+            publicAttachmentCv: true,
             status: true,
           },
         },
@@ -505,13 +531,13 @@ export class UserService {
 
     const listCandidateConvert = listCandidate.map((el) => {
       if (
-        el.candidateInformation.publicCVType === EPublicCVType.ATTACHMENT_CV
+        el.candidateInformation.publicCvType === EPublicCVType.ATTACHMENT_CV
       ) {
         const candidate = {
           ...el,
           candidateInformation: {
-            publicCVType: el.candidateInformation.publicCVType,
-            publicAttachmentCV: el.candidateInformation.publicAttachmentCV,
+            publicCVType: el.candidateInformation.publicCvType,
+            publicAttachmentCV: el.candidateInformation.publicAttachmentCv,
           },
         };
         return candidate;

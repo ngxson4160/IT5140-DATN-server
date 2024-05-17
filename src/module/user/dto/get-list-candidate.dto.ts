@@ -26,27 +26,30 @@ export class GetListCandidateDto extends PaginationDto {
   yearExperienceMax?: number;
 
   @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  desiredJobCategoryId?: number;
+  desiredJobCategoryIds?: string;
 
   @IsOptional()
   @IsEnum(EGender)
+  @Type(() => Number)
   gender?: EGender;
 
   @IsOptional()
   @IsEnum(EJobLevel)
+  @Type(() => Number)
   desiredJobLevel?: EJobLevel;
 
   @IsOptional()
   @IsEnum(EJobMode)
+  @Type(() => Number)
   desiredJobMode?: EJobMode;
 
   @IsOptional()
   @IsEnum(EMaritalStatus)
+  @Type(() => Number)
   maritalStatus?: EMaritalStatus;
 
   @IsOptional()
   @IsEnum(EEducationLevel)
+  @Type(() => Number)
   educationalLevel?: EEducationLevel;
 }

@@ -126,7 +126,7 @@ const main = async () => {
       status: 1,
       cityId: 1,
       phoneNumber: '0987654321',
-      district: 'Đông Anh',
+      districtId: 1,
       maritalStatus: 0,
       address: 'Vĩnh Ngọc',
       educationalLevel: 4,

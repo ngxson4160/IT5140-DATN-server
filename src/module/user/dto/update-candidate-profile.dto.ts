@@ -24,6 +24,10 @@ export class UpdateUserProfileDto {
   cityId?: number;
 
   @IsOptional()
+  @IsNumber()
+  districtId?: number;
+
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
   firstName?: string;
@@ -48,10 +52,6 @@ export class UpdateUserProfileDto {
   @IsString()
   @IsOptional()
   phoneNumber?: string;
-
-  @IsOptional()
-  @IsString()
-  district?: string;
 
   @IsOptional()
   @IsEnum(EMaritalStatus)
@@ -124,9 +124,9 @@ export class UpdateUserProfileDto {
 
   @IsOptional()
   @IsEnum(EPublicCVType)
-  publicCVType?: EPublicCVType;
+  publicCvType?: EPublicCVType;
 
   @IsOptional()
   @IsString()
-  publicAttachmentCV?: string;
+  publicAttachmentCv?: string;
 }
