@@ -52,6 +52,7 @@ model User {
   messages             Message[]
   blogs                Blog[]
   userFollowTags       UserFollowTag[]
+  userFollowJobs       UserFollowJob[]
 
   @@map("user")
 }
@@ -202,11 +203,27 @@ model Job {
   creator     User?        @relation(fields: [creatorId], references: [id])
   jobCategory JobCategory? @relation(fields: [jobCategoryId], references: [id])
 
-  applications Application[]
-  jobHasTags   JobHasTag[]
-  jobHasCities JobHasCity[]
+  applications   Application[]
+  jobHasTags     JobHasTag[]
+  jobHasCities   JobHasCity[]
+  userFollowJobs UserFollowJob[]
 
   @@map("job")
+}
+
+model UserFollowJob {
+  id     Int @id @default(autoincrement())
+  jobId  Int @map("job_id")
+  userId Int @map("user_id")
+
+  createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+  updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+
+  job  Job  @relation(fields: [jobId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([jobId, userId])
+  @@map("user_follow_job")
 }
 
 model Application {

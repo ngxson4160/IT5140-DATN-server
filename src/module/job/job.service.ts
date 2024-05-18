@@ -12,6 +12,8 @@ import {
 import { GetListJobDto } from './dto/get-list-job.dto';
 import { EOrderPaging } from 'src/_core/type/order-paging.type';
 import { FormatQueryArray } from 'src/_core/helper/utils';
+import { FollowJobDto } from './dto/follow-job.dto';
+import { GetListFavoriteJobDto } from './dto/get-list-favorite-job';
 
 @Injectable()
 export class JobService {
@@ -101,6 +103,14 @@ export class JobService {
             status: true,
           },
         },
+        ...(userId && {
+          userFollowJobs: {
+            select: {
+              userId: true,
+              jobId: true,
+            },
+          },
+        }),
         jobHasCities: {
           select: {
             city: {
@@ -137,6 +147,14 @@ export class JobService {
       job['application'] = userStatusApplication;
     });
     delete job.applications;
+
+    job['userFollowJob'] = false;
+    if (job.userFollowJobs) {
+      job.userFollowJobs.forEach((userFollowJob) => {
+        if (userFollowJob.userId === userId) job['userFollowJob'] = true;
+      });
+      delete job.userFollowJobs;
+    }
 
     const cities = job.jobHasCities.map((el) => ({
       id: el.city.id,
@@ -426,6 +444,14 @@ export class JobService {
             status: true,
           },
         },
+        ...(userId && {
+          userFollowJobs: {
+            select: {
+              userId: true,
+              jobId: true,
+            },
+          },
+        }),
         creator: {
           select: {
             company: {
@@ -472,6 +498,15 @@ export class JobService {
         }));
         delete listJob[i].jobHasTags;
         listJob[i]['tags'] = tags;
+
+        listJob[i]['userFollowJob'] = false;
+        if (listJob[i].userFollowJobs) {
+          listJob[i].userFollowJobs.forEach((userFollowJob) => {
+            if (userFollowJob.userId === userId)
+              listJob[i]['userFollowJob'] = true;
+          });
+        }
+        delete listJob[i].userFollowJobs;
       }
     }
 
@@ -485,6 +520,131 @@ export class JobService {
         },
       },
       data: listJob,
+    };
+  }
+
+  async followJob(userId: number, jobId: number, data: FollowJobDto) {
+    const { isFavorite } = data;
+
+    const job = await this.prisma.job.findUnique({
+      where: {
+        id: jobId,
+      },
+    });
+
+    if (!job) {
+      throw new CommonException(MessageResponse.JOB.NOT_FOUND(jobId));
+    }
+
+    if (isFavorite) {
+      await this.prisma.userFollowJob.create({
+        data: {
+          userId,
+          jobId,
+        },
+      });
+    } else {
+      const userFollowJob = await this.prisma.userFollowJob.findUnique({
+        where: {
+          jobId_userId: {
+            userId,
+            jobId,
+          },
+        },
+      });
+
+      if (!userFollowJob) {
+        throw new CommonException(MessageResponse.USER_FOLLOW_JOB.NOT_FOUND);
+      }
+
+      await this.prisma.userFollowJob.delete({
+        where: {
+          jobId_userId: {
+            userId,
+            jobId,
+          },
+        },
+      });
+    }
+  }
+
+  async getListJobFavorite(userId: number, query: GetListFavoriteJobDto) {
+    const { page, limit } = query;
+
+    const totalJobFavorite = await this.prisma.userFollowJob.count({
+      where: {
+        userId,
+      },
+    });
+
+    const listJob = await this.prisma.userFollowJob.findMany({
+      where: {
+        userId,
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      select: {
+        job: {
+          select: {
+            id: true,
+            jobCategoryId: true,
+            title: true,
+            salaryMin: true,
+            salaryMax: true,
+            images: true,
+            jobMode: true,
+            level: true,
+            officeName: true,
+            creator: {
+              select: {
+                company: {
+                  select: {
+                    id: true,
+                    name: true,
+                    avatar: true,
+                    coverImage: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: [
+        {
+          createdAt: ESort.DESC,
+        },
+      ],
+    });
+
+    const result = [] as any[];
+    for (let i = 0; i < limit; i++) {
+      if (listJob[i]) {
+        const job = listJob[i].job;
+        delete listJob[i].job;
+        result.push(job);
+      }
+    }
+
+    for (let i = 0; i < limit; i++) {
+      if (result[i]) {
+        const company = result[i].creator.company;
+        delete result[i].creator.company;
+        result[i]['company'] = company;
+        result[i]['userFollowJob'] = true;
+      }
+    }
+
+    return {
+      meta: {
+        pagination: {
+          page: page,
+          pageSize: limit,
+          totalPage: Math.ceil(totalJobFavorite / limit),
+          totalItem: totalJobFavorite,
+        },
+      },
+      data: result,
     };
   }
 }

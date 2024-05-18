@@ -125,6 +125,7 @@ export class UserService {
 
     let { publicAttachmentCv } = body;
 
+    console.log(publicCvType);
     if (
       publicCvType === EPublicCVType.NOT_PUBLIC ||
       publicCvType === EPublicCVType.SYSTEM_CV
@@ -155,13 +156,6 @@ export class UserService {
     const userUpdated = await this.prisma.user.update({
       where: {
         id,
-        userRoles: {
-          some: {
-            role: {
-              name: ERole.USER,
-            },
-          },
-        },
       },
       data: {
         cityId,
@@ -207,6 +201,7 @@ export class UserService {
         },
       },
     });
+    console.log('run hereeeeee');
 
     delete userUpdated.password;
     return userUpdated;
@@ -403,6 +398,7 @@ export class UserService {
           page: +page,
           pageSize: +limit,
           totalPage: Math.ceil(listApplications.length / limit),
+          totalItem: listApplications.length,
         },
       },
       data: listItems,
