@@ -4,13 +4,8 @@ import { CreateJobDto } from './dto/create-job.dto';
 import { CommonException } from 'src/_core/middleware/filter/exception.filter';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
 import { UpdateJobDto } from './dto/update-job.dto';
-import {
-  EApplicationStatus,
-  EJobStatus,
-  ESort,
-} from 'src/_core/constant/enum.constant';
+import { EJobStatus, ESort } from 'src/_core/constant/enum.constant';
 import { GetListJobDto } from './dto/get-list-job.dto';
-import { EOrderPaging } from 'src/_core/type/order-paging.type';
 import { FormatQueryArray } from 'src/_core/helper/utils';
 import { FollowJobDto } from './dto/follow-job.dto';
 import { GetListFavoriteJobDto } from './dto/get-list-favorite-job';
@@ -479,7 +474,7 @@ export class JobService {
       delete job.applications;
     });
 
-    for (let i = 0; i < limit; i++) {
+    for (let i = 0; i < listJob.length; i++) {
       if (listJob[i]) {
         const company = listJob[i].creator.company;
         delete listJob[i].creator.company;

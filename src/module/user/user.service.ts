@@ -1,15 +1,13 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
 import { CommonException } from 'src/_core/middleware/filter/exception.filter';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UpdateUserDto } from './dto/update-user.dto';
 import {
   EApplicationStatus,
   EJobStatus,
   EPublicCVType,
   ERole,
   ESort,
-  EUserStatus,
 } from 'src/_core/constant/enum.constant';
 import { GetListApplicationDto } from './dto/get-list-applications.dto';
 import { EOrderPaging } from 'src/_core/type/order-paging.type';
@@ -125,7 +123,6 @@ export class UserService {
 
     let { publicAttachmentCv } = body;
 
-    console.log(publicCvType);
     if (
       publicCvType === EPublicCVType.NOT_PUBLIC ||
       publicCvType === EPublicCVType.SYSTEM_CV
@@ -201,7 +198,6 @@ export class UserService {
         },
       },
     });
-    console.log('run hereeeeee');
 
     delete userUpdated.password;
     return userUpdated;
@@ -228,6 +224,21 @@ export class UserService {
       );
     }
 
+    const candidateInformation =
+      await this.prisma.candidateInformation.findUnique({
+        where: {
+          userId,
+        },
+        include: {
+          desiredJobCategory: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      });
+
     try {
       const applicationCreated = await this.prisma.$transaction(async (tx) => {
         const applicationCreated = await tx.application.create({
@@ -235,11 +246,13 @@ export class UserService {
             userId,
             jobId,
             candidateCv: data.candidateCv,
-            candidateFirstName: data.candidateFirstName,
-            candidateLastName: data.candidateLastName,
+            candidateName: data.candidateName,
             candidatePhoneNumber: data.candidatePhoneNumber,
             candidateEmail: data.candidateEmail,
             cvType: data.cvType,
+            ...(data.cvType === EPublicCVType.SYSTEM_CV && {
+              systemCv: candidateInformation,
+            }),
           },
         });
 
@@ -532,8 +545,8 @@ export class UserService {
         const candidate = {
           ...el,
           candidateInformation: {
-            publicCVType: el.candidateInformation.publicCvType,
-            publicAttachmentCV: el.candidateInformation.publicAttachmentCv,
+            publicCvType: el.candidateInformation.publicCvType,
+            publicAttachmentCv: el.candidateInformation.publicAttachmentCv,
           },
         };
         return candidate;

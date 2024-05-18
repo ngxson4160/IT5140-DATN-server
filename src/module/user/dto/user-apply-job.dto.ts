@@ -7,10 +7,7 @@ export class UserApplyJobDto {
   candidateCv: string;
 
   @IsString()
-  candidateFirstName: string;
-
-  @IsString()
-  candidateLastName: string;
+  candidateName: string;
 
   @IsString()
   candidateEmail: string;

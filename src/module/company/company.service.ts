@@ -156,7 +156,8 @@ export class CompanyService {
     applicationUpdateDto: ApplicationUpdateDto,
   ) {
     //TODO Validate nếu đã interview rồi thì không thể rejectCV chẳng hạn???
-    const { status, interviewSchedule, companyRemark } = applicationUpdateDto;
+    const { status, interviewSchedule, companyRemark, classify } =
+      applicationUpdateDto;
     const job = await this.prisma.job.findUnique({
       where: {
         id: jobId,
@@ -182,7 +183,7 @@ export class CompanyService {
 
     const applicationUpdated = await this.prisma.application.update({
       where: { id: applicationId },
-      data: { status, interviewSchedule, companyRemark },
+      data: { status, interviewSchedule, companyRemark, classify },
     });
 
     return applicationUpdated;
@@ -323,7 +324,7 @@ export class CompanyService {
   }
 
   async getListCandidate(userId: number, query: GetListCandidateDto) {
-    const { jobId, status, sortCreatedAt, limit, page } = query;
+    const { jobId, status, sortCreatedAt, limit, page, classify, name } = query;
 
     const totalApplications = await this.prisma.application.count({
       where: {
@@ -338,15 +339,33 @@ export class CompanyService {
     const listApplication = await this.prisma.application.findMany({
       where: {
         status,
+        classify,
         job: {
           id: jobId,
           creatorId: userId,
+        },
+        candidateName: {
+          contains: name,
         },
       },
       include: {
         job: {
           select: {
             title: true,
+          },
+        },
+        user: {
+          select: {
+            // avatar: user.avatar,
+            // gender: user.gender,
+            // maritalStatus: user.maritalStatus,
+            // address: user.address,
+            avatar: true,
+            gender: true,
+            maritalStatus: true,
+            address: true,
+            district: true,
+            educationalLevel: true,
           },
         },
       },
@@ -358,6 +377,24 @@ export class CompanyService {
         },
       ],
     });
+
+    for (let i = 0; i < listApplication.length; i++) {
+      listApplication[i]['avatar'] = listApplication[i].user.avatar;
+      listApplication[i]['gender'] = listApplication[i].user.gender;
+      listApplication[i]['maritalStatus'] =
+        listApplication[i].user.maritalStatus;
+      listApplication[i]['address'] = listApplication[i].user.address;
+      listApplication[i]['district'] = listApplication[i].user.district;
+      listApplication[i]['educationalLevel'] =
+        listApplication[i].user.educationalLevel;
+      delete listApplication[i].user;
+
+      if (listApplication[i].systemCv) {
+        listApplication[i]['candidateInformation'] =
+          listApplication[i].systemCv;
+      }
+      delete listApplication[i].systemCv;
+    }
 
     return {
       meta: {

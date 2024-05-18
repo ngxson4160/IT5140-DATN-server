@@ -56,14 +56,14 @@ export class CompanyController {
     );
   }
 
-  @Get('jobs/:jobId/applications')
-  getJobsApplication(
-    @UserData() userData: IUserData,
-    @Param('jobId') jobId: string,
-    @Query() query: GetListApplicationJobDto,
-  ) {
-    return this.companyService.getJobsApplication(userData.id, +jobId, query);
-  }
+  // @Get('jobs/:jobId/applications')
+  // getJobsApplication(
+  //   @UserData() userData: IUserData,
+  //   @Param('jobId') jobId: string,
+  //   @Query() query: GetListApplicationJobDto,
+  // ) {
+  //   return this.companyService.getJobsApplication(userData.id, +jobId, query);
+  // }
 
   @Get('candidates')
   getListCandidate(

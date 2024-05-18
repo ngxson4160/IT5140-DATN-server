@@ -159,7 +159,7 @@ export const MessageResponse = {
     },
     ATTACHMENT_CV_REQUIRED: {
       code: 400024,
-      message: `Require publicAttachmentCV when publicCVType = 2.`,
+      message: `Require publicAttachmentCv when publicCvType = 2.`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
   },
