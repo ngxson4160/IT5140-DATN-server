@@ -232,7 +232,7 @@ export class CompanyService {
       where: {
         creatorId,
         title: { contains: title },
-        status: status ? +status : undefined,
+        status,
         ...filterDate,
       },
       orderBy: {
@@ -324,7 +324,16 @@ export class CompanyService {
   }
 
   async getListCandidate(userId: number, query: GetListCandidateDto) {
-    const { jobId, status, sortCreatedAt, limit, page, classify, name } = query;
+    const {
+      jobId,
+      status,
+      sortCreatedAt,
+      limit,
+      page,
+      classify,
+      name,
+      sortInterviewSchedule,
+    } = query;
 
     const totalApplications = await this.prisma.application.count({
       where: {
@@ -373,7 +382,8 @@ export class CompanyService {
       take: limit,
       orderBy: [
         {
-          createdAt: sortCreatedAt || ESort.DESC,
+          createdAt: sortCreatedAt,
+          interviewSchedule: sortInterviewSchedule,
         },
       ],
     });

@@ -286,14 +286,25 @@ export class JobService {
       throw new CommonException(MessageResponse.JOB.NOT_FOUND(jobId));
     }
 
-    const jobDeleted = await this.prisma.job.update({
-      where: { id: jobId },
-      data: {
-        status: EJobStatus.DELETED,
-      },
-    });
-
-    //TODO update user apply this job to  FAILURE??? ---> or delete user apply this job?
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        await this.prisma.application.deleteMany({
+          where: {
+            jobId,
+          },
+        });
+        await this.prisma.userFollowJob.deleteMany({
+          where: {
+            jobId,
+          },
+        });
+        await this.prisma.job.delete({
+          where: { id: jobId },
+        });
+      });
+    } catch (error: any) {
+      throw error;
+    }
 
     return;
   }

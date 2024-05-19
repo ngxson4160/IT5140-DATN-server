@@ -30,4 +30,8 @@ export class GetListCandidateDto extends PaginationDto {
   @IsOptional()
   @IsEnum(ESort)
   sortCreatedAt?: ESort;
+
+  @IsOptional()
+  @IsEnum(ESort)
+  sortInterviewSchedule?: ESort;
 }
