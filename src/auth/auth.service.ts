@@ -96,6 +96,7 @@ export class AuthService {
             workExperience: [],
             advancedSkill: [],
             languageSkill: [],
+            project: [],
           },
         });
 

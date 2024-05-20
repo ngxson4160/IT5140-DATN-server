@@ -44,11 +44,9 @@ export enum EJobStatus {
 }
 
 export enum EApplicationStatus {
-  WAITING_CV,
-  APPROVE_CV,
-  REJECT_CV,
-  INTERVIEW,
-  PROCESSING,
+  WAITING,
+  CONTACTED,
+  INTERVIEWED,
   SUCCESS,
   FAILURE,
   DELETED,
@@ -77,4 +75,16 @@ export enum ECompanySizeType {
   FAT,
   LARGE,
   BIG,
+}
+
+export enum EPublicCVType {
+  NOT_PUBLIC = 0,
+  SYSTEM_CV = 1,
+  ATTACHMENT_CV = 2,
+}
+
+export enum EApplicationClassify {
+  ONE = 1,
+  TWO = 2,
+  THREE = 3,
 }

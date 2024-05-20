@@ -16,10 +16,15 @@ import { GetListApplicationDto } from './dto/get-list-applications.dto';
 import { UpdateUserProfileDto } from './dto/update-candidate-profile.dto';
 import { UserApplyJobDto } from './dto/user-apply-job.dto';
 import { UpdateAccountInfoDto } from './dto/update-user-profile';
+import { JobService } from '../job/job.service';
+import { GetListFavoriteJobDto } from '../job/dto/get-list-favorite-job';
 
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly jobService: JobService,
+  ) {}
 
   @Get('account-info')
   async getAccountInfo(@UserData() userData: IUserData) {
@@ -70,5 +75,13 @@ export class UserController {
     @Query() query: GetListApplicationDto,
   ) {
     return this.userService.getListApplications(userData.id, query);
+  }
+
+  @Get('jobs/favorites')
+  userListFavorite(
+    @UserData() userData: IUserData,
+    @Query() query: GetListFavoriteJobDto,
+  ) {
+    return this.jobService.getListJobFavorite(userData.id, query);
   }
 }

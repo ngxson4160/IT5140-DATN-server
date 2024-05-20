@@ -16,6 +16,7 @@ import { Public } from 'src/auth/decorator/public.decorator';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { GetListJobDto } from './dto/get-list-job.dto';
 import { PublicOrAuth } from 'src/_core/decorator/public-or-auth.decorator';
+import { FollowJobDto } from './dto/follow-job.dto';
 
 @Controller('jobs')
 export class JobController {
@@ -32,7 +33,6 @@ export class JobController {
     return this.jobService.getListJob(query, userData?.id);
   }
 
-  //TODO update views and totalApplication
   @PublicOrAuth()
   @Get(':id')
   getJob(@Param('id') id: string, @UserData() userData: IUserData) {
@@ -51,5 +51,14 @@ export class JobController {
   @Delete(':id')
   deleteJob(@UserData() userData: IUserData, @Param('id') jobId: string) {
     return this.jobService.deleteJob(userData.id, +jobId);
+  }
+
+  @Post(':id/favorites')
+  followJob(
+    @UserData() userData: IUserData,
+    @Param('id') jobId: string,
+    @Body() body: FollowJobDto,
+  ) {
+    return this.jobService.followJob(userData.id, +jobId, body);
   }
 }

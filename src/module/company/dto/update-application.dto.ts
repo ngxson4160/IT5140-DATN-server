@@ -1,5 +1,8 @@
 import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
-import { EApplicationStatus } from 'src/_core/constant/enum.constant';
+import {
+  EApplicationClassify,
+  EApplicationStatus,
+} from 'src/_core/constant/enum.constant';
 
 export class ApplicationUpdateDto {
   @IsOptional()
@@ -13,4 +16,8 @@ export class ApplicationUpdateDto {
   @IsOptional()
   @IsString()
   companyRemark: string;
+
+  @IsOptional()
+  @IsEnum(EApplicationClassify)
+  classify: EApplicationClassify;
 }

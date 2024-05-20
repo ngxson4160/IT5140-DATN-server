@@ -15,6 +15,7 @@ import {
 } from 'src/_core/constant/enum.constant';
 
 export class UpdateJobDto {
+  @IsOptional()
   @IsNumber()
   jobCategoryId: number;
 
@@ -23,10 +24,12 @@ export class UpdateJobDto {
   @IsNumber({}, { each: true })
   tagIds: number[];
 
+  @IsOptional()
   @IsArray()
   @IsNumber({}, { each: true })
   cityIds: number[];
 
+  @IsOptional()
   @IsString()
   title: string;
 
@@ -46,21 +49,27 @@ export class UpdateJobDto {
   @IsNumber()
   hours: number;
 
+  @IsOptional()
   @IsEnum(EJobMode)
   jobMode: EJobMode;
 
+  @IsOptional()
   @IsEnum(EJobLevel)
   level: EJobLevel;
 
+  @IsOptional()
   @IsString()
   officeName: string;
 
+  @IsOptional()
   @IsArray()
   address: JsonValue;
 
+  @IsOptional()
   @IsNumber()
   quantity: number;
 
+  @IsOptional()
   @IsEnum(EJobStatus)
   status: EJobStatus;
 
@@ -68,12 +77,15 @@ export class UpdateJobDto {
   @IsString()
   time: string;
 
+  @IsOptional()
   @IsString()
   benefits: string;
 
+  @IsOptional()
   @IsString()
   description: string;
 
+  @IsOptional()
   @IsString()
   requirement: string;
 
@@ -85,9 +97,11 @@ export class UpdateJobDto {
   @IsNumber()
   yearExperience: number;
 
+  @IsOptional()
   @IsDateString()
   hiringStartDate: Date;
 
+  @IsOptional()
   @IsDateString()
   hiringEndDate: Date;
 }

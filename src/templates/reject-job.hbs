@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 10px 20px 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            /* text-align: center; */
+        }
+        .logo {
+            margin-bottom: 25px;
+            text-align: center;
+            padding: 0 100px;
+        }
+        .logo .line{
+            border-bottom: solid 1px gray;
+        }
+        .logo img {
+            width: 100px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        .message {
+            margin-bottom: 30px;
+            color: black !important;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .signature{
+            margin-top: 30px;
+            text-align: left;
+            color: black;
+            line-height: 3px;
+        }
+        .textBold {
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="https://job-nest.s3.ap-southeast-1.amazonaws.com/logo.jpg" alt="Logo">
+            <div class="line"></div>
+        </div>
+        <div class="message">
+            <p>Xin chào <b>{{candidateName}}</b>,</p>
+            <p>Công ty {{companyName}} đã <span class="textBold">Từ chối</span> nhận bạn cho công việc với bài đăng <span class="textBold">{{jobTitle}}</span>.</p>
+        </div>
+        <div class="signature">
+            <p>Trân trọng,</p>
+            <p>Job Nest</p>
+        </div>
+    </div>
+</body>
+</html>

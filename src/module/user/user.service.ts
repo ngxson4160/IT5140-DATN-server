@@ -1,20 +1,21 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
 import { CommonException } from 'src/_core/middleware/filter/exception.filter';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UpdateUserDto } from './dto/update-user.dto';
 import {
   EApplicationStatus,
   EJobStatus,
+  EPublicCVType,
   ERole,
   ESort,
-  EUserStatus,
 } from 'src/_core/constant/enum.constant';
 import { GetListApplicationDto } from './dto/get-list-applications.dto';
 import { EOrderPaging } from 'src/_core/type/order-paging.type';
 import { UpdateUserProfileDto } from './dto/update-candidate-profile.dto';
 import { UserApplyJobDto } from './dto/user-apply-job.dto';
 import { UpdateAccountInfoDto } from './dto/update-user-profile';
+import { GetListCandidateDto } from './dto/get-list-candidate.dto';
+import { FormatQueryArray } from 'src/_core/helper/utils';
 
 @Injectable()
 export class UserService {
@@ -72,6 +73,7 @@ export class UserService {
       },
       include: {
         city: true,
+        district: true,
         candidateInformation: {
           include: {
             desiredJobCategory: true,
@@ -96,7 +98,7 @@ export class UserService {
       dob,
       gender,
       phoneNumber,
-      district,
+      districtId,
       maritalStatus,
       address,
       educationalLevel,
@@ -115,7 +117,23 @@ export class UserService {
       desiredSalary,
       desiredJobLevel,
       desiredJobMode,
+      publicCvType,
+      project,
     } = body;
+
+    let { publicAttachmentCv } = body;
+
+    if (
+      publicCvType === EPublicCVType.NOT_PUBLIC ||
+      publicCvType === EPublicCVType.SYSTEM_CV
+    ) {
+      publicAttachmentCv = null;
+    } else if (
+      publicCvType === EPublicCVType.ATTACHMENT_CV &&
+      !publicAttachmentCv
+    ) {
+      throw new CommonException(MessageResponse.USER.ATTACHMENT_CV_REQUIRED);
+    }
 
     const user = await this.prisma.user.findUnique({
       where: {
@@ -135,13 +153,6 @@ export class UserService {
     const userUpdated = await this.prisma.user.update({
       where: {
         id,
-        userRoles: {
-          some: {
-            role: {
-              name: ERole.USER,
-            },
-          },
-        },
       },
       data: {
         cityId,
@@ -151,7 +162,7 @@ export class UserService {
         dob,
         gender,
         phoneNumber,
-        district,
+        districtId,
         maritalStatus,
         address,
         educationalLevel,
@@ -167,14 +178,18 @@ export class UserService {
             certificate,
             advancedSkill,
             languageSkill,
+            project,
             desiredSalary,
             desiredJobLevel,
             desiredJobMode,
+            publicCvType,
+            publicAttachmentCv,
           },
         },
       },
       include: {
         city: true,
+        district: true,
         candidateInformation: {
           include: {
             desiredJobCategory: true,
@@ -209,6 +224,21 @@ export class UserService {
       );
     }
 
+    const candidateInformation =
+      await this.prisma.candidateInformation.findUnique({
+        where: {
+          userId,
+        },
+        include: {
+          desiredJobCategory: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      });
+
     try {
       const applicationCreated = await this.prisma.$transaction(async (tx) => {
         const applicationCreated = await tx.application.create({
@@ -216,10 +246,13 @@ export class UserService {
             userId,
             jobId,
             candidateCv: data.candidateCv,
-            candidateFirstName: data.candidateFirstName,
-            candidateLastName: data.candidateLastName,
+            candidateName: data.candidateName,
             candidatePhoneNumber: data.candidatePhoneNumber,
             candidateEmail: data.candidateEmail,
+            cvType: data.cvType,
+            ...(data.cvType === EPublicCVType.SYSTEM_CV && {
+              systemCv: candidateInformation,
+            }),
           },
         });
 
@@ -378,9 +411,160 @@ export class UserService {
           page: +page,
           pageSize: +limit,
           totalPage: Math.ceil(listApplications.length / limit),
+          totalItem: listApplications.length,
         },
       },
       data: listItems,
+    };
+  }
+
+  async getListCandidate(query?: GetListCandidateDto) {
+    const {
+      filter,
+      cityId,
+      yearExperienceMin,
+      yearExperienceMax,
+      desiredJobCategoryIds,
+      gender,
+      desiredJobLevel,
+      desiredJobMode,
+      maritalStatus,
+      educationalLevel,
+
+      page,
+      limit,
+    } = query;
+
+    const totalCandidate = await this.prisma.user.count({
+      where: {
+        candidateInformation: {
+          publicCvType: {
+            not: EPublicCVType.NOT_PUBLIC,
+          },
+          yearExperience: {
+            lte: yearExperienceMax,
+            gte: yearExperienceMin,
+          },
+          desiredJobCategory: {
+            id: {
+              in: desiredJobCategoryIds
+                ? FormatQueryArray(desiredJobCategoryIds)
+                : undefined,
+            },
+          },
+          desiredJobLevel,
+          desiredJobMode,
+        },
+        gender,
+        maritalStatus,
+        educationalLevel,
+        cityId,
+      },
+    });
+
+    const listCandidate = await this.prisma.user.findMany({
+      where: {
+        candidateInformation: {
+          publicCvType: {
+            not: EPublicCVType.NOT_PUBLIC,
+          },
+          yearExperience: {
+            lte: yearExperienceMax,
+            gte: yearExperienceMin,
+          },
+          desiredJobCategory: {
+            id: {
+              in: desiredJobCategoryIds
+                ? FormatQueryArray(desiredJobCategoryIds)
+                : undefined,
+            },
+          },
+          desiredJobLevel,
+          desiredJobMode,
+        },
+        gender,
+        maritalStatus,
+        educationalLevel,
+        cityId,
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        avatar: true,
+        dob: true,
+        gender: true,
+        phoneNumber: true,
+        district: true,
+        maritalStatus: true,
+        address: true,
+        educationalLevel: true,
+        status: true,
+        city: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        candidateInformation: {
+          select: {
+            desiredJobCategory: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            desiredCityId: true,
+            target: true,
+            cv: true,
+            yearExperience: true,
+            workExperience: true,
+            project: true,
+            education: true,
+            certificate: true,
+            advancedSkill: true,
+            languageSkill: true,
+            desiredSalary: true,
+            desiredJobLevel: true,
+            desiredJobMode: true,
+            publicCvType: true,
+            publicAttachmentCv: true,
+            status: true,
+          },
+        },
+      },
+    });
+
+    const listCandidateConvert = listCandidate.map((el) => {
+      if (
+        el.candidateInformation.publicCvType === EPublicCVType.ATTACHMENT_CV
+      ) {
+        const candidate = {
+          ...el,
+          candidateInformation: {
+            publicCvType: el.candidateInformation.publicCvType,
+            publicAttachmentCv: el.candidateInformation.publicAttachmentCv,
+          },
+        };
+        return candidate;
+      } else {
+        return el;
+      }
+    });
+
+    return {
+      meta: {
+        pagination: {
+          page: page,
+          pageSize: limit,
+          totalPage: Math.ceil(totalCandidate / limit),
+          totalItem: totalCandidate,
+        },
+      },
+      data: listCandidateConvert,
     };
   }
 }
