@@ -8,13 +8,21 @@ import { CompanyGetListJobDto } from './dto/get-list-job.dto';
 import { EOrderPaging } from 'src/_core/type/order-paging.type';
 import { EJobType } from 'src/_core/type/common.type';
 import { GetListApplicationJobDto } from './dto/get-list-application.dto';
-import { ESort } from 'src/_core/constant/enum.constant';
+import { EApplicationStatus, ESort } from 'src/_core/constant/enum.constant';
 import { GetListCandidateDto } from './dto/get-list-candidate.dto';
 import { GetListCompanyDto } from './dto/get-list-company.dto';
+import { NodeMailerService } from 'src/node-mailer/node-mailer.service';
+import {
+  COMMON_CONSTANT,
+  HANDLEBARS_TEMPLATE_MAIL,
+} from 'src/_core/constant/common.constant';
 
 @Injectable()
 export class CompanyService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly nodeMailer: NodeMailerService,
+  ) {}
 
   async getCompany(id: number) {
     const company = await this.prisma.company.findUnique({
@@ -155,7 +163,6 @@ export class CompanyService {
     applicationId: number,
     applicationUpdateDto: ApplicationUpdateDto,
   ) {
-    //TODO Validate nếu đã interview rồi thì không thể rejectCV chẳng hạn???
     const { status, interviewSchedule, companyRemark, classify } =
       applicationUpdateDto;
     const job = await this.prisma.job.findUnique({
@@ -185,6 +192,55 @@ export class CompanyService {
       where: { id: applicationId },
       data: { status, interviewSchedule, companyRemark, classify },
     });
+
+    if (
+      status === EApplicationStatus.SUCCESS ||
+      status === EApplicationStatus.FAILURE
+    ) {
+      const userCompany = await this.prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+        select: {
+          company: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      });
+
+      const userCandidate = await this.prisma.application.findUnique({
+        where: {
+          id: applicationId,
+        },
+        select: {
+          user: {
+            select: {
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      });
+
+      const context = {
+        candidateName: `${userCandidate.user.firstName} ${userCandidate.user.lastName}`,
+        companyName: userCompany.company.name,
+        jobTitle: job.title,
+      };
+      await this.nodeMailer.sendEmail(
+        [userCandidate.user.email],
+        status === EApplicationStatus.SUCCESS
+          ? COMMON_CONSTANT.ACCEPT_JOB
+          : COMMON_CONSTANT.REJECT_JOB,
+        status === EApplicationStatus.SUCCESS
+          ? HANDLEBARS_TEMPLATE_MAIL.ACCEPT_JOB
+          : HANDLEBARS_TEMPLATE_MAIL.REJECT_JOB,
+        context,
+      );
+    }
 
     return applicationUpdated;
   }
