@@ -15,6 +15,8 @@ import { JobModule } from './module/job/job.module';
 import { ClassTransformer } from 'class-transformer';
 import { CityModule } from './module/city/city.module';
 import { JobCategoryParentModule } from './module/job-category-parent/job-category-parent.module';
+import { MessageModule } from './module/message/message.module';
+import { NotificationModule } from './module/notification/notification.module';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { JobCategoryParentModule } from './module/job-category-parent/job-catego
     JobModule,
     CityModule,
     JobCategoryParentModule,
+    NotificationModule,
+    MessageModule,
   ],
   controllers: [AppController],
   providers: [

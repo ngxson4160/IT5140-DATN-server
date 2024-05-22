@@ -16,12 +16,14 @@ import {
   COMMON_CONSTANT,
   HANDLEBARS_TEMPLATE_MAIL,
 } from 'src/_core/constant/common.constant';
+import { NotificationGateway } from '../notification/notification.gateway';
 
 @Injectable()
 export class CompanyService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly nodeMailer: NodeMailerService,
+    private readonly notificationGateway: NotificationGateway,
   ) {}
 
   async getCompany(id: number) {
@@ -179,13 +181,12 @@ export class CompanyService {
     const application = await this.prisma.application.findUnique({
       where: {
         id: applicationId,
+        jobId: jobId,
       },
     });
 
     if (!application) {
-      throw new CommonException(
-        MessageResponse.APPLICATION.NOT_FOUND(applicationId),
-      );
+      throw new CommonException(MessageResponse.APPLICATION.NOT_FOUND);
     }
 
     const applicationUpdated = await this.prisma.application.update({
@@ -217,6 +218,7 @@ export class CompanyService {
         select: {
           user: {
             select: {
+              id: true,
               email: true,
               firstName: true,
               lastName: true,
@@ -240,6 +242,13 @@ export class CompanyService {
           : HANDLEBARS_TEMPLATE_MAIL.REJECT_JOB,
         context,
       );
+
+      const createNotification = {
+        fromUserId: userId,
+        toUserId: userCandidate.user.id,
+        content: `Job with id = ${jobId} just updated`,
+      };
+      this.notificationGateway.createNotification(createNotification);
     }
 
     return applicationUpdated;

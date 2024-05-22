@@ -88,3 +88,8 @@ export enum EApplicationClassify {
   TWO = 2,
   THREE = 3,
 }
+
+export enum ENotificationStatus {
+  UNREAD,
+  READ,
+}
