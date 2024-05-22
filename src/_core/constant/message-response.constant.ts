@@ -186,11 +186,11 @@ export const MessageResponse = {
   },
 
   APPLICATION: {
-    NOT_FOUND: (id: number) => ({
+    NOT_FOUND: {
       code: 400081,
-      message: `Application not found with id = ${id}.`,
+      message: `Application not found`,
       statusCode: HttpStatus.BAD_REQUEST,
-    }),
+    },
     ALREADY_APPLICATION: {
       code: 400081,
       message: `User has applied for this job.`,

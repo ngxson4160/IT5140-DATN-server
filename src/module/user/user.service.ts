@@ -16,10 +16,14 @@ import { UserApplyJobDto } from './dto/user-apply-job.dto';
 import { UpdateAccountInfoDto } from './dto/update-user-profile';
 import { GetListCandidateDto } from './dto/get-list-candidate.dto';
 import { FormatQueryArray } from 'src/_core/helper/utils';
+import { NotificationGateway } from '../notification/notification.gateway';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationGateway: NotificationGateway,
+  ) {}
 
   async getAccountInfo(id: number) {
     const user = await this.prisma.user.findUnique({
@@ -265,6 +269,15 @@ export class UserService {
           },
         });
 
+        if (job.allowNotification) {
+          const createNotification = {
+            fromUserId: userId,
+            toUserId: job.creatorId,
+            content: `User with id = ${userId} applied jobId = ${jobId}`,
+          };
+          this.notificationGateway.createNotification(createNotification);
+        }
+
         return applicationCreated;
       });
 
@@ -285,7 +298,7 @@ export class UserService {
     });
 
     if (!application) {
-      throw new CommonException(MessageResponse.APPLICATION.NOT_FOUND(jobId));
+      throw new CommonException(MessageResponse.APPLICATION.NOT_FOUND);
     }
 
     await this.prisma.application.update({
