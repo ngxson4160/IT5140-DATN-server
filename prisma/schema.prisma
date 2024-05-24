@@ -47,12 +47,11 @@ model User {
   applications         Application[]
   sendNotifications    Notification[]        @relation("notification_from_user")
   receiveNotifications Notification[]        @relation("notification_to_user")
-  sendMessages         Conversation[]        @relation("conversation_from_user")
-  sreceiveMessages     Conversation[]        @relation("conversation_to_user")
   messages             Message[]
   blogs                Blog[]
   userFollowTags       UserFollowTag[]
   userFollowJobs       UserFollowJob[]
+  userHasConversations UserHasConversation[]
 
   @@map("user")
 }
@@ -292,19 +291,38 @@ model NotificationTemplate {
 model Conversation {
   id Int @id @default(autoincrement())
 
-  fromUserId Int @map("from_user_id")
-  toUserId   Int @map("to_user_id")
+  name                 String?
+  type                 Int
+  
+  userHasConversations UserHasConversation[]
+  messages             Message[]
 
-  fromUser User @relation(fields: [fromUserId], references: [id], name: "conversation_from_user")
-  toUser   User @relation(fields: [toUserId], references: [id], name: "conversation_to_user")
-
-  @@unique([fromUserId, toUserId])
   @@map("conversation")
 }
 
+model UserHasConversation {
+  id Int @id @default(autoincrement())
+
+  userId         Int @map("user_id")
+  conversationId Int @map("conversation_id")
+
+  status    Int       @default(0) @db.TinyInt
+  createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+  createdBy Int?      @map("create_by")
+  updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+  updatedBy Int?      @map("update_by")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@unique([userId, conversationId])
+  @@map("user_has_conversation")
+}
+
 model Message {
-  id        Int @id @default(autoincrement())
-  creatorId Int @map("creator_id")
+  id             Int @id @default(autoincrement())
+  creatorId      Int @map("creator_id")
+  conversationId Int @map("conversation_id")
 
   content String
 
@@ -314,7 +332,8 @@ model Message {
   updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
   updatedBy Int?      @map("update_by")
 
-  creator User @relation(fields: [creatorId], references: [id])
+  creator      User         @relation(fields: [creatorId], references: [id])
+  conversation Conversation @relation(fields: [conversationId], references: [id])
 
   @@map("message")
 }

@@ -2,18 +2,50 @@ import {
   WebSocketGateway,
   SubscribeMessage,
   MessageBody,
+  WebSocketServer,
+  ConnectedSocket,
 } from '@nestjs/websockets';
 import { MessageService } from './message.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
+import { Injectable } from '@nestjs/common';
+import { Socket, Server } from 'socket.io';
 
-@WebSocketGateway()
+@Injectable()
+@WebSocketGateway({
+  cors: {
+    origin: '*',
+  },
+})
 export class MessageGateway {
+  @WebSocketServer()
+  server: Server;
+
   constructor(private readonly messageService: MessageService) {}
 
+  @SubscribeMessage('join_room')
+  joinRoom(@MessageBody('id') id: string, @ConnectedSocket() client: Socket) {
+    console.log('join_room', id.toString());
+  }
+
+  @SubscribeMessage('leave_room')
+  leaveRoom(@MessageBody('id') id: string, @ConnectedSocket() client: Socket) {
+    client.leave(id);
+  }
+
   @SubscribeMessage('createMessage')
-  create(@MessageBody() createMessageDto: CreateMessageDto) {
-    return this.messageService.create(createMessageDto);
+  async create(
+    @MessageBody() createMessageDto: CreateMessageDto,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const userId = client.handshake.headers['userid'];
+    const message = await this.messageService.createMessage(
+      +userId,
+      createMessageDto,
+    );
+    this.server.to(message.conversationId.toString()).emit('createMessage', {
+      message,
+    });
   }
 
   @SubscribeMessage('findAllMessage')

@@ -93,3 +93,13 @@ export enum ENotificationStatus {
   UNREAD,
   READ,
 }
+
+export enum EConversationType {
+  PAIR,
+  GROUP,
+}
+
+export enum EUserHasConversationStatus {
+  READ_MESSAGE,
+  UNREAD_MESSAGE,
+}
