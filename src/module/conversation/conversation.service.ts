@@ -3,7 +3,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { CommonException } from 'src/_core/middleware/filter/exception.filter';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
-import { EConversationType } from 'src/_core/constant/enum.constant';
+import { EConversationType, ESort } from 'src/_core/constant/enum.constant';
+import { GetMessageConversation } from './dto/get-message-conversation.dto';
 
 @Injectable()
 export class ConversationService {
@@ -66,5 +67,100 @@ export class ConversationService {
     } catch (e) {
       throw e;
     }
+  }
+
+  async getMessageConversation(
+    userId: number,
+    conversationId: number,
+    data: GetMessageConversation,
+  ) {
+    const { page, limit, cursor } = data;
+
+    let users = await this.prisma.user.findMany({
+      where: {
+        userHasConversations: {
+          some: {
+            conversationId,
+          },
+        },
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        avatar: true,
+      },
+    });
+
+    const conversation = await this.prisma.conversation.findUnique({
+      where: {
+        id: conversationId,
+        userHasConversations: {
+          some: {
+            userId,
+          },
+        },
+      },
+    });
+
+    if (!conversation) {
+      throw new CommonException(MessageResponse.CONVERSATION.NOT_FOUND);
+    }
+
+    const totalMessage = await this.prisma.message.count({
+      where: {
+        conversationId,
+      },
+    });
+
+    let listMessage = await this.prisma.message.findMany({
+      where: {
+        conversationId,
+        id: {
+          lt: cursor,
+        },
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { id: ESort.DESC },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatar: true,
+          },
+        },
+      },
+    });
+
+    users = users.filter((el) => el.id !== userId);
+    listMessage = listMessage.map((el) => {
+      if (el.creatorId === userId) {
+        el['yourMessage'] = true;
+      } else {
+        el['yourMessage'] = false;
+      }
+      return el;
+    });
+
+    return {
+      meta: {
+        pagination: {
+          page: page,
+          pageSize: limit,
+          totalPage: Math.ceil(totalMessage / limit),
+          totalItem: totalMessage,
+        },
+      },
+      data: {
+        conversation: {
+          ...conversation,
+          users,
+        },
+        message: listMessage.reverse(),
+      },
+    };
   }
 }

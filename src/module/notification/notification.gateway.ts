@@ -28,7 +28,6 @@ export class NotificationGateway {
   handleConnection(client: Socket) {
     const userId = client.handshake.headers['userid'];
     client.join(userId);
-    console.log(client.id);
   }
 
   handleDisconnect(client: Socket) {

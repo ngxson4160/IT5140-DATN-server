@@ -25,7 +25,7 @@ export class MessageGateway {
 
   @SubscribeMessage('join_room')
   joinRoom(@MessageBody('id') id: string, @ConnectedSocket() client: Socket) {
-    console.log('join_room', id.toString());
+    client.join(id);
   }
 
   @SubscribeMessage('leave_room')
