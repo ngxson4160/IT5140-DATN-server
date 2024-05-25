@@ -5,6 +5,7 @@ import { CommonException } from 'src/_core/middleware/filter/exception.filter';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
 import { EConversationType, ESort } from 'src/_core/constant/enum.constant';
 import { GetMessageConversation } from './dto/get-message-conversation.dto';
+import { GetListConversation } from './dto/get-list-conversation.dto';
 
 @Injectable()
 export class ConversationService {
@@ -89,6 +90,13 @@ export class ConversationService {
         firstName: true,
         lastName: true,
         avatar: true,
+        company: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
       },
     });
 
@@ -130,6 +138,13 @@ export class ConversationService {
             firstName: true,
             lastName: true,
             avatar: true,
+            company: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+              },
+            },
           },
         },
       },
@@ -161,6 +176,83 @@ export class ConversationService {
         },
         message: listMessage.reverse(),
       },
+    };
+  }
+
+  async getConversationDetail(userId: number, conversationId: number) {
+    const conversation = await this.prisma.conversation.findUnique({
+      where: {
+        id: conversationId,
+        userHasConversations: {
+          some: { userId },
+        },
+      },
+      include: {
+        messages: {
+          take: 2,
+        },
+      },
+    });
+
+    if (!conversation) {
+      throw new CommonException(MessageResponse.CONVERSATION.NOT_FOUND);
+    }
+
+    return conversation;
+  }
+
+  async getListConversation(userId: number, data: GetListConversation) {
+    const { page, limit, cursor } = data;
+
+    const countListConversation = await this.prisma.conversation.count({
+      where: {
+        id: {
+          lt: cursor,
+        },
+        userHasConversations: {
+          some: {
+            userId,
+          },
+        },
+      },
+    });
+
+    const listConversation = await this.prisma.conversation.findMany({
+      where: {
+        id: {
+          lt: cursor,
+        },
+        userHasConversations: {
+          some: {
+            userId,
+          },
+        },
+      },
+      take: limit,
+      skip: (page - 1) * limit,
+      orderBy: {
+        id: ESort.DESC,
+      },
+      include: {
+        messages: {
+          orderBy: {
+            id: ESort.DESC,
+          },
+          take: 1,
+        },
+      },
+    });
+
+    return {
+      meta: {
+        pagination: {
+          page: page,
+          pageSize: limit,
+          totalPage: Math.ceil(countListConversation / limit),
+          totalItem: countListConversation,
+        },
+      },
+      data: listConversation,
     };
   }
 }
