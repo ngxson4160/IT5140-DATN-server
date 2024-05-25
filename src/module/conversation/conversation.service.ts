@@ -217,7 +217,7 @@ export class ConversationService {
       },
     });
 
-    const listConversation = await this.prisma.conversation.findMany({
+    let listConversation = await this.prisma.conversation.findMany({
       where: {
         id: {
           lt: cursor,
@@ -240,7 +240,44 @@ export class ConversationService {
           },
           take: 1,
         },
+        userHasConversations: {
+          where: {
+            userId: {
+              not: userId,
+            },
+          },
+          select: {
+            status: true,
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+                company: {
+                  select: {
+                    id: true,
+                    name: true,
+                    avatar: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
+    });
+
+    listConversation = listConversation.map((conversation) => {
+      conversation['users'] = [];
+      conversation.userHasConversations.forEach((el) => {
+        el.user['statusConversation'] = el.status;
+        conversation['users'].push(el.user);
+      });
+
+      delete conversation.userHasConversations;
+
+      return conversation;
     });
 
     return {
