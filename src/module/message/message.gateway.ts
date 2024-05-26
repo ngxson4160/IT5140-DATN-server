@@ -11,6 +11,7 @@ import { Injectable } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { ConversationService } from '../conversation/conversation.service';
 import { CreateConversationDto } from '../conversation/dto/create-conversation.dto';
+import { ReadMessageDto } from './dto/read-message.dto';
 
 @Injectable()
 @WebSocketGateway({
@@ -43,6 +44,8 @@ export class MessageGateway {
       body,
     );
     this.server.emit('create_conversation', { conversation });
+
+    return conversation;
   }
 
   @SubscribeMessage('createMessage')
@@ -55,20 +58,27 @@ export class MessageGateway {
       +userId,
       createMessageDto,
     );
-    const conversation = await this.conversationService.getConversationDetail(
+
+    this.server.to(message.conversationId.toString()).emit('createMessage', {
+      message,
+    });
+  }
+
+  @SubscribeMessage('read_conversation')
+  async readMessage(
+    @MessageBody() readMessageDto: ReadMessageDto,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const userId = client.handshake.headers['userid'];
+    const message = await this.conversationService.readConversation(
       +userId,
-      createMessageDto.conversationId,
+      readMessageDto,
     );
-    if (conversation.messages.length === 1) {
-      this.server
-        .to(message.conversationId.toString())
-        .emit('create_conversation', {
-          message,
-        });
-    } else {
-      this.server.to(message.conversationId.toString()).emit('createMessage', {
+
+    this.server
+      .to(readMessageDto.conversationId.toString())
+      .emit('read_conversation', {
         message,
       });
-    }
   }
 }

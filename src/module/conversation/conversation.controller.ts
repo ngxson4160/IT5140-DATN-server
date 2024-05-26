@@ -28,7 +28,8 @@ export class ConversationController {
     @Query()
     data: GetListConversation,
   ) {
-    return this.conversationService.getListConversation(userData.id, data);
+    // return this.conversationService.getListConversation(userData.id, data);
+    return this.conversationService.getListConversationTest(userData.id, data);
   }
 
   @Get(':id/messages')

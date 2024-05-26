@@ -100,6 +100,6 @@ export enum EConversationType {
 }
 
 export enum EUserHasConversationStatus {
-  READ_MESSAGE,
   UNREAD_MESSAGE,
+  READ_MESSAGE,
 }

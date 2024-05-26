@@ -291,9 +291,9 @@ model NotificationTemplate {
 model Conversation {
   id Int @id @default(autoincrement())
 
-  name                 String?
-  type                 Int
-  
+  name String?
+  type Int
+
   userHasConversations UserHasConversation[]
   messages             Message[]
 
@@ -324,7 +324,7 @@ model Message {
   creatorId      Int @map("creator_id")
   conversationId Int @map("conversation_id")
 
-  content String
+  content String @db.Text
 
   status    Int       @default(1) @db.TinyInt
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)

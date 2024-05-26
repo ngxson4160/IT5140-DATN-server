@@ -318,6 +318,14 @@ export class AuthService {
         },
         firstName: true,
         lastName: true,
+        avatar: true,
+        company: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
       },
     });
 
@@ -365,6 +373,8 @@ export class AuthService {
           roles,
           firstName: user.firstName,
           lastName: user.lastName,
+          avatar: user.avatar,
+          company: user.company,
         },
         token: accessToken,
         refreshToken,

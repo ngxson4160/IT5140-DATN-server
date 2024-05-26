@@ -3,9 +3,14 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { CommonException } from 'src/_core/middleware/filter/exception.filter';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
-import { EConversationType, ESort } from 'src/_core/constant/enum.constant';
+import {
+  EConversationType,
+  ESort,
+  EUserHasConversationStatus,
+} from 'src/_core/constant/enum.constant';
 import { GetMessageConversation } from './dto/get-message-conversation.dto';
 import { GetListConversation } from './dto/get-list-conversation.dto';
+import { ReadMessageDto } from '../message/dto/read-message.dto';
 
 @Injectable()
 export class ConversationService {
@@ -16,6 +21,16 @@ export class ConversationService {
     data: CreateConversationDto,
   ) {
     const { withUserId } = data;
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: withUserId,
+      },
+    });
+
+    if (!user) {
+      throw new CommonException(MessageResponse.USER.NOT_FOUND(withUserId));
+    }
 
     const conversation = await this.prisma.conversation.findFirst({
       where: {
@@ -38,7 +53,11 @@ export class ConversationService {
     });
 
     if (conversation?.userHasConversations?.length === 2) {
-      throw new CommonException(MessageResponse.CONVERSATION.EXIST);
+      return {
+        userCreateId,
+        withUserId,
+        conversationId: conversation.id,
+      };
     }
 
     try {
@@ -128,8 +147,8 @@ export class ConversationService {
           lt: cursor,
         },
       },
-      skip: (page - 1) * limit,
       take: limit,
+      // skip: (page - 1) * limit,
       orderBy: { id: ESort.DESC },
       include: {
         creator: {
@@ -229,7 +248,7 @@ export class ConversationService {
         },
       },
       take: limit,
-      skip: (page - 1) * limit,
+      // skip: (page - 1) * limit,
       orderBy: {
         id: ESort.DESC,
       },
@@ -291,5 +310,118 @@ export class ConversationService {
       },
       data: listConversation,
     };
+  }
+
+  async getListConversationTest(userId: number, data: GetListConversation) {
+    const { page, limit, cursor } = data;
+
+    const countListConversation = await this.prisma.conversation.count({
+      where: {
+        userHasConversations: {
+          some: {
+            userId,
+          },
+        },
+        messages: {
+          some: {
+            id: {
+              gt: 0,
+            },
+          },
+        },
+      },
+    });
+
+    let message = await this.prisma.message.findMany({
+      distinct: 'conversationId',
+      where: {
+        id: {
+          lt: cursor,
+        },
+        conversation: {
+          userHasConversations: {
+            some: {
+              userId,
+            },
+          },
+        },
+      },
+      take: limit,
+      orderBy: {
+        id: ESort.DESC,
+      },
+      include: {
+        conversation: {
+          select: {
+            id: true,
+            userHasConversations: {
+              // where: {
+              //   userId: {
+              //     not: userId,
+              //   },
+              // },
+              select: {
+                user: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    avatar: true,
+                    company: {
+                      select: {
+                        id: true,
+                        name: true,
+                        avatar: true,
+                      },
+                    },
+                  },
+                },
+                status: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    message = message.map((mess) => {
+      mess.conversation.userHasConversations.forEach((el) => {
+        if (el.user.id === userId) {
+          mess.conversation['status'] = el.status;
+        } else {
+          mess.conversation['users'] = el.user;
+        }
+      });
+
+      delete mess.conversation.userHasConversations;
+
+      return mess;
+    });
+
+    return {
+      meta: {
+        pagination: {
+          page: page,
+          pageSize: limit,
+          totalPage: Math.ceil(countListConversation / limit),
+          totalItem: countListConversation,
+        },
+      },
+      data: message,
+    };
+  }
+
+  async readConversation(userId: number, data: ReadMessageDto) {
+    await this.prisma.userHasConversation.update({
+      where: {
+        userId_conversationId: {
+          userId,
+          conversationId: data.conversationId,
+        },
+      },
+      data: {
+        status: EUserHasConversationStatus.READ_MESSAGE,
+      },
+    });
   }
 }

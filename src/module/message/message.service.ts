@@ -3,6 +3,7 @@ import { CreateMessageDto } from './dto/create-message.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CommonException } from 'src/_core/middleware/filter/exception.filter';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
+import { EUserHasConversationStatus } from 'src/_core/constant/enum.constant';
 
 @Injectable()
 export class MessageService {
@@ -50,9 +51,46 @@ export class MessageService {
             },
           },
         },
+        conversation: {
+          select: {
+            id: true,
+          },
+        },
       },
     });
 
-    return messageCreated;
+    await this.prisma.userHasConversation.updateMany({
+      where: {
+        conversationId,
+      },
+      data: {
+        status: EUserHasConversationStatus.UNREAD_MESSAGE,
+      },
+    });
+
+    await this.prisma.userHasConversation.update({
+      where: {
+        userId_conversationId: {
+          userId,
+          conversationId,
+        },
+      },
+      data: {
+        status: EUserHasConversationStatus.READ_MESSAGE,
+      },
+    });
+
+    const messageFormat = {
+      ...messageCreated,
+      conversation: {
+        ...messageCreated.conversation,
+        status: EUserHasConversationStatus.UNREAD_MESSAGE,
+        users: messageCreated.creator,
+      },
+    };
+
+    // delete messageFormat.creator;
+
+    return messageFormat;
   }
 }
