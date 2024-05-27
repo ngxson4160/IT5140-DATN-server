@@ -26,6 +26,15 @@ export class ConversationService {
       where: {
         id: withUserId,
       },
+      include: {
+        company: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+      },
     });
 
     if (!user) {
@@ -34,29 +43,23 @@ export class ConversationService {
 
     const conversation = await this.prisma.conversation.findFirst({
       where: {
-        userHasConversations: {
-          // Why using 'every' instead 'some' is wrong.
-          some: {
-            userId: {
-              in: [userCreateId, withUserId],
-            },
-          },
-        },
-      },
-      include: {
-        userHasConversations: {
-          select: {
-            id: true,
-          },
-        },
+        AND: [
+          { userHasConversations: { some: { userId: userCreateId } } },
+          { userHasConversations: { some: { userId: withUserId } } },
+        ],
       },
     });
 
-    if (conversation?.userHasConversations?.length === 2) {
+    if (conversation) {
       return {
-        userCreateId,
-        withUserId,
-        conversationId: conversation.id,
+        ...conversation,
+        users: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          avatar: user.avatar,
+          company: user.company,
+        },
       };
     }
 
@@ -78,9 +81,14 @@ export class ConversationService {
           ],
         });
         return {
-          userCreateId,
-          withUserId,
-          conversationId: conversationCreated.id,
+          ...conversationCreated,
+          users: {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            avatar: user.avatar,
+            company: user.company,
+          },
         };
       });
       return response;
@@ -220,97 +228,97 @@ export class ConversationService {
     return conversation;
   }
 
-  async getListConversation(userId: number, data: GetListConversation) {
-    const { page, limit, cursor } = data;
+  // async getListConversation(userId: number, data: GetListConversation) {
+  //   const { page, limit, cursor } = data;
 
-    const countListConversation = await this.prisma.conversation.count({
-      where: {
-        id: {
-          lt: cursor,
-        },
-        userHasConversations: {
-          some: {
-            userId,
-          },
-        },
-      },
-    });
+  //   const countListConversation = await this.prisma.conversation.count({
+  //     where: {
+  //       id: {
+  //         lt: cursor,
+  //       },
+  //       userHasConversations: {
+  //         some: {
+  //           userId,
+  //         },
+  //       },
+  //     },
+  //   });
 
-    let listConversation = await this.prisma.conversation.findMany({
-      where: {
-        id: {
-          lt: cursor,
-        },
-        userHasConversations: {
-          some: {
-            userId,
-          },
-        },
-      },
-      take: limit,
-      // skip: (page - 1) * limit,
-      orderBy: {
-        id: ESort.DESC,
-      },
-      include: {
-        messages: {
-          orderBy: {
-            id: ESort.DESC,
-          },
-          take: 1,
-        },
-        userHasConversations: {
-          where: {
-            userId: {
-              not: userId,
-            },
-          },
-          select: {
-            status: true,
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                avatar: true,
-                company: {
-                  select: {
-                    id: true,
-                    name: true,
-                    avatar: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
+  //   let listConversation = await this.prisma.conversation.findMany({
+  //     where: {
+  //       id: {
+  //         lt: cursor,
+  //       },
+  //       userHasConversations: {
+  //         some: {
+  //           userId,
+  //         },
+  //       },
+  //     },
+  //     take: limit,
+  //     // skip: (page - 1) * limit,
+  //     orderBy: {
+  //       id: ESort.DESC,
+  //     },
+  //     include: {
+  //       messages: {
+  //         orderBy: {
+  //           id: ESort.DESC,
+  //         },
+  //         take: 1,
+  //       },
+  //       userHasConversations: {
+  //         where: {
+  //           userId: {
+  //             not: userId,
+  //           },
+  //         },
+  //         select: {
+  //           status: true,
+  //           user: {
+  //             select: {
+  //               id: true,
+  //               firstName: true,
+  //               lastName: true,
+  //               avatar: true,
+  //               company: {
+  //                 select: {
+  //                   id: true,
+  //                   name: true,
+  //                   avatar: true,
+  //                 },
+  //               },
+  //             },
+  //           },
+  //         },
+  //       },
+  //     },
+  //   });
 
-    listConversation = listConversation.map((conversation) => {
-      conversation['users'] = [];
-      conversation.userHasConversations.forEach((el) => {
-        el.user['statusConversation'] = el.status;
-        conversation['users'].push(el.user);
-      });
+  //   listConversation = listConversation.map((conversation) => {
+  //     conversation['users'] = [];
+  //     conversation.userHasConversations.forEach((el) => {
+  //       el.user['statusConversation'] = el.status;
+  //       conversation['users'].push(el.user);
+  //     });
 
-      delete conversation.userHasConversations;
+  //     delete conversation.userHasConversations;
 
-      return conversation;
-    });
+  //     return conversation;
+  //   });
 
-    return {
-      meta: {
-        pagination: {
-          page: page,
-          pageSize: limit,
-          totalPage: Math.ceil(countListConversation / limit),
-          totalItem: countListConversation,
-        },
-      },
-      data: listConversation,
-    };
-  }
+  //   return {
+  //     meta: {
+  //       pagination: {
+  //         page: page,
+  //         pageSize: limit,
+  //         totalPage: Math.ceil(countListConversation / limit),
+  //         totalItem: countListConversation,
+  //       },
+  //     },
+  //     data: listConversation,
+  //   };
+  // }
 
   async getListConversationTest(userId: number, data: GetListConversation) {
     const { page, limit, cursor } = data;
