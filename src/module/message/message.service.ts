@@ -3,7 +3,10 @@ import { CreateMessageDto } from './dto/create-message.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CommonException } from 'src/_core/middleware/filter/exception.filter';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
-import { EUserHasConversationStatus } from 'src/_core/constant/enum.constant';
+import {
+  EConversationStatus,
+  EUserHasConversationStatus,
+} from 'src/_core/constant/enum.constant';
 
 @Injectable()
 export class MessageService {
@@ -59,26 +62,41 @@ export class MessageService {
       },
     });
 
-    await this.prisma.userHasConversation.updateMany({
-      where: {
-        conversationId,
-      },
-      data: {
-        status: EUserHasConversationStatus.UNREAD_MESSAGE,
-      },
-    });
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        await tx.userHasConversation.updateMany({
+          where: {
+            conversationId,
+          },
+          data: {
+            status: EUserHasConversationStatus.UNREAD_MESSAGE,
+          },
+        });
 
-    await this.prisma.userHasConversation.update({
-      where: {
-        userId_conversationId: {
-          userId,
-          conversationId,
-        },
-      },
-      data: {
-        status: EUserHasConversationStatus.READ_MESSAGE,
-      },
-    });
+        await tx.userHasConversation.update({
+          where: {
+            userId_conversationId: {
+              userId,
+              conversationId,
+            },
+          },
+          data: {
+            status: EUserHasConversationStatus.READ_MESSAGE,
+          },
+        });
+
+        await tx.conversation.update({
+          where: {
+            id: conversation.id,
+          },
+          data: {
+            status: EConversationStatus.ACTIVE,
+          },
+        });
+      });
+    } catch (error) {
+      throw error;
+    }
 
     const messageFormat = {
       ...messageCreated,
@@ -88,8 +106,6 @@ export class MessageService {
         users: messageCreated.creator,
       },
     };
-
-    // delete messageFormat.creator;
 
     return messageFormat;
   }

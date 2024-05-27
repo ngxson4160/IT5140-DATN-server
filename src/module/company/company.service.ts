@@ -36,6 +36,11 @@ export class CompanyService {
             name: true,
           },
         },
+        users: {
+          select: {
+            id: true,
+          },
+        },
       },
     });
 
@@ -56,6 +61,7 @@ export class CompanyService {
       primaryPhoneNumber: company.primaryPhoneNumber,
       website: company.website,
       socialMedia: company.socialMedia,
+      users: company.users[0],
     };
   }
 

@@ -294,6 +294,7 @@ model Conversation {
   name String?
   type Int
 
+  status    Int       @default(0) @db.TinyInt
   userHasConversations UserHasConversation[]
   messages             Message[]
 

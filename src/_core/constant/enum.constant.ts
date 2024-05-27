@@ -103,3 +103,8 @@ export enum EUserHasConversationStatus {
   UNREAD_MESSAGE,
   READ_MESSAGE,
 }
+
+export enum EConversationStatus {
+  NOT_ACTIVE,
+  ACTIVE,
+}

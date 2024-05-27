@@ -12,6 +12,7 @@ import { Socket, Server } from 'socket.io';
 import { ConversationService } from '../conversation/conversation.service';
 import { CreateConversationDto } from '../conversation/dto/create-conversation.dto';
 import { ReadMessageDto } from './dto/read-message.dto';
+import { EConversationStatus } from 'src/_core/constant/enum.constant';
 
 @Injectable()
 @WebSocketGateway({
@@ -38,12 +39,20 @@ export class MessageGateway {
     client.leave(id);
   }
 
-  createConversationPair(userId: number, body: CreateConversationDto) {
-    const conversation = this.conversationService.createConversationPair(
+  async createConversationPair(userId: number, body: CreateConversationDto) {
+    const conversation = await this.conversationService.createConversationPair(
       userId,
       body,
     );
-    this.server.emit('create_conversation', { conversation });
+
+    if (conversation.status === EConversationStatus.NOT_ACTIVE) {
+      const payload = {
+        conversationId: conversation.id,
+        fromUserId: userId,
+        toUserId: body.withUserId,
+      };
+      this.server.emit('create_conversation', { payload });
+    }
 
     return conversation;
   }
@@ -58,6 +67,12 @@ export class MessageGateway {
       +userId,
       createMessageDto,
     );
+
+    // const payloadConversation = {
+    //   toUserId: createMessageDto.toUserId,
+    //   conversationId: message.conversationId.toString(),
+    // };
+    // this.server.emit('create_conversation', { payloadConversation });
 
     this.server.to(message.conversationId.toString()).emit('createMessage', {
       message,

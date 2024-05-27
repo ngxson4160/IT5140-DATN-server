@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { TransformStringToNumber } from 'src/_core/decorator/transform-string-to-number.decorator';
 
 export class CreateMessageDto {
@@ -8,4 +8,8 @@ export class CreateMessageDto {
   @IsNumber()
   @TransformStringToNumber()
   conversationId: number;
+
+  @IsOptional()
+  @TransformStringToNumber()
+  toUserId?: number;
 }
