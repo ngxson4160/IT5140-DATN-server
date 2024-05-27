@@ -143,7 +143,7 @@ export const MessageResponse = {
       message: `Get user detail success.`,
     },
     NOT_FOUND: (id: number) => ({
-      code: 400021,
+      code: 404021,
       message: `User not found with id = ${id}.`,
       statusCode: HttpStatus.BAD_REQUEST,
     }),
@@ -171,7 +171,7 @@ export const MessageResponse = {
       statusCode: HttpStatus.BAD_REQUEST,
     },
     NOT_FOUND: (id: number) => ({
-      code: 400041,
+      code: 404041,
       message: `Company not found with id = ${id}.`,
       statusCode: HttpStatus.BAD_REQUEST,
     }),
@@ -179,7 +179,7 @@ export const MessageResponse = {
 
   JOB: {
     NOT_FOUND: (id: number) => ({
-      code: 400061,
+      code: 404061,
       message: `Job not found with id = ${id}.`,
       statusCode: HttpStatus.BAD_REQUEST,
     }),
@@ -187,7 +187,7 @@ export const MessageResponse = {
 
   APPLICATION: {
     NOT_FOUND: {
-      code: 400081,
+      code: 404081,
       message: `Application not found`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
@@ -200,8 +200,21 @@ export const MessageResponse = {
 
   USER_FOLLOW_JOB: {
     NOT_FOUND: {
-      code: 400101,
+      code: 404101,
       message: `Not found user follow job`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+  },
+
+  CONVERSATION: {
+    EXIST: {
+      code: 400121,
+      message: `Conversation exist`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+    NOT_FOUND: {
+      code: 404102,
+      message: `Not found conversation`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
   },

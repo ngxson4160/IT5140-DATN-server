@@ -17,6 +17,7 @@ import { CityModule } from './module/city/city.module';
 import { JobCategoryParentModule } from './module/job-category-parent/job-category-parent.module';
 import { MessageModule } from './module/message/message.module';
 import { NotificationModule } from './module/notification/notification.module';
+import { ConversationModule } from './module/conversation/conversation.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { NotificationModule } from './module/notification/notification.module';
     JobCategoryParentModule,
     NotificationModule,
     MessageModule,
+    ConversationModule,
   ],
   controllers: [AppController],
   providers: [

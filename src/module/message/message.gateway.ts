@@ -2,37 +2,83 @@ import {
   WebSocketGateway,
   SubscribeMessage,
   MessageBody,
+  WebSocketServer,
+  ConnectedSocket,
 } from '@nestjs/websockets';
 import { MessageService } from './message.service';
 import { CreateMessageDto } from './dto/create-message.dto';
-import { UpdateMessageDto } from './dto/update-message.dto';
+import { Injectable } from '@nestjs/common';
+import { Socket, Server } from 'socket.io';
+import { ConversationService } from '../conversation/conversation.service';
+import { CreateConversationDto } from '../conversation/dto/create-conversation.dto';
+import { ReadMessageDto } from './dto/read-message.dto';
 
-@WebSocketGateway()
+@Injectable()
+@WebSocketGateway({
+  cors: {
+    origin: '*',
+  },
+})
 export class MessageGateway {
-  constructor(private readonly messageService: MessageService) {}
+  @WebSocketServer()
+  server: Server;
+
+  constructor(
+    private readonly messageService: MessageService,
+    private readonly conversationService: ConversationService,
+  ) {}
+
+  @SubscribeMessage('join_room')
+  joinRoom(@MessageBody('id') id: string, @ConnectedSocket() client: Socket) {
+    client.join(id);
+  }
+
+  @SubscribeMessage('leave_room')
+  leaveRoom(@MessageBody('id') id: string, @ConnectedSocket() client: Socket) {
+    client.leave(id);
+  }
+
+  createConversationPair(userId: number, body: CreateConversationDto) {
+    const conversation = this.conversationService.createConversationPair(
+      userId,
+      body,
+    );
+    this.server.emit('create_conversation', { conversation });
+
+    return conversation;
+  }
 
   @SubscribeMessage('createMessage')
-  create(@MessageBody() createMessageDto: CreateMessageDto) {
-    return this.messageService.create(createMessageDto);
+  async create(
+    @MessageBody() createMessageDto: CreateMessageDto,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const userId = client.handshake.headers['userid'];
+    const message = await this.messageService.createMessage(
+      +userId,
+      createMessageDto,
+    );
+
+    this.server.to(message.conversationId.toString()).emit('createMessage', {
+      message,
+    });
   }
 
-  @SubscribeMessage('findAllMessage')
-  findAll() {
-    return this.messageService.findAll();
-  }
+  @SubscribeMessage('read_conversation')
+  async readMessage(
+    @MessageBody() readMessageDto: ReadMessageDto,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const userId = client.handshake.headers['userid'];
+    const message = await this.conversationService.readConversation(
+      +userId,
+      readMessageDto,
+    );
 
-  @SubscribeMessage('findOneMessage')
-  findOne(@MessageBody() id: number) {
-    return this.messageService.findOne(id);
-  }
-
-  @SubscribeMessage('updateMessage')
-  update(@MessageBody() updateMessageDto: UpdateMessageDto) {
-    return this.messageService.update(updateMessageDto.id, updateMessageDto);
-  }
-
-  @SubscribeMessage('removeMessage')
-  remove(@MessageBody() id: number) {
-    return this.messageService.remove(id);
+    this.server
+      .to(readMessageDto.conversationId.toString())
+      .emit('read_conversation', {
+        message,
+      });
   }
 }

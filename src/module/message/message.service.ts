@@ -1,26 +1,96 @@
 import { Injectable } from '@nestjs/common';
 import { CreateMessageDto } from './dto/create-message.dto';
-import { UpdateMessageDto } from './dto/update-message.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { CommonException } from 'src/_core/middleware/filter/exception.filter';
+import { MessageResponse } from 'src/_core/constant/message-response.constant';
+import { EUserHasConversationStatus } from 'src/_core/constant/enum.constant';
 
 @Injectable()
 export class MessageService {
-  create(createMessageDto: CreateMessageDto) {
-    return 'This action adds a new message';
-  }
+  constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    return `This action returns all message`;
-  }
+  async createMessage(userId: number, data: CreateMessageDto) {
+    const { content, conversationId } = data;
 
-  findOne(id: number) {
-    return `This action returns a #${id} message`;
-  }
+    const conversation = await this.prisma.conversation.findFirst({
+      where: {
+        id: conversationId,
+      },
+      include: {
+        userHasConversations: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
 
-  update(id: number, updateMessageDto: UpdateMessageDto) {
-    return `This action updates a #${id} message`;
-  }
+    if (!conversation?.userHasConversations) {
+      throw new CommonException(MessageResponse.CONVERSATION.NOT_FOUND);
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} message`;
+    const messageCreated = await this.prisma.message.create({
+      data: {
+        creatorId: userId,
+        conversationId,
+        content,
+      },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatar: true,
+            company: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+              },
+            },
+          },
+        },
+        conversation: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    await this.prisma.userHasConversation.updateMany({
+      where: {
+        conversationId,
+      },
+      data: {
+        status: EUserHasConversationStatus.UNREAD_MESSAGE,
+      },
+    });
+
+    await this.prisma.userHasConversation.update({
+      where: {
+        userId_conversationId: {
+          userId,
+          conversationId,
+        },
+      },
+      data: {
+        status: EUserHasConversationStatus.READ_MESSAGE,
+      },
+    });
+
+    const messageFormat = {
+      ...messageCreated,
+      conversation: {
+        ...messageCreated.conversation,
+        status: EUserHasConversationStatus.UNREAD_MESSAGE,
+        users: messageCreated.creator,
+      },
+    };
+
+    // delete messageFormat.creator;
+
+    return messageFormat;
   }
 }
