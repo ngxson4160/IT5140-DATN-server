@@ -64,7 +64,7 @@ export class NotificationService {
   }
 
   async countNotificationUnread(userId: number) {
-    return this.prisma.notification.count({
+    return await this.prisma.notification.count({
       where: { toUserId: userId, status: ENotificationStatus.UNREAD },
     });
   }
