@@ -18,6 +18,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import { NodeMailerService } from 'src/node-mailer/node-mailer.service';
 import {
   COMMON_CONSTANT,
+  CONFIGURATION,
   HANDLEBARS_TEMPLATE_MAIL,
 } from 'src/_core/constant/common.constant';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -71,7 +72,7 @@ export class AuthService {
             firstName,
             lastName,
             password: passwordHash,
-            avatar,
+            avatar: CONFIGURATION.USER_AVATAR_DEFAULT,
             dob,
             gender,
             phoneNumber,
@@ -214,6 +215,8 @@ export class AuthService {
             primaryPhoneNumber,
             primaryAddress,
             canCreateJob: true,
+            avatar: CONFIGURATION.COMPANY_AVATAR_DEFAULT,
+            coverImage: CONFIGURATION.COMPANY_COVER_IMAGE_DEFAULT,
           },
         });
 
@@ -234,6 +237,7 @@ export class AuthService {
             gender,
             status: EUserStatus.INACTIVE,
             companyId: companyCreated.id,
+            avatar: CONFIGURATION.USER_AVATAR_DEFAULT,
           },
         });
 
