@@ -73,10 +73,12 @@ export class ConversationService {
             {
               userId: userCreateId,
               conversationId: conversationCreated.id,
+              status: EUserHasConversationStatus.UNREAD_MESSAGE,
             },
             {
               userId: withUserId,
               conversationId: conversationCreated.id,
+              status: EUserHasConversationStatus.UNREAD_MESSAGE,
             },
           ],
         });
@@ -228,99 +230,7 @@ export class ConversationService {
     return conversation;
   }
 
-  // async getListConversation(userId: number, data: GetListConversation) {
-  //   const { page, limit, cursor } = data;
-
-  //   const countListConversation = await this.prisma.conversation.count({
-  //     where: {
-  //       id: {
-  //         lt: cursor,
-  //       },
-  //       userHasConversations: {
-  //         some: {
-  //           userId,
-  //         },
-  //       },
-  //     },
-  //   });
-
-  //   let listConversation = await this.prisma.conversation.findMany({
-  //     where: {
-  //       id: {
-  //         lt: cursor,
-  //       },
-  //       userHasConversations: {
-  //         some: {
-  //           userId,
-  //         },
-  //       },
-  //     },
-  //     take: limit,
-  //     // skip: (page - 1) * limit,
-  //     orderBy: {
-  //       id: ESort.DESC,
-  //     },
-  //     include: {
-  //       messages: {
-  //         orderBy: {
-  //           id: ESort.DESC,
-  //         },
-  //         take: 1,
-  //       },
-  //       userHasConversations: {
-  //         where: {
-  //           userId: {
-  //             not: userId,
-  //           },
-  //         },
-  //         select: {
-  //           status: true,
-  //           user: {
-  //             select: {
-  //               id: true,
-  //               firstName: true,
-  //               lastName: true,
-  //               avatar: true,
-  //               company: {
-  //                 select: {
-  //                   id: true,
-  //                   name: true,
-  //                   avatar: true,
-  //                 },
-  //               },
-  //             },
-  //           },
-  //         },
-  //       },
-  //     },
-  //   });
-
-  //   listConversation = listConversation.map((conversation) => {
-  //     conversation['users'] = [];
-  //     conversation.userHasConversations.forEach((el) => {
-  //       el.user['statusConversation'] = el.status;
-  //       conversation['users'].push(el.user);
-  //     });
-
-  //     delete conversation.userHasConversations;
-
-  //     return conversation;
-  //   });
-
-  //   return {
-  //     meta: {
-  //       pagination: {
-  //         page: page,
-  //         pageSize: limit,
-  //         totalPage: Math.ceil(countListConversation / limit),
-  //         totalItem: countListConversation,
-  //       },
-  //     },
-  //     data: listConversation,
-  //   };
-  // }
-
-  async getListConversationTest(userId: number, data: GetListConversation) {
+  async getListConversation(userId: number, data: GetListConversation) {
     const { page, limit, cursor } = data;
 
     const countListConversation = await this.prisma.conversation.count({
@@ -363,11 +273,6 @@ export class ConversationService {
           select: {
             id: true,
             userHasConversations: {
-              // where: {
-              //   userId: {
-              //     not: userId,
-              //   },
-              // },
               select: {
                 user: {
                   select: {
@@ -431,5 +336,13 @@ export class ConversationService {
         status: EUserHasConversationStatus.READ_MESSAGE,
       },
     });
+  }
+
+  async countConversationUnread(userId: number) {
+    const countConversation = await this.prisma.userHasConversation.count({
+      where: { userId, status: EUserHasConversationStatus.UNREAD_MESSAGE },
+    });
+
+    return countConversation;
   }
 }

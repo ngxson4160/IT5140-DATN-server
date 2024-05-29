@@ -294,7 +294,7 @@ model Conversation {
   name String?
   type Int
 
-  status    Int       @default(0) @db.TinyInt
+  status               Int                   @default(0) @db.TinyInt
   userHasConversations UserHasConversation[]
   messages             Message[]
 
@@ -469,4 +469,13 @@ model CompanyHasCity {
   city City    @relation(fields: [cityId], references: [id])
 
   @@map("company_has_city")
+}
+
+model Configuration {
+  id Int @id @default(autoincrement())
+
+  key   String @unique()
+  value String
+
+  @@map("configuration")
 }

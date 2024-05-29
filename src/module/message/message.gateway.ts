@@ -68,15 +68,19 @@ export class MessageGateway {
       createMessageDto,
     );
 
-    // const payloadConversation = {
-    //   toUserId: createMessageDto.toUserId,
-    //   conversationId: message.conversationId.toString(),
-    // };
-    // this.server.emit('create_conversation', { payloadConversation });
-
     this.server.to(message.conversationId.toString()).emit('createMessage', {
       message,
     });
+
+    const count = await this.conversationService.countConversationUnread(
+      createMessageDto.toUserId,
+    );
+
+    this.server
+      .to(createMessageDto.toUserId.toString())
+      .emit('count_conversation_unread', {
+        count,
+      });
   }
 
   @SubscribeMessage('read_conversation')
@@ -95,5 +99,22 @@ export class MessageGateway {
       .emit('read_conversation', {
         message,
       });
+
+    const count = await this.conversationService.countConversationUnread(
+      +userId,
+    );
+
+    this.server.to(userId).emit('count_conversation_unread', {
+      count,
+    });
+  }
+
+  @SubscribeMessage('count_conversation_unread')
+  async countConversationUnread(@ConnectedSocket() client: Socket) {
+    const userId = client.handshake.headers['userid'];
+
+    const count = this.conversationService.countConversationUnread(+userId);
+
+    return count;
   }
 }
