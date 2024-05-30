@@ -9,6 +9,7 @@ import { GetListJobDto } from './dto/get-list-job.dto';
 import { FormatQueryArray } from 'src/_core/helper/utils';
 import { FollowJobDto } from './dto/follow-job.dto';
 import { GetListFavoriteJobDto } from './dto/get-list-favorite-job';
+import { ReopenJobDto } from './dto/reopen-job.dto';
 
 @Injectable()
 export class JobService {
@@ -96,6 +97,7 @@ export class JobService {
           select: {
             userId: true,
             status: true,
+            version: true,
           },
         },
         ...(userId && {
@@ -136,7 +138,7 @@ export class JobService {
     const userStatusApplication: object | null = { status: null };
     job['application'] = userStatusApplication;
     job.applications.forEach((application) => {
-      if (application.userId === userId)
+      if (application.userId === userId && application.version === job.version)
         userStatusApplication['status'] = application.status;
 
       job['application'] = userStatusApplication;
@@ -275,6 +277,28 @@ export class JobService {
     } catch (e) {
       throw e;
     }
+  }
+
+  async reopenJob(userId: number, jobId: number, data: ReopenJobDto) {
+    const { hiringEndDate } = data;
+
+    const job = await this.prisma.job.findUnique({
+      where: { id: jobId, creatorId: userId },
+    });
+
+    if (!job) {
+      throw new CommonException(MessageResponse.JOB.NOT_FOUND(jobId));
+    }
+
+    const jobUpdated = await this.prisma.job.update({
+      where: { id: jobId },
+      data: {
+        hiringEndDate,
+        version: ++job.version,
+      },
+    });
+
+    return jobUpdated;
   }
 
   async deleteJob(userId: number, jobId: number) {

@@ -193,6 +193,7 @@ model Job {
   hiringStartDate   DateTime @map("hiring_start_date")
   hiringEndDate     DateTime @map("hiring_end_date")
   allowNotification Boolean  @default(true) @map("allow_notification")
+  version           Int      @default(0)
 
   status    Int       @default(1) @db.TinyInt
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
@@ -234,13 +235,14 @@ model Application {
   status               Int       @default(0) @db.TinyInt
   interviewSchedule    DateTime? @map("interview_schedule")
   companyRemark        String?   @map("company_remark")
-  candidateCv          String    @map("candidate_cv")
+  candidateCv          String?    @map("candidate_cv")
   systemCv             Json?     @map("system_cv")
   candidateName        String    @map("candidate_name")
   candidateEmail       String    @map("candidate_email")
   candidatePhoneNumber String    @map("candidate_phone_number")
   cvType               Int?      @map("cv_type")
   classify             Int?      @map("classify")
+  version              Int       @default(0)
 
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
   createdBy Int?      @map("create_by")
@@ -250,7 +252,6 @@ model Application {
   user User @relation(fields: [userId], references: [id])
   job  Job  @relation(fields: [jobId], references: [id])
 
-  @@unique([userId, jobId])
   @@map("application")
 }
 

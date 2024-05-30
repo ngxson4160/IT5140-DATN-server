@@ -216,9 +216,11 @@ export class UserService {
       throw new CommonException(MessageResponse.JOB.NOT_FOUND(jobId));
     }
 
-    const application = await this.prisma.application.findUnique({
+    const application = await this.prisma.application.findFirst({
       where: {
-        userId_jobId: { userId, jobId },
+        userId,
+        jobId,
+        version: job.version,
       },
     });
 
@@ -249,7 +251,7 @@ export class UserService {
           data: {
             userId,
             jobId,
-            candidateCv: data.candidateCv,
+            candidateCv: data?.candidateCv,
             candidateName: data.candidateName,
             candidatePhoneNumber: data.candidatePhoneNumber,
             candidateEmail: data.candidateEmail,
@@ -257,6 +259,7 @@ export class UserService {
             ...(data.cvType === EPublicCVType.SYSTEM_CV && {
               systemCv: candidateInformation,
             }),
+            version: job.version,
           },
         });
 
@@ -288,12 +291,19 @@ export class UserService {
   }
 
   async userDeleteApplyJob(userId: number, jobId: number) {
-    const application = await this.prisma.application.findUnique({
+    const job = await this.prisma.job.findUnique({
+      where: { id: jobId, status: EJobStatus.PUBLIC },
+    });
+
+    if (!job) {
+      throw new CommonException(MessageResponse.JOB.NOT_FOUND(jobId));
+    }
+
+    const application = await this.prisma.application.findFirst({
       where: {
-        userId_jobId: { userId, jobId },
-        status: {
-          not: EApplicationStatus.DELETED,
-        },
+        userId,
+        jobId,
+        version: job.version,
       },
     });
 
@@ -301,17 +311,22 @@ export class UserService {
       throw new CommonException(MessageResponse.APPLICATION.NOT_FOUND);
     }
 
-    await this.prisma.application.update({
-      where: {
-        userId_jobId: {
-          userId,
-          jobId,
-        },
-      },
-      data: {
-        status: EApplicationStatus.DELETED,
-      },
-    });
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        await tx.application.delete({
+          where: {
+            id: application.id,
+          },
+        });
+
+        await tx.job.update({
+          where: { id: jobId },
+          data: {
+            totalCandidate: --job.totalCandidate,
+          },
+        });
+      });
+    } catch (error) {}
 
     return;
   }

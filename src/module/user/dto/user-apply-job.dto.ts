@@ -1,10 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { EPublicCVType } from 'src/_core/constant/enum.constant';
 
 export class UserApplyJobDto {
+  @IsOptional()
   @IsString()
-  candidateCv: string;
+  candidateCv?: string;
 
   @IsString()
   candidateName: string;
