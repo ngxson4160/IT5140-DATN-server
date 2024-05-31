@@ -11,7 +11,7 @@ export class ApplicationUpdateDto {
 
   @IsOptional()
   @IsDateString()
-  interviewSchedule: Date;
+  interviewSchedule: string;
 
   @IsOptional()
   @IsString()

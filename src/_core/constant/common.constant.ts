@@ -1,3 +1,5 @@
+import { EApplicationStatus } from './enum.constant';
+
 export const COMMON_CONSTANT = {
   LOG_TIMESTAMP_FORMAT: 'YYYY-MM-DDTHH:mm:ss',
   VERIFY_ACCOUNT: 'Xác minh tài khoản',
@@ -17,8 +19,24 @@ export const HANDLEBARS_TEMPLATE_MAIL = {
   REJECT_JOB: 'reject-job',
 };
 
+export const NOTIFICATION_TEMPLATE = {
+  CANDIDATE_APPLY_JOB: 'CANDIDATE_APPLY_JOB',
+  CANDIDATE_DELETE_APPLY_JOB: 'CANDIDATE_DELETE_APPLY_JOB',
+  COMPANY_UPDATE_APPLICATION_STATUS: 'COMPANY_UPDATE_APPLICATION_STATUS',
+  COMPANY_DELETE_JOB: 'COMPANY_DELETE_JOB',
+  COMPANY_ADD_INTERVIEW_SCHEDULE: 'COMPANY_ADD_INTERVIEW_SCHEDULE',
+};
+
 export const CONFIGURATION = {
   USER_AVATAR_DEFAULT: 'USER_AVATAR_DEFAULT',
   COMPANY_AVATAR_DEFAULT: 'COMPANY_AVATAR_DEFAULT',
   COMPANY_COVER_IMAGE_DEFAULT: 'COMPANY_COVER_IMAGE_DEFAULT',
 };
+
+export const CApplicationStatus = [
+  { value: EApplicationStatus.WAITING, name: 'Chưa liên hệ' },
+  { value: EApplicationStatus.CONTACTED, name: 'Đã liên hệ' },
+  { value: EApplicationStatus.INTERVIEWED, name: 'Đã phỏng vấn' },
+  { value: EApplicationStatus.SUCCESS, name: 'Trúng tuyển' },
+  { value: EApplicationStatus.FAILURE, name: 'Từ chối' },
+];

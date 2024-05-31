@@ -13,10 +13,13 @@ import { GetListCandidateDto } from './dto/get-list-candidate.dto';
 import { GetListCompanyDto } from './dto/get-list-company.dto';
 import { NodeMailerService } from 'src/node-mailer/node-mailer.service';
 import {
+  CApplicationStatus,
   COMMON_CONSTANT,
   HANDLEBARS_TEMPLATE_MAIL,
+  NOTIFICATION_TEMPLATE,
 } from 'src/_core/constant/common.constant';
 import { NotificationGateway } from '../notification/notification.gateway';
+import { formatDateFull, formatMessage } from 'src/_core/helper/utils';
 
 @Injectable()
 export class CompanyService {
@@ -200,39 +203,39 @@ export class CompanyService {
       data: { status, interviewSchedule, companyRemark, classify },
     });
 
+    const userCompany = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        company: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    const userCandidate = await this.prisma.application.findUnique({
+      where: {
+        id: applicationId,
+      },
+      select: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
     if (
       status === EApplicationStatus.SUCCESS ||
       status === EApplicationStatus.FAILURE
     ) {
-      const userCompany = await this.prisma.user.findUnique({
-        where: {
-          id: userId,
-        },
-        select: {
-          company: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      });
-
-      const userCandidate = await this.prisma.application.findUnique({
-        where: {
-          id: applicationId,
-        },
-        select: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              firstName: true,
-              lastName: true,
-            },
-          },
-        },
-      });
-
       const context = {
         candidateName: `${userCandidate.user.firstName} ${userCandidate.user.lastName}`,
         companyName: userCompany.company.name,
@@ -248,11 +251,44 @@ export class CompanyService {
           : HANDLEBARS_TEMPLATE_MAIL.REJECT_JOB,
         context,
       );
+    }
 
+    if (status || status === 0) {
+      const notificationTemplate =
+        await this.prisma.notificationTemplate.findUnique({
+          where: {
+            code: NOTIFICATION_TEMPLATE.COMPANY_UPDATE_APPLICATION_STATUS,
+          },
+        });
+      const content = formatMessage(notificationTemplate.content, [
+        `${userCompany.company.name}`,
+        CApplicationStatus[status]?.name,
+        job.title,
+      ]);
       const createNotification = {
         fromUserId: userId,
         toUserId: userCandidate.user.id,
-        content: `Job with id = ${jobId} just updated`,
+        content,
+      };
+      this.notificationGateway.createNotification(createNotification);
+    }
+
+    if (interviewSchedule) {
+      const notificationTemplate =
+        await this.prisma.notificationTemplate.findUnique({
+          where: {
+            code: NOTIFICATION_TEMPLATE.COMPANY_ADD_INTERVIEW_SCHEDULE,
+          },
+        });
+      const content = formatMessage(notificationTemplate.content, [
+        `${userCompany.company.name}`,
+        formatDateFull(interviewSchedule),
+        job.title,
+      ]);
+      const createNotification = {
+        fromUserId: userId,
+        toUserId: userCandidate.user.id,
+        content,
       };
       this.notificationGateway.createNotification(createNotification);
     }
