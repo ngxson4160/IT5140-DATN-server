@@ -65,6 +65,9 @@ export class AuthService {
 
     const passwordHash = await hashPassword(password);
     try {
+      const configuration = await this.prisma.configuration.findUnique({
+        where: { key: CONFIGURATION.USER_AVATAR_DEFAULT },
+      });
       const urlActive = await this.prisma.$transaction(async (tx) => {
         const userCreated = await tx.user.create({
           data: {
@@ -72,7 +75,7 @@ export class AuthService {
             firstName,
             lastName,
             password: passwordHash,
-            avatar: CONFIGURATION.USER_AVATAR_DEFAULT,
+            avatar: configuration.value,
             dob,
             gender,
             phoneNumber,
@@ -199,6 +202,17 @@ export class AuthService {
     }
 
     try {
+      const userAvatarDefault = await this.prisma.configuration.findUnique({
+        where: { key: CONFIGURATION.USER_AVATAR_DEFAULT },
+      });
+      const companyAvatarDefault = await this.prisma.configuration.findUnique({
+        where: { key: CONFIGURATION.COMPANY_AVATAR_DEFAULT },
+      });
+      const companyCoverImageDefault =
+        await this.prisma.configuration.findUnique({
+          where: { key: CONFIGURATION.COMPANY_COVER_IMAGE_DEFAULT },
+        });
+
       const urlActive = await this.prisma.$transaction(async (tx) => {
         const company = await tx.company.findUnique({ where: { name } });
 
@@ -215,8 +229,8 @@ export class AuthService {
             primaryPhoneNumber,
             primaryAddress,
             canCreateJob: true,
-            avatar: CONFIGURATION.COMPANY_AVATAR_DEFAULT,
-            coverImage: CONFIGURATION.COMPANY_COVER_IMAGE_DEFAULT,
+            avatar: companyAvatarDefault.value,
+            coverImage: companyCoverImageDefault.value,
           },
         });
 
@@ -237,7 +251,7 @@ export class AuthService {
             gender,
             status: EUserStatus.INACTIVE,
             companyId: companyCreated.id,
-            avatar: CONFIGURATION.USER_AVATAR_DEFAULT,
+            avatar: userAvatarDefault.value,
           },
         });
 
