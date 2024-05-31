@@ -15,8 +15,9 @@ import { UpdateUserProfileDto } from './dto/update-candidate-profile.dto';
 import { UserApplyJobDto } from './dto/user-apply-job.dto';
 import { UpdateAccountInfoDto } from './dto/update-user-profile';
 import { GetListCandidateDto } from './dto/get-list-candidate.dto';
-import { FormatQueryArray } from 'src/_core/helper/utils';
+import { FormatQueryArray, formatMessage } from 'src/_core/helper/utils';
 import { NotificationGateway } from '../notification/notification.gateway';
+import { NOTIFICATION_TEMPLATE } from 'src/_core/constant/common.constant';
 
 @Injectable()
 export class UserService {
@@ -242,6 +243,12 @@ export class UserService {
               name: true,
             },
           },
+          user: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
         },
       });
 
@@ -273,10 +280,20 @@ export class UserService {
         });
 
         if (job.allowNotification) {
+          const notificationTemplate =
+            await this.prisma.notificationTemplate.findUnique({
+              where: {
+                code: NOTIFICATION_TEMPLATE.CANDIDATE_APPLY_JOB,
+              },
+            });
+          const content = formatMessage(notificationTemplate.content, [
+            `${candidateInformation.user.firstName} ${candidateInformation.user.lastName}`,
+            job.title,
+          ]);
           const createNotification = {
             fromUserId: userId,
             toUserId: job.creatorId,
-            content: `User with id = ${userId} applied jobId = ${jobId}`,
+            content,
           };
           this.notificationGateway.createNotification(createNotification);
         }
@@ -305,6 +322,14 @@ export class UserService {
         jobId,
         version: job.version,
       },
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
     });
 
     if (!application) {
@@ -325,6 +350,25 @@ export class UserService {
             totalCandidate: --job.totalCandidate,
           },
         });
+
+        if (job.allowNotification) {
+          const notificationTemplate =
+            await this.prisma.notificationTemplate.findUnique({
+              where: {
+                code: NOTIFICATION_TEMPLATE.CANDIDATE_DELETE_APPLY_JOB,
+              },
+            });
+          const content = formatMessage(notificationTemplate.content, [
+            `${application.user.firstName} ${application.user.lastName}`,
+            job.title,
+          ]);
+          const createNotification = {
+            fromUserId: userId,
+            toUserId: job.creatorId,
+            content,
+          };
+          this.notificationGateway.createNotification(createNotification);
+        }
       });
     } catch (error) {}
 

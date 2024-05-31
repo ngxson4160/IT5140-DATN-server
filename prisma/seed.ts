@@ -1,5 +1,8 @@
 import { PrismaClient } from '@prisma/client';
-import { CONFIGURATION } from 'src/_core/constant/common.constant';
+import {
+  CONFIGURATION,
+  NOTIFICATION_TEMPLATE,
+} from 'src/_core/constant/common.constant';
 import { DataCity } from 'src/_core/data/city-district';
 import { JobCategory } from 'src/_core/data/job-category';
 import { hashPassword } from 'src/_core/helper/utils';
@@ -42,6 +45,48 @@ const main = async () => {
     });
   });
   await Promise.all(configurationPromise);
+
+  /**
+   * notification template
+   */
+  const notificationTemplates = [
+    {
+      id: 1,
+      code: NOTIFICATION_TEMPLATE.CANDIDATE_APPLY_JOB,
+      content:
+        '<p>Ứng viên <strong>{0}</strong> đã ứng tuyển vào công việc <strong>{1}</strong></p>',
+    },
+    {
+      id: 2,
+      code: NOTIFICATION_TEMPLATE.CANDIDATE_DELETE_APPLY_JOB,
+      content:
+        '<p>Ứng viên <strong>{0}</strong> đã hủy ứng tuyển vào công việc <strong>{1}</strong></p>',
+    },
+    {
+      id: 3,
+      code: NOTIFICATION_TEMPLATE.COMPANY_UPDATE_APPLICATION_STATUS,
+      content:
+        '<p>Công ty <strong>{0}</strong> đã cập nhật trạng thái <strong>{1}</strong> cho hồ sơ ứng tuyển vào công việc <strong>{2}</strong></p>',
+    },
+    {
+      id: 4,
+      code: NOTIFICATION_TEMPLATE.COMPANY_DELETE_JOB,
+      content:
+        '<p>Công ty <strong>{0}</strong> đã loại bỏ công việc <strong>{1}</strong></p>',
+    },
+  ];
+  const notificationTemplatePromise = notificationTemplates.map(
+    (notificationTemplate) => {
+      return prisma.notificationTemplate.upsert({
+        where: {
+          id: notificationTemplate.id,
+        },
+        create: notificationTemplate,
+        update: notificationTemplate,
+      });
+    },
+  );
+  await Promise.all(notificationTemplatePromise);
 
   //**City */
   const cityDistrict = DataCity.map((city) => {
