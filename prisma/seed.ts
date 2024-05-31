@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { CONFIGURATION } from 'src/_core/constant/common.constant';
 import { DataCity } from 'src/_core/data/city-district';
 import { JobCategory } from 'src/_core/data/job-category';
 import { hashPassword } from 'src/_core/helper/utils';
@@ -7,6 +8,40 @@ const prisma = new PrismaClient();
 const main = async () => {
   const password = '12345678';
   const passwordHash = await hashPassword(password);
+
+  /**
+   * configuration
+   */
+  const configurations = [
+    {
+      id: 1,
+      key: CONFIGURATION.USER_AVATAR_DEFAULT,
+      value:
+        'https://job-nest.s3.ap-southeast-1.amazonaws.com/user-avatar-default.jpg',
+    },
+    {
+      id: 2,
+      key: CONFIGURATION.COMPANY_AVATAR_DEFAULT,
+      value:
+        'https://job-nest.s3.ap-southeast-1.amazonaws.com/company-avatar-default.jpg',
+    },
+    {
+      id: 3,
+      key: CONFIGURATION.COMPANY_COVER_IMAGE_DEFAULT,
+      value:
+        'https://job-nest.s3.ap-southeast-1.amazonaws.com/company-cover-default.png',
+    },
+  ];
+  const configurationPromise = configurations.map((configuration) => {
+    return prisma.configuration.upsert({
+      where: {
+        id: configuration.id,
+      },
+      create: configuration,
+      update: configuration,
+    });
+  });
+  await Promise.all(configurationPromise);
 
   //**City */
   const cityDistrict = DataCity.map((city) => {
@@ -90,6 +125,10 @@ const main = async () => {
       primaryPhoneNumber: '0987654329',
       status: 1,
       canCreateJob: true,
+      avatar:
+        'https://job-nest.s3.ap-southeast-1.amazonaws.com/company-avatar-default.jpg',
+      coverImage:
+        'https://job-nest.s3.ap-southeast-1.amazonaws.com/company-cover-default.png',
     },
   ];
   const companyPromise = companies.map((company) => {
@@ -108,6 +147,7 @@ const main = async () => {
     {
       id: 1,
       email: 'admin@gmail.com',
+      avatar: 'https://job-nest.s3.ap-southeast-1.amazonaws.com/logo.jpg',
       firstName: '',
       lastName: 'Admin',
       password: passwordHash,
@@ -118,6 +158,8 @@ const main = async () => {
     {
       id: 2,
       email: 'user@gmail.com',
+      avatar:
+        'https://job-nest.s3.ap-southeast-1.amazonaws.com/user-avatar-default.jpg',
       firstName: 'Nguyễn',
       lastName: 'Sơn',
       password: passwordHash,
@@ -134,6 +176,8 @@ const main = async () => {
     {
       id: 3,
       email: 'company@gmail.com',
+      avatar:
+        'https://job-nest.s3.ap-southeast-1.amazonaws.com/user-avatar-default.jpg',
       firstName: 'Job',
       lastName: 'Nest',
       password: passwordHash,
@@ -315,6 +359,38 @@ const main = async () => {
       id: 25,
       action: 'UserController.updateAccountInfo',
     },
+    {
+      id: 26,
+      action: 'CandidateController.getListCandidate',
+    },
+    {
+      id: 27,
+      action: 'JobController.followJob',
+    },
+    {
+      id: 28,
+      action: 'UserController.userListFavorite',
+    },
+    {
+      id: 29,
+      action: 'NotificationController.getListNotification',
+    },
+    {
+      id: 30,
+      action: 'NotificationController.updateManyNotification',
+    },
+    {
+      id: 31,
+      action: 'ConversationController.createConversationPair',
+    },
+    {
+      id: 32,
+      action: 'ConversationController.getMessageConversation',
+    },
+    {
+      id: 33,
+      action: 'ConversationController.getListConversation',
+    },
   ];
 
   const permissionPromise = permissions.map((permission) => {
@@ -412,6 +488,30 @@ const main = async () => {
       roleId: 3,
       permissionId: 25,
     },
+    {
+      roleId: 3,
+      permissionId: 26,
+    },
+    {
+      roleId: 3,
+      permissionId: 29,
+    },
+    {
+      roleId: 3,
+      permissionId: 30,
+    },
+    {
+      roleId: 3,
+      permissionId: 31,
+    },
+    {
+      roleId: 3,
+      permissionId: 32,
+    },
+    {
+      roleId: 3,
+      permissionId: 33,
+    },
 
     //USER
     {
@@ -478,6 +578,34 @@ const main = async () => {
       roleId: 4,
       permissionId: 25,
     },
+    {
+      roleId: 4,
+      permissionId: 27,
+    },
+    {
+      roleId: 4,
+      permissionId: 28,
+    },
+    {
+      roleId: 4,
+      permissionId: 29,
+    },
+    {
+      roleId: 4,
+      permissionId: 30,
+    },
+    {
+      roleId: 4,
+      permissionId: 31,
+    },
+    {
+      roleId: 4,
+      permissionId: 32,
+    },
+    {
+      roleId: 4,
+      permissionId: 33,
+    },
   ];
 
   rolePermissions = [...rolePermissions, ...roleRootPermission];
@@ -503,10 +631,7 @@ const main = async () => {
       desiredJobCategoryId: 1,
       desiredCityId: 4,
       target: 'Đi làm kiếm tiền',
-      cv: [
-        'https://job-nest.s3.ap-southeast-1.amazonaws.com/pdfs/037ba06b25150a28a174d7bd4fcf4a63e40edca35b29c315cc1bd50cfa31357bb1b0925c4e5a9e6acdbaa7f877899613f67dbe6a5d2ff82aab0b506b82d27a3f.pdf',
-        'https://job-nest.s3.ap-southeast-1.amazonaws.com/pdfs/1d9f4f50e00c33b8867529d2bece5496ea949d949f0c0f011c8ef260301abd784af6b76509fb070c024417f601f943397196fae5eb71003599b260f42c15c1fa.pdf',
-      ],
+      cv: [],
       yearExperience: 10,
       workExperience: [
         {

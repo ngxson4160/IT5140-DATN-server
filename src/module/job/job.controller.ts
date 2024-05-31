@@ -17,6 +17,7 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { GetListJobDto } from './dto/get-list-job.dto';
 import { PublicOrAuth } from 'src/_core/decorator/public-or-auth.decorator';
 import { FollowJobDto } from './dto/follow-job.dto';
+import { ReopenJobDto } from './dto/reopen-job.dto';
 
 @Controller('jobs')
 export class JobController {
@@ -37,6 +38,15 @@ export class JobController {
   @Get(':id')
   getJob(@Param('id') id: string, @UserData() userData: IUserData) {
     return this.jobService.getJob(+id, userData?.id);
+  }
+
+  @Put(':id/reopen')
+  reopenJob(
+    @UserData() userData: IUserData,
+    @Param('id') jobId: string,
+    @Body() body: ReopenJobDto,
+  ) {
+    return this.jobService.reopenJob(userData.id, +jobId, body);
   }
 
   @Put(':id')
