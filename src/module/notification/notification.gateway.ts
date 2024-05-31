@@ -12,6 +12,7 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { ENotificationStatus } from 'src/_core/constant/enum.constant';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 @WebSocketGateway({
@@ -23,7 +24,10 @@ export class NotificationGateway {
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly notificationService: NotificationService) {}
+  constructor(
+    private readonly notificationService: NotificationService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   handleConnection(client: Socket) {
     const userId = client.handshake.headers['userid'];
@@ -73,6 +77,25 @@ export class NotificationGateway {
       createNotification,
     );
 
+    const userSend = await this.prisma.user.findUnique({
+      where: {
+        id: createNotification.fromUserId,
+      },
+      select: {
+        avatar: true,
+        company: {
+          select: {
+            avatar: true,
+          },
+        },
+      },
+    });
+
+    if (userSend?.company) {
+      userSend.avatar = userSend?.company.avatar;
+    }
+    delete userSend.company;
+
     const countNotificationUnread =
       await this.notificationService.countNotificationUnread(
         createNotification.toUserId,
@@ -81,7 +104,7 @@ export class NotificationGateway {
     this.server
       .to(createNotification.toUserId.toString())
       .emit('createNotification', {
-        notificationCreated: content,
+        notificationCreated: { ...content, userSend },
         countNotificationUnread,
       });
 
