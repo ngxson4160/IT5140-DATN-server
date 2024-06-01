@@ -405,6 +405,23 @@ export class UserService {
         updatedAt: true,
         updatedBy: true,
         candidateCv: true,
+        cvType: true,
+        systemCv: true,
+        user: {
+          select: {
+            avatar: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phoneNumber: true,
+            gender: true,
+            maritalStatus: true,
+            dob: true,
+            address: true,
+            district: true,
+            city: true,
+          },
+        },
         job: {
           select: {
             id: true,

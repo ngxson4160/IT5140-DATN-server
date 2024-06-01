@@ -2,6 +2,7 @@ import { JsonValue } from '@prisma/client/runtime/library';
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsNumber,
@@ -96,4 +97,8 @@ export class CreateJobDto {
 
   @IsDateString()
   hiringEndDate: Date;
+
+  @IsOptional()
+  @IsBoolean()
+  allowNotification: boolean;
 }

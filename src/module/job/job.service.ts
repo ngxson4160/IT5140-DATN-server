@@ -37,6 +37,7 @@ export class JobService {
       yearExperience,
       hiringStartDate,
       hiringEndDate,
+      allowNotification,
       time,
     } = data;
 
@@ -63,6 +64,7 @@ export class JobService {
         yearExperience,
         hiringStartDate,
         hiringEndDate,
+        allowNotification,
         time,
         ...(cityIds &&
           cityIds.length > 0 && {
@@ -213,6 +215,7 @@ export class JobService {
       yearExperience,
       hiringStartDate,
       hiringEndDate,
+      allowNotification,
       time,
     } = data;
 
@@ -250,6 +253,7 @@ export class JobService {
             yearExperience,
             hiringStartDate,
             hiringEndDate,
+            allowNotification,
             time,
             ...(cityIds &&
               cityIds.length > 0 && {

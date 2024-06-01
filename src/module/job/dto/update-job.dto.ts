@@ -1,6 +1,7 @@
 import { JsonValue } from '@prisma/client/runtime/library';
 import {
   IsArray,
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsNumber,
@@ -104,4 +105,8 @@ export class UpdateJobDto {
   @IsOptional()
   @IsDateString()
   hiringEndDate: Date;
+
+  @IsOptional()
+  @IsBoolean()
+  allowNotification: boolean;
 }
