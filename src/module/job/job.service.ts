@@ -284,7 +284,7 @@ export class JobService {
   }
 
   async reopenJob(userId: number, jobId: number, data: ReopenJobDto) {
-    const { hiringEndDate } = data;
+    const { hiringStartDate, hiringEndDate } = data;
 
     const job = await this.prisma.job.findUnique({
       where: { id: jobId, creatorId: userId },
@@ -297,6 +297,7 @@ export class JobService {
     const jobUpdated = await this.prisma.job.update({
       where: { id: jobId },
       data: {
+        hiringStartDate,
         hiringEndDate,
         version: ++job.version,
       },
@@ -352,7 +353,7 @@ export class JobService {
       companyId,
       page,
       limit,
-      sortCreatedAt,
+      sortHiringStartDate,
       all,
     } = query;
 
@@ -448,7 +449,7 @@ export class JobService {
       take: limit,
       orderBy: [
         {
-          createdAt: sortCreatedAt || ESort.DESC,
+          createdAt: sortHiringStartDate || ESort.DESC,
         },
       ],
       include: {

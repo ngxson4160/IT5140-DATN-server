@@ -297,7 +297,7 @@ export class CompanyService {
   }
 
   async getListJob(creatorId: number, query: CompanyGetListJobDto) {
-    const { title, type, status, sortCreatedAt } = query;
+    const { title, type, status, sortHiringStartDate } = query;
 
     let {
       page,
@@ -343,7 +343,7 @@ export class CompanyService {
         ...filterDate,
       },
       orderBy: {
-        createdAt: sortCreatedAt || ESort.DESC,
+        hiringStartDate: sortHiringStartDate || ESort.DESC,
       },
     });
 

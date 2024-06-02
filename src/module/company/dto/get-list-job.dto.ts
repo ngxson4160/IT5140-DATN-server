@@ -21,5 +21,5 @@ export class CompanyGetListJobDto extends PaginationDto {
 
   @IsOptional()
   @IsEnum(ESort)
-  sortCreatedAt?: ESort;
+  sortHiringStartDate?: ESort;
 }
