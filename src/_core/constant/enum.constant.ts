@@ -77,6 +77,17 @@ export enum ECompanySizeType {
   BIG,
 }
 
+export enum EYearExperience {
+  NOT_AVAILABLE,
+  UNDER_ONE,
+  ONE,
+  TWO,
+  THREE,
+  FOUR,
+  FIVE,
+  HIGHER_FIVE,
+}
+
 export enum EPublicCVType {
   NOT_PUBLIC = 0,
   SYSTEM_CV = 1,
