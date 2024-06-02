@@ -51,10 +51,23 @@ export class MessageGateway {
         fromUserId: userId,
         toUserId: body.withUserId,
       };
-      this.server.emit('create_conversation', { payload });
+      this.server.emit('get_conversation_detail', { payload });
     }
 
     return conversation;
+  }
+
+  async getConversationDetail(
+    conversationId: number,
+    fromUserId: number,
+    toUserId: number,
+  ) {
+    const payload = {
+      conversationId,
+      fromUserId,
+      toUserId,
+    };
+    this.server.emit('get_conversation_detail', { payload });
   }
 
   @SubscribeMessage('createMessage')
