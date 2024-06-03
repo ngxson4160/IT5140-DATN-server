@@ -6,7 +6,9 @@ import {
   EJobLevel,
   EJobMode,
   EMaritalStatus,
+  EYearExperience,
 } from 'src/_core/constant/enum.constant';
+import { TransformStringToNumber } from 'src/_core/decorator/transform-string-to-number.decorator';
 import { PaginationDto } from 'src/_core/dto/query-paging.dto';
 
 export class GetListCandidateDto extends PaginationDto {
@@ -15,41 +17,51 @@ export class GetListCandidateDto extends PaginationDto {
   @Type(() => Number)
   cityId?: number;
 
-  @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  yearExperienceMin?: number;
+  // @IsOptional()
+  // @IsNumber()
+  // @Type(() => Number)
+  // yearExperienceMin?: number;
+
+  // @IsOptional()
+  // @IsNumber()
+  // @Type(() => Number)
+  // yearExperienceMax?: number;
 
   @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  yearExperienceMax?: number;
+  @IsEnum(EYearExperience)
+  @TransformStringToNumber()
+  yearExperience?: EYearExperience;
 
   @IsOptional()
   desiredJobCategoryIds?: string;
 
   @IsOptional()
   @IsEnum(EGender)
-  @Type(() => Number)
+  // @Type(() => Number)
+  @TransformStringToNumber()
   gender?: EGender;
 
   @IsOptional()
   @IsEnum(EJobLevel)
-  @Type(() => Number)
+  // @Type(() => Number)
+  @TransformStringToNumber()
   desiredJobLevel?: EJobLevel;
 
   @IsOptional()
   @IsEnum(EJobMode)
-  @Type(() => Number)
+  // @Type(() => Number)
+  @TransformStringToNumber()
   desiredJobMode?: EJobMode;
 
   @IsOptional()
   @IsEnum(EMaritalStatus)
-  @Type(() => Number)
+  // @Type(() => Number)
+  @TransformStringToNumber()
   maritalStatus?: EMaritalStatus;
 
   @IsOptional()
   @IsEnum(EEducationLevel)
-  @Type(() => Number)
+  // @Type(() => Number)
+  @TransformStringToNumber()
   educationalLevel?: EEducationLevel;
 }

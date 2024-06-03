@@ -7,7 +7,13 @@ import {
   IsEnum,
   IsBoolean,
 } from 'class-validator';
-import { EJobLevel, EJobMode, ESort } from 'src/_core/constant/enum.constant';
+import {
+  EJobLevel,
+  EJobMode,
+  ESort,
+  EYearExperience,
+} from 'src/_core/constant/enum.constant';
+import { TransformStringToNumber } from 'src/_core/decorator/transform-string-to-number.decorator';
 import { PaginationDto } from 'src/_core/dto/query-paging.dto';
 
 // TODO Validate
@@ -30,12 +36,12 @@ export class GetListJobDto extends PaginationDto {
 
   @IsOptional()
   @IsEnum(EJobMode)
-  @Type(() => Number)
+  @TransformStringToNumber()
   jobMode?: EJobMode;
 
   @IsOptional()
   @IsEnum(EJobLevel)
-  @Type(() => Number)
+  @TransformStringToNumber()
   level?: EJobLevel;
 
   @IsOptional()
@@ -49,6 +55,11 @@ export class GetListJobDto extends PaginationDto {
   yearExperienceMax?: number;
 
   @IsOptional()
+  @IsEnum(EYearExperience)
+  @TransformStringToNumber()
+  yearExperience: EYearExperience;
+
+  @IsOptional()
   @IsNumber()
   @Type(() => Number)
   salaryMin?: number;
@@ -60,12 +71,12 @@ export class GetListJobDto extends PaginationDto {
 
   @IsOptional()
   @IsNumber()
-  @Type(() => Number)
+  @TransformStringToNumber()
   companyId: number;
 
   @IsOptional()
   @IsEnum(ESort)
-  sortCreatedAt?: ESort;
+  sortHiringStartDate?: ESort;
 
   @IsOptional()
   @IsBoolean()

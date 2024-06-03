@@ -33,16 +33,35 @@ export class ConversationController {
   }
 
   @Get(':id/messages')
-  getMessageConversation(
+  async getMessageConversation(
     @UserData() userData: IUserData,
     @Param('id') conversationId: string,
     @Query()
     data: GetMessageConversation,
   ) {
-    return this.conversationService.getMessageConversation(
+    const response = await this.conversationService.getMessageConversation(
       userData.id,
       +conversationId,
       data,
+    );
+
+    this.messageGateway.getConversationDetail(
+      +conversationId,
+      userData.id,
+      response.data.conversation.users[0]?.id,
+    );
+
+    return response;
+  }
+
+  @Get(':id')
+  getConversationDetail(
+    @UserData() userData: IUserData,
+    @Param('id') conversationId: string,
+  ) {
+    return this.conversationService.getConversationDetail(
+      userData.id,
+      +conversationId,
     );
   }
 }

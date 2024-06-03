@@ -98,6 +98,32 @@ export class MessageService {
       throw error;
     }
 
+    const userReceive = await this.prisma.userHasConversation.findFirst({
+      where: {
+        conversationId,
+        userId: {
+          not: userId,
+        },
+      },
+      select: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatar: true,
+            company: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
     const messageFormat = {
       ...messageCreated,
       conversation: {
@@ -105,6 +131,7 @@ export class MessageService {
         status: EUserHasConversationStatus.UNREAD_MESSAGE,
         users: messageCreated.creator,
       },
+      userReceive: userReceive.user,
     };
 
     return messageFormat;

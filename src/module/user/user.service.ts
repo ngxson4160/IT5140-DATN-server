@@ -8,6 +8,7 @@ import {
   EPublicCVType,
   ERole,
   ESort,
+  EYearExperience,
 } from 'src/_core/constant/enum.constant';
 import { GetListApplicationDto } from './dto/get-list-applications.dto';
 import { EOrderPaging } from 'src/_core/type/order-paging.type';
@@ -405,6 +406,23 @@ export class UserService {
         updatedAt: true,
         updatedBy: true,
         candidateCv: true,
+        cvType: true,
+        systemCv: true,
+        user: {
+          select: {
+            avatar: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phoneNumber: true,
+            gender: true,
+            maritalStatus: true,
+            dob: true,
+            address: true,
+            district: true,
+            city: true,
+          },
+        },
         job: {
           select: {
             id: true,
@@ -494,8 +512,9 @@ export class UserService {
     const {
       filter,
       cityId,
-      yearExperienceMin,
-      yearExperienceMax,
+      // yearExperienceMin,
+      // yearExperienceMax,
+      yearExperience,
       desiredJobCategoryIds,
       gender,
       desiredJobLevel,
@@ -507,16 +526,40 @@ export class UserService {
       limit,
     } = query;
 
+    let yearExperienceQuery: any;
+    if (yearExperience === 0) {
+      yearExperienceQuery = 0;
+    } else if (yearExperience === EYearExperience.UNDER_ONE) {
+      yearExperienceQuery = {
+        lte: 1,
+      };
+    } else if (yearExperience === EYearExperience.ONE) {
+      yearExperienceQuery = 1;
+    } else if (yearExperience === EYearExperience.TWO) {
+      yearExperienceQuery = 2;
+    } else if (yearExperience === EYearExperience.THREE) {
+      yearExperienceQuery = 3;
+    } else if (yearExperience === EYearExperience.FOUR) {
+      yearExperienceQuery = 4;
+    } else if (yearExperience === EYearExperience.FIVE) {
+      yearExperienceQuery = 5;
+    } else if (yearExperience > 5) {
+      yearExperienceQuery = {
+        gt: 5,
+      };
+    }
+
     const totalCandidate = await this.prisma.user.count({
       where: {
         candidateInformation: {
           publicCvType: {
             not: EPublicCVType.NOT_PUBLIC,
           },
-          yearExperience: {
-            lte: yearExperienceMax,
-            gte: yearExperienceMin,
-          },
+          // yearExperience: {
+          //   lte: yearExperienceMax,
+          //   gte: yearExperienceMin,
+          // },
+          yearExperience: yearExperienceQuery,
           desiredJobCategory: {
             id: {
               in: desiredJobCategoryIds
@@ -540,10 +583,11 @@ export class UserService {
           publicCvType: {
             not: EPublicCVType.NOT_PUBLIC,
           },
-          yearExperience: {
-            lte: yearExperienceMax,
-            gte: yearExperienceMin,
-          },
+          // yearExperience: {
+          //   lte: yearExperienceMax,
+          //   gte: yearExperienceMin,
+          // },
+          yearExperience: yearExperienceQuery,
           desiredJobCategory: {
             id: {
               in: desiredJobCategoryIds

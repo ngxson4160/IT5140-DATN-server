@@ -73,12 +73,12 @@ export class ConversationService {
             {
               userId: userCreateId,
               conversationId: conversationCreated.id,
-              status: EUserHasConversationStatus.UNREAD_MESSAGE,
+              status: EUserHasConversationStatus.READ_MESSAGE,
             },
             {
               userId: withUserId,
               conversationId: conversationCreated.id,
-              status: EUserHasConversationStatus.UNREAD_MESSAGE,
+              status: EUserHasConversationStatus.READ_MESSAGE,
             },
           ],
         });
@@ -227,7 +227,13 @@ export class ConversationService {
       throw new CommonException(MessageResponse.CONVERSATION.NOT_FOUND);
     }
 
-    return conversation;
+    const userHasConversation = await this.prisma.userHasConversation.findMany({
+      where: {
+        conversationId,
+      },
+    });
+
+    return { ...conversation, users: userHasConversation };
   }
 
   async getListConversation(userId: number, data: GetListConversation) {

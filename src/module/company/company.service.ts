@@ -297,7 +297,8 @@ export class CompanyService {
   }
 
   async getListJob(creatorId: number, query: CompanyGetListJobDto) {
-    const { title, type, status, sortCreatedAt } = query;
+    const { title, type, status, sortHiringStartDate, sortHiringEndDate } =
+      query;
 
     let {
       page,
@@ -342,9 +343,10 @@ export class CompanyService {
         status,
         ...filterDate,
       },
-      orderBy: {
-        createdAt: sortCreatedAt || ESort.DESC,
-      },
+      orderBy: [
+        { hiringStartDate: sortHiringStartDate },
+        { hiringEndDate: sortHiringEndDate },
+      ],
     });
 
     const skipItems = (+page - 1) * +limit;
@@ -488,10 +490,8 @@ export class CompanyService {
       skip: (page - 1) * limit,
       take: limit,
       orderBy: [
-        {
-          createdAt: sortCreatedAt,
-          interviewSchedule: sortInterviewSchedule,
-        },
+        { createdAt: sortCreatedAt },
+        { interviewSchedule: sortInterviewSchedule },
       ],
     });
 
