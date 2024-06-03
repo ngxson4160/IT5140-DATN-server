@@ -88,6 +88,15 @@ export class BlogService {
   async getListBlog(query: GetListBlogDto) {
     const { creatorId, limit, page, sortCreatedAt, filter } = query;
 
+    const totalBlog = await this.prisma.blog.count({
+      where: {
+        title: {
+          contains: filter,
+        },
+        creatorId,
+      },
+    });
+
     const listBlog = await this.prisma.blog.findMany({
       where: {
         title: {
@@ -104,6 +113,16 @@ export class BlogService {
       ],
     });
 
-    return listBlog;
+    return {
+      meta: {
+        pagination: {
+          page: page,
+          pageSize: limit,
+          totalPage: Math.ceil(totalBlog / limit),
+          totalItem: totalBlog,
+        },
+      },
+      data: listBlog,
+    };
   }
 }

@@ -370,9 +370,10 @@ model Blog {
   id        Int @id @default(autoincrement())
   creatorId Int @map("creator_id")
 
-  title   String
-  image   String
-  content String @db.Text
+  title      String
+  image      String
+  content    String @db.Text
+  totalViews Int?   @default(0) @map("total_views")
 
   status    Int       @default(1) @db.TinyInt
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)

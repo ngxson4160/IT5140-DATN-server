@@ -26,22 +26,24 @@ export class BlogController {
   }
 
   @Public()
-  @Get('id')
+  @Get(':id')
   getDetail(@Param('id') id: number) {
+    console.log('run here');
     return this.blogService.getDetail(id);
   }
 
   @Public()
+  @Get()
   getListBlog(@Query() query: GetListBlogDto) {
     return this.blogService.getListBlog(query);
   }
 
-  @Delete('id')
+  @Delete(':id')
   deleteBlog(@UserData() userData: IUserData, @Param('id') id: number) {
     return this.blogService.deleteBlog(userData.id, id);
   }
 
-  @Put('id')
+  @Put(':id')
   updateBlog(
     @UserData() userData: IUserData,
     @Param('id') id: number,
