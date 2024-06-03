@@ -213,8 +213,16 @@ export const MessageResponse = {
       statusCode: HttpStatus.BAD_REQUEST,
     },
     NOT_FOUND: {
-      code: 404102,
+      code: 404121,
       message: `Not found conversation`,
+      statusCode: HttpStatus.BAD_REQUEST,
+    },
+  },
+
+  BLOG: {
+    NOT_FOUND: {
+      code: 404141,
+      message: `Blog not found`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
   },

@@ -18,6 +18,7 @@ import { JobCategoryParentModule } from './module/job-category-parent/job-catego
 import { MessageModule } from './module/message/message.module';
 import { NotificationModule } from './module/notification/notification.module';
 import { ConversationModule } from './module/conversation/conversation.module';
+import { BlogModule } from './module/blog/blog.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ConversationModule } from './module/conversation/conversation.module';
     NotificationModule,
     MessageModule,
     ConversationModule,
+    BlogModule,
   ],
   controllers: [AppController],
   providers: [

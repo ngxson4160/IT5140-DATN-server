@@ -235,7 +235,7 @@ model Application {
   status               Int       @default(0) @db.TinyInt
   interviewSchedule    DateTime? @map("interview_schedule")
   companyRemark        String?   @map("company_remark")
-  candidateCv          String?    @map("candidate_cv")
+  candidateCv          String?   @map("candidate_cv")
   systemCv             Json?     @map("system_cv")
   candidateName        String    @map("candidate_name")
   candidateEmail       String    @map("candidate_email")
@@ -371,7 +371,8 @@ model Blog {
   creatorId Int @map("creator_id")
 
   title   String
-  content String
+  image   String
+  content String @db.Text
 
   status    Int       @default(1) @db.TinyInt
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
