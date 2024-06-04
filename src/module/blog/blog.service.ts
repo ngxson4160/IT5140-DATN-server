@@ -105,7 +105,7 @@ export class BlogService {
   }
 
   async getListBlog(query: GetListBlogDto) {
-    const { creatorId, limit, page, sortCreatedAt, filter } = query;
+    const { creatorId, limit, page, sortCreatedAt, filter, companyId } = query;
 
     const totalBlog = await this.prisma.blog.count({
       where: {
@@ -113,6 +113,9 @@ export class BlogService {
           contains: filter,
         },
         creatorId,
+        creator: {
+          companyId,
+        },
       },
     });
 
