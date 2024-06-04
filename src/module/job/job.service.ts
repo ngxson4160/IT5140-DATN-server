@@ -573,7 +573,20 @@ export class JobService {
       throw new CommonException(MessageResponse.JOB.NOT_FOUND(jobId));
     }
 
+    const userFollowJob = await this.prisma.userFollowJob.findUnique({
+      where: {
+        jobId_userId: {
+          userId,
+          jobId,
+        },
+      },
+    });
+
     if (isFavorite) {
+      if (userFollowJob) {
+        throw new CommonException(MessageResponse.USER_FOLLOW_JOB.FOLLOWED);
+      }
+
       await this.prisma.userFollowJob.create({
         data: {
           userId,
@@ -581,15 +594,6 @@ export class JobService {
         },
       });
     } else {
-      const userFollowJob = await this.prisma.userFollowJob.findUnique({
-        where: {
-          jobId_userId: {
-            userId,
-            jobId,
-          },
-        },
-      });
-
       if (!userFollowJob) {
         throw new CommonException(MessageResponse.USER_FOLLOW_JOB.NOT_FOUND);
       }

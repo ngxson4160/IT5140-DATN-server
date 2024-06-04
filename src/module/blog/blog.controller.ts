@@ -15,6 +15,7 @@ import { CreateBlogDto } from './dto/create-blog.dto';
 import { Public } from 'src/auth/decorator/public.decorator';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { GetListBlogDto } from './dto/get-list-blog.dto';
+import { FollowBlogDto } from './dto/follow-blog.dto';
 
 @Controller('blogs')
 export class BlogController {
@@ -23,6 +24,15 @@ export class BlogController {
   @Post()
   createBlog(@UserData() userData: IUserData, @Body() body: CreateBlogDto) {
     return this.blogService.createBlog(userData.id, body);
+  }
+
+  @Post(':id/favorites')
+  userFollowBlog(
+    @UserData() userData: IUserData,
+    @Param('id') id: string,
+    @Body() body: FollowBlogDto,
+  ) {
+    return this.blogService.userFollowBlog(userData.id, +id, body);
   }
 
   @Public()

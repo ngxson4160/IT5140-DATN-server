@@ -6,6 +6,7 @@ import { MessageResponse } from 'src/_core/constant/message-response.constant';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { GetListBlogDto } from './dto/get-list-blog.dto';
 import { ESort } from 'src/_core/constant/enum.constant';
+import { FollowBlogDto } from './dto/follow-blog.dto';
 
 @Injectable()
 export class BlogService {
@@ -50,9 +51,25 @@ export class BlogService {
       throw new CommonException(MessageResponse.BLOG.NOT_FOUND);
     }
 
+    await this.prisma.blog.update({
+      where: {
+        id,
+      },
+      data: {
+        totalViews: blog.totalViews + 1,
+      },
+    });
+
+    const totalFollow = await this.prisma.userFollowBlog.count({
+      where: {
+        blogId: id,
+      },
+    });
+
     const company = blog.creator.company;
     delete blog.creator;
     blog['company'] = company;
+    blog['totalFollow'] = totalFollow;
 
     return blog;
   }
@@ -147,6 +164,11 @@ export class BlogService {
             },
           },
         },
+        _count: {
+          select: {
+            userFollowBlogs: true,
+          },
+        },
       },
     });
 
@@ -167,5 +189,54 @@ export class BlogService {
       },
       data: listBlog,
     };
+  }
+
+  async userFollowBlog(userId: number, blogId: number, data: FollowBlogDto) {
+    const { isFavorite } = data;
+
+    const blog = await this.prisma.blog.findUnique({
+      where: {
+        id: blogId,
+      },
+    });
+
+    if (!blog) {
+      throw new CommonException(MessageResponse.BLOG.NOT_FOUND);
+    }
+
+    const userFollowBlog = await this.prisma.userFollowBlog.findUnique({
+      where: {
+        blogId_userId: {
+          userId,
+          blogId,
+        },
+      },
+    });
+
+    if (isFavorite) {
+      if (userFollowBlog) {
+        throw new CommonException(MessageResponse.USER_FOLLOW_BLOG.FOLLOWED);
+      }
+
+      await this.prisma.userFollowBlog.create({
+        data: {
+          userId,
+          blogId,
+        },
+      });
+    } else {
+      if (!userFollowBlog) {
+        throw new CommonException(MessageResponse.USER_FOLLOW_BLOG.NOT_FOUND);
+      }
+
+      await this.prisma.userFollowBlog.delete({
+        where: {
+          blogId_userId: {
+            userId,
+            blogId,
+          },
+        },
+      });
+    }
   }
 }

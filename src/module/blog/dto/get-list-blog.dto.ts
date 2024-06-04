@@ -10,6 +10,7 @@ export class GetListBlogDto extends PaginationDto {
 
   @IsOptional()
   @IsNumber()
+  @Type(() => Number)
   creatorId?: number;
 
   @IsOptional()
