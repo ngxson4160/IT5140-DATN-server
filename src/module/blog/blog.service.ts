@@ -29,13 +29,32 @@ export class BlogService {
       where: {
         id,
       },
+      include: {
+        creator: {
+          select: {
+            company: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+                primaryAddress: true,
+                sizeType: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!blog) {
       throw new CommonException(MessageResponse.BLOG.NOT_FOUND);
     }
 
-    return blog;
+    const company = blog.creator.company;
+
+    delete blog.creator;
+
+    return { blog, company };
   }
 
   async deleteBlog(userId: number, id: number) {
