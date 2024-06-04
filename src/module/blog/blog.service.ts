@@ -51,10 +51,10 @@ export class BlogService {
     }
 
     const company = blog.creator.company;
-
     delete blog.creator;
+    blog['company'] = company;
 
-    return { blog, company };
+    return blog;
   }
 
   async deleteBlog(userId: number, id: number) {
@@ -130,6 +130,27 @@ export class BlogService {
           createdAt: sortCreatedAt || ESort.DESC,
         },
       ],
+      include: {
+        creator: {
+          select: {
+            company: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+                primaryAddress: true,
+                sizeType: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    listBlog.forEach((blog) => {
+      const company = blog.creator.company;
+      delete blog.creator;
+      blog['company'] = company;
     });
 
     return {
