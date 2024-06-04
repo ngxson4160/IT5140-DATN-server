@@ -28,7 +28,6 @@ export class BlogController {
   @Public()
   @Get(':id')
   getDetail(@Param('id') id: number) {
-    console.log('run here');
     return this.blogService.getDetail(id);
   }
 

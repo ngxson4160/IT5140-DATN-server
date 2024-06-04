@@ -29,11 +29,30 @@ export class BlogService {
       where: {
         id,
       },
+      include: {
+        creator: {
+          select: {
+            company: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+                primaryAddress: true,
+                sizeType: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!blog) {
       throw new CommonException(MessageResponse.BLOG.NOT_FOUND);
     }
+
+    const company = blog.creator.company;
+    delete blog.creator;
+    blog['company'] = company;
 
     return blog;
   }
@@ -111,6 +130,27 @@ export class BlogService {
           createdAt: sortCreatedAt || ESort.DESC,
         },
       ],
+      include: {
+        creator: {
+          select: {
+            company: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+                primaryAddress: true,
+                sizeType: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    listBlog.forEach((blog) => {
+      const company = blog.creator.company;
+      delete blog.creator;
+      blog['company'] = company;
     });
 
     return {

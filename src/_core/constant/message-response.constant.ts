@@ -223,7 +223,7 @@ export const MessageResponse = {
     NOT_FOUND: {
       code: 404141,
       message: `Blog not found`,
-      statusCode: HttpStatus.BAD_REQUEST,
+      statusCode: HttpStatus.NOT_FOUND,
     },
   },
 };
