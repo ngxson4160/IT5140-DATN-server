@@ -317,17 +317,17 @@ export class JobService {
 
     try {
       await this.prisma.$transaction(async (tx) => {
-        await this.prisma.application.deleteMany({
+        await tx.application.deleteMany({
           where: {
             jobId,
           },
         });
-        await this.prisma.userFollowJob.deleteMany({
+        await tx.userFollowJob.deleteMany({
           where: {
             jobId,
           },
         });
-        await this.prisma.job.delete({
+        await tx.job.delete({
           where: { id: jobId },
         });
       });

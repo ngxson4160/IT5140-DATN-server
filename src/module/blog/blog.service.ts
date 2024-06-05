@@ -25,7 +25,7 @@ export class BlogService {
     });
   }
 
-  async getDetail(id: number) {
+  async getDetail(id: number, userId?: number) {
     const blog = await this.prisma.blog.findUnique({
       where: {
         id,
@@ -44,6 +44,18 @@ export class BlogService {
             },
           },
         },
+        ...(userId && {
+          userFollowBlogs: {
+            where: {
+              userId,
+            },
+          },
+        }),
+        _count: {
+          select: {
+            userFollowBlogs: true,
+          },
+        },
       },
     });
 
@@ -60,16 +72,19 @@ export class BlogService {
       },
     });
 
-    const totalFollow = await this.prisma.userFollowBlog.count({
-      where: {
-        blogId: id,
-      },
-    });
+    if (blog.userFollowBlogs?.length > 0) {
+      blog['isFollow'] = true;
+    } else {
+      blog['isFollow'] = false;
+    }
+    delete blog.userFollowBlogs;
 
     const company = blog.creator.company;
     delete blog.creator;
     blog['company'] = company;
-    blog['totalFollow'] = totalFollow;
+
+    blog['totalFollow'] = blog._count.userFollowBlogs;
+    delete blog._count.userFollowBlogs;
 
     return blog;
   }
@@ -86,11 +101,22 @@ export class BlogService {
       throw new CommonException(MessageResponse.BLOG.NOT_FOUND);
     }
 
-    await this.prisma.blog.delete({
-      where: {
-        id,
-      },
-    });
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        await tx.userFollowBlog.deleteMany({
+          where: {
+            blogId: id,
+          },
+        });
+        await tx.blog.delete({
+          where: { id },
+        });
+      });
+    } catch (error: any) {
+      throw error;
+    }
+
+    return;
   }
 
   async updateBlog(userId: number, id: number, data: UpdateBlogDto) {
@@ -121,7 +147,7 @@ export class BlogService {
     return blogUpdated;
   }
 
-  async getListBlog(query: GetListBlogDto) {
+  async getListBlog(query: GetListBlogDto, userId?: number) {
     const { creatorId, limit, page, sortCreatedAt, filter, companyId } = query;
 
     const totalBlog = await this.prisma.blog.count({
@@ -164,6 +190,13 @@ export class BlogService {
             },
           },
         },
+        ...(userId && {
+          userFollowBlogs: {
+            where: {
+              userId,
+            },
+          },
+        }),
         _count: {
           select: {
             userFollowBlogs: true,
@@ -173,9 +206,19 @@ export class BlogService {
     });
 
     listBlog.forEach((blog) => {
+      blog['totalFollow'] = blog._count.userFollowBlogs;
+      delete blog._count.userFollowBlogs;
+
       const company = blog.creator.company;
       delete blog.creator;
       blog['company'] = company;
+
+      if (blog.userFollowBlogs?.length > 0) {
+        blog['isFollow'] = true;
+      } else {
+        blog['isFollow'] = false;
+      }
+      delete blog.userFollowBlogs;
     });
 
     return {
