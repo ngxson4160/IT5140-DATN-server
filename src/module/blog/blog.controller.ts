@@ -12,9 +12,10 @@ import { BlogService } from './blog.service';
 import { UserData } from 'src/auth/decorator/user-data.decorator';
 import { IUserData } from 'src/_core/type/user-data.type';
 import { CreateBlogDto } from './dto/create-blog.dto';
-import { Public } from 'src/auth/decorator/public.decorator';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { GetListBlogDto } from './dto/get-list-blog.dto';
+import { FollowBlogDto } from './dto/follow-blog.dto';
+import { PublicOrAuth } from 'src/_core/decorator/public-or-auth.decorator';
 
 @Controller('blogs')
 export class BlogController {
@@ -25,16 +26,25 @@ export class BlogController {
     return this.blogService.createBlog(userData.id, body);
   }
 
-  @Public()
-  @Get(':id')
-  getDetail(@Param('id') id: number) {
-    return this.blogService.getDetail(id);
+  @Post(':id/favorites')
+  userFollowBlog(
+    @UserData() userData: IUserData,
+    @Param('id') id: string,
+    @Body() body: FollowBlogDto,
+  ) {
+    return this.blogService.userFollowBlog(userData.id, +id, body);
   }
 
-  @Public()
+  @PublicOrAuth()
+  @Get(':id')
+  getDetail(@UserData() userData: IUserData, @Param('id') id: number) {
+    return this.blogService.getDetail(id, userData?.id);
+  }
+
+  @PublicOrAuth()
   @Get()
-  getListBlog(@Query() query: GetListBlogDto) {
-    return this.blogService.getListBlog(query);
+  getListBlog(@UserData() userData: IUserData, @Query() query: GetListBlogDto) {
+    return this.blogService.getListBlog(query, userData?.id);
   }
 
   @Delete(':id')

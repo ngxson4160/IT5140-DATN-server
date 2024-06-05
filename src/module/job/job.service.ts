@@ -317,17 +317,17 @@ export class JobService {
 
     try {
       await this.prisma.$transaction(async (tx) => {
-        await this.prisma.application.deleteMany({
+        await tx.application.deleteMany({
           where: {
             jobId,
           },
         });
-        await this.prisma.userFollowJob.deleteMany({
+        await tx.userFollowJob.deleteMany({
           where: {
             jobId,
           },
         });
-        await this.prisma.job.delete({
+        await tx.job.delete({
           where: { id: jobId },
         });
       });
@@ -573,7 +573,20 @@ export class JobService {
       throw new CommonException(MessageResponse.JOB.NOT_FOUND(jobId));
     }
 
+    const userFollowJob = await this.prisma.userFollowJob.findUnique({
+      where: {
+        jobId_userId: {
+          userId,
+          jobId,
+        },
+      },
+    });
+
     if (isFavorite) {
+      if (userFollowJob) {
+        throw new CommonException(MessageResponse.USER_FOLLOW_JOB.FOLLOWED);
+      }
+
       await this.prisma.userFollowJob.create({
         data: {
           userId,
@@ -581,15 +594,6 @@ export class JobService {
         },
       });
     } else {
-      const userFollowJob = await this.prisma.userFollowJob.findUnique({
-        where: {
-          jobId_userId: {
-            userId,
-            jobId,
-          },
-        },
-      });
-
       if (!userFollowJob) {
         throw new CommonException(MessageResponse.USER_FOLLOW_JOB.NOT_FOUND);
       }

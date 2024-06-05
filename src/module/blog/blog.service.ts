@@ -6,6 +6,7 @@ import { MessageResponse } from 'src/_core/constant/message-response.constant';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { GetListBlogDto } from './dto/get-list-blog.dto';
 import { ESort } from 'src/_core/constant/enum.constant';
+import { FollowBlogDto } from './dto/follow-blog.dto';
 
 @Injectable()
 export class BlogService {
@@ -24,7 +25,7 @@ export class BlogService {
     });
   }
 
-  async getDetail(id: number) {
+  async getDetail(id: number, userId?: number) {
     const blog = await this.prisma.blog.findUnique({
       where: {
         id,
@@ -43,6 +44,18 @@ export class BlogService {
             },
           },
         },
+        ...(userId && {
+          userFollowBlogs: {
+            where: {
+              userId,
+            },
+          },
+        }),
+        _count: {
+          select: {
+            userFollowBlogs: true,
+          },
+        },
       },
     });
 
@@ -50,9 +63,28 @@ export class BlogService {
       throw new CommonException(MessageResponse.BLOG.NOT_FOUND);
     }
 
+    await this.prisma.blog.update({
+      where: {
+        id,
+      },
+      data: {
+        totalViews: blog.totalViews + 1,
+      },
+    });
+
+    if (blog.userFollowBlogs?.length > 0) {
+      blog['isFollow'] = true;
+    } else {
+      blog['isFollow'] = false;
+    }
+    delete blog.userFollowBlogs;
+
     const company = blog.creator.company;
     delete blog.creator;
     blog['company'] = company;
+
+    blog['totalFollow'] = blog._count.userFollowBlogs;
+    delete blog._count.userFollowBlogs;
 
     return blog;
   }
@@ -69,11 +101,22 @@ export class BlogService {
       throw new CommonException(MessageResponse.BLOG.NOT_FOUND);
     }
 
-    await this.prisma.blog.delete({
-      where: {
-        id,
-      },
-    });
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        await tx.userFollowBlog.deleteMany({
+          where: {
+            blogId: id,
+          },
+        });
+        await tx.blog.delete({
+          where: { id },
+        });
+      });
+    } catch (error: any) {
+      throw error;
+    }
+
+    return;
   }
 
   async updateBlog(userId: number, id: number, data: UpdateBlogDto) {
@@ -104,8 +147,8 @@ export class BlogService {
     return blogUpdated;
   }
 
-  async getListBlog(query: GetListBlogDto) {
-    const { creatorId, limit, page, sortCreatedAt, filter } = query;
+  async getListBlog(query: GetListBlogDto, userId?: number) {
+    const { creatorId, limit, page, sortCreatedAt, filter, companyId } = query;
 
     const totalBlog = await this.prisma.blog.count({
       where: {
@@ -113,6 +156,9 @@ export class BlogService {
           contains: filter,
         },
         creatorId,
+        creator: {
+          companyId,
+        },
       },
     });
 
@@ -144,13 +190,35 @@ export class BlogService {
             },
           },
         },
+        ...(userId && {
+          userFollowBlogs: {
+            where: {
+              userId,
+            },
+          },
+        }),
+        _count: {
+          select: {
+            userFollowBlogs: true,
+          },
+        },
       },
     });
 
     listBlog.forEach((blog) => {
+      blog['totalFollow'] = blog._count.userFollowBlogs;
+      delete blog._count.userFollowBlogs;
+
       const company = blog.creator.company;
       delete blog.creator;
       blog['company'] = company;
+
+      if (blog.userFollowBlogs?.length > 0) {
+        blog['isFollow'] = true;
+      } else {
+        blog['isFollow'] = false;
+      }
+      delete blog.userFollowBlogs;
     });
 
     return {
@@ -164,5 +232,54 @@ export class BlogService {
       },
       data: listBlog,
     };
+  }
+
+  async userFollowBlog(userId: number, blogId: number, data: FollowBlogDto) {
+    const { isFavorite } = data;
+
+    const blog = await this.prisma.blog.findUnique({
+      where: {
+        id: blogId,
+      },
+    });
+
+    if (!blog) {
+      throw new CommonException(MessageResponse.BLOG.NOT_FOUND);
+    }
+
+    const userFollowBlog = await this.prisma.userFollowBlog.findUnique({
+      where: {
+        blogId_userId: {
+          userId,
+          blogId,
+        },
+      },
+    });
+
+    if (isFavorite) {
+      if (userFollowBlog) {
+        throw new CommonException(MessageResponse.USER_FOLLOW_BLOG.FOLLOWED);
+      }
+
+      await this.prisma.userFollowBlog.create({
+        data: {
+          userId,
+          blogId,
+        },
+      });
+    } else {
+      if (!userFollowBlog) {
+        throw new CommonException(MessageResponse.USER_FOLLOW_BLOG.NOT_FOUND);
+      }
+
+      await this.prisma.userFollowBlog.delete({
+        where: {
+          blogId_userId: {
+            userId,
+            blogId,
+          },
+        },
+      });
+    }
   }
 }

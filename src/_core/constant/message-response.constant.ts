@@ -202,6 +202,11 @@ export const MessageResponse = {
     NOT_FOUND: {
       code: 404101,
       message: `Not found user follow job`,
+      statusCode: HttpStatus.NOT_FOUND,
+    },
+    FOLLOWED: {
+      code: 400101,
+      message: `Followed this blog`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
   },
@@ -224,6 +229,19 @@ export const MessageResponse = {
       code: 404141,
       message: `Blog not found`,
       statusCode: HttpStatus.NOT_FOUND,
+    },
+  },
+
+  USER_FOLLOW_BLOG: {
+    NOT_FOUND: {
+      code: 404161,
+      message: `Not found user follow blog`,
+      statusCode: HttpStatus.NOT_FOUND,
+    },
+    FOLLOWED: {
+      code: 400161,
+      message: `Followed this blog`,
+      statusCode: HttpStatus.BAD_REQUEST,
     },
   },
 };

@@ -52,6 +52,7 @@ model User {
   userFollowTags       UserFollowTag[]
   userFollowJobs       UserFollowJob[]
   userHasConversations UserHasConversation[]
+  userFollowBlogs      UserFollowBlog[]
 
   @@map("user")
 }
@@ -381,9 +382,25 @@ model Blog {
   updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
   updatedBy Int?      @map("update_by")
 
-  creator User @relation(fields: [creatorId], references: [id])
+  creator         User             @relation(fields: [creatorId], references: [id])
+  userFollowBlogs UserFollowBlog[]
 
   @@map("blog")
+}
+
+model UserFollowBlog {
+  id     Int @id @default(autoincrement())
+  blogId Int @map("blog_id")
+  userId Int @map("user_id")
+
+  createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+  updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+
+  blog Blog @relation(fields: [blogId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([blogId, userId])
+  @@map("user_follow_blog")
 }
 
 model Tag {
