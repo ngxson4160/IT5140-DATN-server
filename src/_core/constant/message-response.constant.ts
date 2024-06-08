@@ -5,17 +5,17 @@ export const MessageResponse = {
     INTERNAL_SERVER_ERROR: {
       code: 500000,
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: 'Internal Server Error.',
+      message: 'Đã có lỗi xảy ra, vui lòng thử lại sau',
     },
     UNAUTHORIZED: {
       code: 401000,
       statusCode: HttpStatus.UNAUTHORIZED,
-      message: 'Unauthorize.',
+      message: 'Bạn không có quyền',
     },
     FORBIDDEN: {
       code: 403000,
       statusCode: HttpStatus.FORBIDDEN,
-      message: 'Forbidden.',
+      message: 'Bạn không có quyền',
     },
   },
 
@@ -23,7 +23,7 @@ export const MessageResponse = {
     OK: {
       code: 200000,
       statusCode: HttpStatus.OK,
-      message: 'Success.',
+      message: 'Thành công',
     },
     UNAUTHORIZED: {
       code: 401001,
@@ -38,93 +38,90 @@ export const MessageResponse = {
     MIN_LENGTH_8: {
       code: 400003,
       statusCode: HttpStatus.UNAUTHORIZED,
-      message: 'Minimum 8 characters',
+      message: 'Tối thiểu 8 ký tự',
     },
     FORBIDDEN: {
       code: 403001,
       statusCode: HttpStatus.FORBIDDEN,
-      message: 'The user does not have execute this permission.',
+      message: 'Bạn không có quyền thực hiện hành động này',
     },
     S3_UPLOAD_ERROR: {
       code: 500001,
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: 'An error occurred when uploading the file to s3.',
+      message: 'Đã có lỗi xảy ra trong quá trình tải ảnh',
     },
     S3_DELETE_ERROR: {
       code: 500002,
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: 'An error occurred when deleting the file in s3.',
+      message: 'Đã có lỗi xảy ra trong quá trình xóa ảnh',
     },
     LOCAL_UPLOAD_ERROR: {
       code: 500003,
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: 'An error occurred when uploading the file local.',
+      message: 'Đã có lỗi xảy ra trong quá trình tải ảnh',
     },
   },
 
   AUTH: {
     //TODO delete url
-    USER_SIGN_UP_SUCCESS: (urlActive: string) => ({
+    USER_SIGN_UP_SUCCESS: {
       code: 200001,
       message:
         'Account registration is successful, please wait for admin to approve your account',
-      extraMeta: { urlActive },
-    }),
-    COMPANY_SIGN_UP_SUCCESS: (urlActive: string) => ({
+    },
+    COMPANY_SIGN_UP_SUCCESS: {
       code: 200002,
       message:
         'Company registration is successful, please wait for admin to approve your account',
-      extraMeta: { urlActive },
-    }),
+    },
     ACTIVE_ACCOUNT_SUCCUSS: {
       code: 200003,
-      message: 'Active account is successful.',
+      message: 'Kích hoạt tài khoản thành công',
     },
     SIGN_IN_SUCCESS: {
       code: 200004,
-      message: 'Sign in user successfully.',
+      message: 'Đăng nhập thành công',
     },
     CHANGE_PASSWORD_SUCCESS: {
       code: 200005,
-      message: 'Change password successfully.',
+      message: 'Thay đổi mật khẩu thành công',
     },
     REQUEST_RESET_PASSWORD_SUCCESS: {
       code: 200006,
-      message:
-        'The link to create a new password has been sent to the corresponding email.',
+      message: 'Link đặt lại mật khẩu đã được gửi tới email tương ứng',
     },
     RESET_PASSWORD_SUCCESS: {
       code: 200007,
-      message: 'Reset password success.',
+      message: 'Đặt lại mật khẩu thành công',
     },
     EMAIL_OR_PASSWORD_NOT_TRUE: {
       code: 400001,
-      message: `Email or password not true.`,
+      message: `Email hoặc mật khẩu không chính xác`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
     EMAIL_EXIST: {
       code: 400002,
-      message: `Email already exist.`,
+      message: `Email đã được sử dụng`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
     ACTIVE_ACCOUNT_FAIL: {
       code: 400010,
-      message: `Active account fail.`,
+      message: `Kich hoạt tài khoản thất bại`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
     ACTIVE_ACCOUNT: {
       code: 400011,
-      message: `Please activate your account via email before performing this operation.`,
+      message: `Vui lòng kích hoạt tài khoản trước khi sử dụng`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
     PASSWORD_INCORRECT: {
       code: 400012,
-      message: `Password incorrect.`,
+      message: 'Tài khoản hoặc mật khẩu không chính xác',
       statusCode: HttpStatus.BAD_REQUEST,
     },
     RESET_PASSWORD_FAIL: {
       code: 400013,
-      message: `Reset password fail.`,
+      message: `Đặt lại mật khẩu thất bại`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
   },
@@ -132,29 +129,29 @@ export const MessageResponse = {
   USER: {
     CREATE_SUCCESS: {
       code: 200021,
-      message: 'Create user successfully.',
+      message: 'Tạo người dùng thành công',
     },
     UPDATE_SUCCESS: {
       code: 200022,
-      message: `Update user success.`,
+      message: `Cập nhật thông tin người dùng thành công`,
     },
     GET_USER_DETAIL: {
       code: 200023,
-      message: `Get user detail success.`,
+      message: `Láy thông tin cá nhân thành công`,
     },
     NOT_FOUND: (id: number) => ({
       code: 404021,
-      message: `User not found with id = ${id}.`,
+      message: `Không timg thấy người dùng với id = ${id}.`,
       statusCode: HttpStatus.BAD_REQUEST,
     }),
     CANDIDATE_NOT_FOUND: (id: number) => ({
       code: 400023,
-      message: `Candidate not found with id = ${id}.`,
+      message: `Không tìm thấy ứng viên với id = ${id}.`,
       statusCode: HttpStatus.BAD_REQUEST,
     }),
     NOT_EXIST: {
       code: 400022,
-      message: `User does not exist.`,
+      message: `Người dùng không tồn tại`,
       statusCode: HttpStatus.BAD_REQUEST,
     },
     ATTACHMENT_CV_REQUIRED: {

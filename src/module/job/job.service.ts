@@ -392,9 +392,21 @@ export class JobService {
     const whereQuery = {
       ...(filter && {
         OR: [
-          { title: { contains: filter } },
-          { description: { contains: filter } },
-          { benefits: { contains: filter } },
+          {
+            title: {
+              search: filter,
+            },
+          },
+          {
+            description: {
+              search: filter,
+            },
+          },
+          {
+            requirement: {
+              search: filter,
+            },
+          },
         ],
       }),
       jobCategory: {
@@ -425,7 +437,7 @@ export class JobService {
       //   gte: yearExperienceMin,
       //   lte: yearExperienceMax,
       // },
-      yearExperience: yearExperience,
+      yearExperience,
       jobMode,
       level,
       status: EJobStatus.PUBLIC,
@@ -442,18 +454,72 @@ export class JobService {
     };
 
     const totalApplications = await this.prisma.job.count({
-      where: whereQuery,
+      where: {
+        ...whereQuery,
+        ...(filter && {
+          OR: [
+            {
+              title: {
+                search: filter,
+              },
+            },
+            {
+              description: {
+                search: filter,
+              },
+            },
+            {
+              requirement: {
+                search: filter,
+              },
+            },
+          ],
+        }),
+      },
     });
+
+    // const results = await this.prisma.$queryRaw
+    //   `
+    // SELECT j.*, MATCH(title, description, requirement) AGAINST (${filter}) AS relevance_score
+    // FROM job j
+    // ORDER BY relevance_score DESC
+    // LIMIT 15;
+    // `;
+    // console.log(results)
+
+    let orderBy: object;
+
+    if (filter) {
+      // orderBy = {
+      //   _relevance: {
+      //     fields: ['title', 'description', 'requirement'],
+      //     search: filter,
+      //     sort: ESort.DESC,
+      //   },
+      // };
+      orderBy = [
+        {
+          _relevance: {
+            fields: ['title', 'description', 'requirement'],
+            search: filter,
+            sort: ESort.DESC,
+          },
+        },
+        {
+          hiringStartDate: sortHiringStartDate || ESort.DESC,
+        },
+      ];
+    } else {
+      orderBy = {
+        hiringStartDate: sortHiringStartDate || ESort.DESC,
+      };
+    }
 
     const listJob = await this.prisma.job.findMany({
       where: whereQuery,
       skip: (page - 1) * limit,
       take: limit,
-      orderBy: [
-        {
-          createdAt: sortHiringStartDate || ESort.DESC,
-        },
-      ],
+      orderBy,
       include: {
         jobHasCities: {
           select: {

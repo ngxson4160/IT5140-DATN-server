@@ -130,7 +130,7 @@ export class AuthService {
       });
 
       return {
-        meta: MessageResponse.AUTH.USER_SIGN_UP_SUCCESS(urlActive),
+        meta: MessageResponse.AUTH.USER_SIGN_UP_SUCCESS,
       };
     } catch (e) {
       throw e;
@@ -289,7 +289,7 @@ export class AuthService {
       });
 
       return {
-        meta: MessageResponse.AUTH.COMPANY_SIGN_UP_SUCCESS(urlActive),
+        meta: MessageResponse.AUTH.COMPANY_SIGN_UP_SUCCESS,
       };
     } catch (e) {
       throw e;

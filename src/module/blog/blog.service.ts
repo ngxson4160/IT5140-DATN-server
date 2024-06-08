@@ -150,32 +150,75 @@ export class BlogService {
   async getListBlog(query: GetListBlogDto, userId?: number) {
     const { creatorId, limit, page, sortCreatedAt, filter, companyId } = query;
 
+    const whereCondition = {
+      creatorId,
+      creator: {
+        companyId,
+      },
+    };
+
     const totalBlog = await this.prisma.blog.count({
+      // where: {
+      //   title: {
+      //     contains: filter,
+      //   },
+      //   creatorId,
+      //   creator: {
+      //     companyId,
+      //   },
+      // },
       where: {
-        title: {
-          contains: filter,
-        },
-        creatorId,
-        creator: {
-          companyId,
-        },
+        ...whereCondition,
+        ...(filter && {
+          OR: [
+            {
+              title: {
+                search: filter,
+              },
+            },
+            {
+              content: {
+                search: filter,
+              },
+            },
+          ],
+        }),
       },
     });
 
-    const listBlog = await this.prisma.blog.findMany({
-      where: {
-        title: {
-          contains: filter,
+    let orderBy: object;
+
+    if (filter) {
+      // orderBy = {
+      //   _relevance: {
+      //     fields: ['title', 'content'],
+      //     search: filter,
+      //     sort: ESort.DESC,
+      //   },
+      // };
+      orderBy = [
+        {
+          _relevance: {
+            fields: ['title', 'content'],
+            search: filter,
+            sort: ESort.DESC,
+          },
         },
-        creatorId,
-      },
-      skip: (page - 1) * limit,
-      take: limit,
-      orderBy: [
         {
           createdAt: sortCreatedAt || ESort.DESC,
         },
-      ],
+      ];
+    } else {
+      orderBy = {
+        createdAt: sortCreatedAt || ESort.DESC,
+      };
+    }
+
+    const listBlog = await this.prisma.blog.findMany({
+      where: whereCondition,
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy,
       include: {
         creator: {
           select: {
