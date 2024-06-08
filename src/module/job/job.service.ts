@@ -454,28 +454,7 @@ export class JobService {
     };
 
     const totalApplications = await this.prisma.job.count({
-      where: {
-        ...whereQuery,
-        ...(filter && {
-          OR: [
-            {
-              title: {
-                search: filter,
-              },
-            },
-            {
-              description: {
-                search: filter,
-              },
-            },
-            {
-              requirement: {
-                search: filter,
-              },
-            },
-          ],
-        }),
-      },
+      where: whereQuery,
     });
 
     // const results = await this.prisma.$queryRaw
@@ -490,13 +469,6 @@ export class JobService {
     let orderBy: object;
 
     if (filter) {
-      // orderBy = {
-      //   _relevance: {
-      //     fields: ['title', 'description', 'requirement'],
-      //     search: filter,
-      //     sort: ESort.DESC,
-      //   },
-      // };
       orderBy = [
         {
           _relevance: {

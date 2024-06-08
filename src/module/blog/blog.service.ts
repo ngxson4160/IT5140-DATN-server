@@ -155,6 +155,20 @@ export class BlogService {
       creator: {
         companyId,
       },
+      ...(filter && {
+        OR: [
+          {
+            title: {
+              search: filter,
+            },
+          },
+          {
+            content: {
+              search: filter,
+            },
+          },
+        ],
+      }),
     };
 
     const totalBlog = await this.prisma.blog.count({
@@ -167,23 +181,7 @@ export class BlogService {
       //     companyId,
       //   },
       // },
-      where: {
-        ...whereCondition,
-        ...(filter && {
-          OR: [
-            {
-              title: {
-                search: filter,
-              },
-            },
-            {
-              content: {
-                search: filter,
-              },
-            },
-          ],
-        }),
-      },
+      where: whereCondition,
     });
 
     let orderBy: object;
