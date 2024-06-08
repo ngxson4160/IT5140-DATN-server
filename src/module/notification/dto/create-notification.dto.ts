@@ -1,4 +1,5 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { ENotificationType } from 'src/_core/constant/enum.constant';
 import { TransformStringToNumber } from 'src/_core/decorator/transform-string-to-number.decorator';
 
 export class CreateNotificationDto {
@@ -12,4 +13,9 @@ export class CreateNotificationDto {
 
   @IsString()
   content: string;
+
+  @IsOptional()
+  @IsEnum(ENotificationType)
+  @TransformStringToNumber()
+  type?: ENotificationType;
 }

@@ -105,6 +105,15 @@ export enum ENotificationStatus {
   READ,
 }
 
+export enum ENotificationType {
+  CANDIDATE_APPLY_JOB,
+  CANDIDATE_DELETE_APPLY_JOB,
+  COMPANY_UPDATE_APPLICATION_STATUS,
+  COMPANY_DELETE_JOB,
+  COMPANY_ADD_INTERVIEW_SCHEDULE,
+  COMPANY_VIEW_CV,
+}
+
 export enum EConversationType {
   PAIR,
   GROUP,

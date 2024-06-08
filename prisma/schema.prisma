@@ -265,6 +265,7 @@ model Notification {
   fromUserId Int?   @map("from_user_id")
   toUserId   Int    @map("to_user_id")
   content    String @db.Text
+  type       Int?   @db.TinyInt
 
   status    Int       @default(0) @db.TinyInt
   createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)

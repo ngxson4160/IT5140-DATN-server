@@ -70,9 +70,21 @@ const main = async () => {
     },
     {
       id: 4,
+      code: NOTIFICATION_TEMPLATE.COMPANY_ADD_INTERVIEW_SCHEDULE,
+      content:
+        '<p>Công ty <strong>{0}</strong> đã thêm lịch phỏng vấn vào lúc <strong>{1}</strong> cho công việc <strong>{2}</strong></p>',
+    },
+    {
+      id: 5,
       code: NOTIFICATION_TEMPLATE.COMPANY_DELETE_JOB,
       content:
         '<p>Công ty <strong>{0}</strong> đã loại bỏ công việc <strong>{1}</strong></p>',
+    },
+    {
+      id: 6,
+      code: NOTIFICATION_TEMPLATE.COMPANY_VIEW_CV,
+      content:
+        '<p>Hồ sơ của bạn đã được xem bởi công ty <strong>{0}</strong></p>',
     },
   ];
   const notificationTemplatePromise = notificationTemplates.map(

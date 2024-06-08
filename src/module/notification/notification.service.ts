@@ -70,9 +70,9 @@ export class NotificationService {
   }
 
   async createNotification(data: CreateNotificationDto) {
-    const { fromUserId, toUserId, content } = data;
+    const { fromUserId, toUserId, content, type } = data;
     return await this.prisma.notification.create({
-      data: { fromUserId, toUserId, content },
+      data: { fromUserId, toUserId, content, type },
     });
   }
 
