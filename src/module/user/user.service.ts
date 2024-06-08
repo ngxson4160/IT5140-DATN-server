@@ -574,8 +574,31 @@ export class UserService {
         maritalStatus,
         educationalLevel,
         cityId,
+        OR: [
+          {
+            firstName: {
+              search: filter,
+            },
+          },
+          {
+            lastName: {
+              search: filter,
+            },
+          },
+        ],
       },
     });
+
+    let orderBy: object;
+    if (filter) {
+      orderBy = {
+        _relevance: {
+          fields: ['firstName', 'lastName'],
+          search: filter,
+          sort: ESort.DESC,
+        },
+      };
+    }
 
     const listCandidate = await this.prisma.user.findMany({
       where: {
@@ -604,6 +627,7 @@ export class UserService {
         cityId,
       },
       skip: (page - 1) * limit,
+      orderBy,
       take: limit,
       select: {
         id: true,
