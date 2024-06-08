@@ -574,18 +574,20 @@ export class UserService {
         maritalStatus,
         educationalLevel,
         cityId,
-        OR: [
-          {
-            firstName: {
-              search: filter,
+        ...(filter && {
+          OR: [
+            {
+              firstName: {
+                search: filter,
+              },
             },
-          },
-          {
-            lastName: {
-              search: filter,
+            {
+              lastName: {
+                search: filter,
+              },
             },
-          },
-        ],
+          ],
+        }),
       },
     });
 
@@ -625,6 +627,20 @@ export class UserService {
         maritalStatus,
         educationalLevel,
         cityId,
+        ...(filter && {
+          OR: [
+            {
+              firstName: {
+                search: filter,
+              },
+            },
+            {
+              lastName: {
+                search: filter,
+              },
+            },
+          ],
+        }),
       },
       skip: (page - 1) * limit,
       orderBy,

@@ -155,47 +155,29 @@ export class BlogService {
       creator: {
         companyId,
       },
+      ...(filter && {
+        OR: [
+          {
+            title: {
+              search: filter,
+            },
+          },
+          {
+            content: {
+              search: filter,
+            },
+          },
+        ],
+      }),
     };
 
     const totalBlog = await this.prisma.blog.count({
-      // where: {
-      //   title: {
-      //     contains: filter,
-      //   },
-      //   creatorId,
-      //   creator: {
-      //     companyId,
-      //   },
-      // },
-      where: {
-        ...whereCondition,
-        ...(filter && {
-          OR: [
-            {
-              title: {
-                search: filter,
-              },
-            },
-            {
-              content: {
-                search: filter,
-              },
-            },
-          ],
-        }),
-      },
+      where: whereCondition,
     });
 
     let orderBy: object;
 
     if (filter) {
-      // orderBy = {
-      //   _relevance: {
-      //     fields: ['title', 'content'],
-      //     search: filter,
-      //     sort: ESort.DESC,
-      //   },
-      // };
       orderBy = [
         {
           _relevance: {

@@ -73,17 +73,32 @@ export class CompanyService {
 
     const totalCompany = await this.prisma.company.count({
       where: {
-        name: { contains: name },
+        ...(name && {
+          name: { search: name },
+        }),
       },
     });
 
+    let orderBy: object;
+    if (name) {
+      orderBy = {
+        _relevance: {
+          fields: ['name'],
+          search: name,
+          sort: ESort.DESC,
+        },
+      };
+    }
+
     const listCompany = await this.prisma.company.findMany({
       where: {
-        name: { contains: name },
+        ...(name && {
+          name: { search: name },
+        }),
       },
       skip: (page - 1) * limit,
       take: limit,
-      orderBy: [{ createdAt: sortCreatedAt || ESort.DESC }],
+      orderBy,
     });
 
     return {

@@ -134,6 +134,7 @@ model Company {
   users            User[]
   companyHasCities CompanyHasCity[]
 
+  @@fulltext([name])
   @@map("company")
 }
 
