@@ -392,9 +392,21 @@ export class JobService {
     const whereQuery = {
       ...(filter && {
         OR: [
-          { title: { contains: filter } },
-          { description: { contains: filter } },
-          { benefits: { contains: filter } },
+          {
+            title: {
+              search: filter,
+            },
+          },
+          {
+            description: {
+              search: filter,
+            },
+          },
+          {
+            requirement: {
+              search: filter,
+            },
+          },
         ],
       }),
       jobCategory: {
@@ -449,11 +461,9 @@ export class JobService {
       where: whereQuery,
       skip: (page - 1) * limit,
       take: limit,
-      orderBy: [
-        {
-          createdAt: sortHiringStartDate || ESort.DESC,
-        },
-      ],
+      orderBy: {
+        hiringStartDate: sortHiringStartDate || ESort.DESC,
+      },
       include: {
         jobHasCities: {
           select: {
