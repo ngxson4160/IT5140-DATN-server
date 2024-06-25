@@ -10,6 +10,7 @@ import { FormatQueryArray } from 'src/_core/helper/utils';
 import { FollowJobDto } from './dto/follow-job.dto';
 import { GetListFavoriteJobDto } from './dto/get-list-favorite-job';
 import { ReopenJobDto } from './dto/reopen-job.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class JobService {
@@ -390,25 +391,49 @@ export class JobService {
     }
 
     const whereQuery = {
-      ...(filter && {
-        OR: [
-          {
-            title: {
-              search: filter,
-            },
-          },
-          {
-            description: {
-              search: filter,
-            },
-          },
-          {
-            requirement: {
-              search: filter,
-            },
-          },
-        ],
-      }),
+      // ...(filter && {
+      // OR: [
+      //   {
+      //     title: {
+      //       search: filter,
+      //     },
+      //   },
+      //   {
+      //     description: {
+      //       search: filter,
+      //     },
+      //   },
+      //   {
+      //     requirement: {
+      //       search: filter,
+      //     },
+      //   },
+      // ],
+      AND: [
+        {
+          ...(filter && {
+            OR: [
+              {
+                title: {
+                  search: filter,
+                },
+              },
+              {
+                description: {
+                  search: filter,
+                },
+              },
+              {
+                requirement: {
+                  search: filter,
+                },
+              },
+            ],
+          }),
+        },
+        { ...whereSalary },
+      ],
+      // }),
       jobCategory: {
         id: {
           in: jobCategoryIds ? FormatQueryArray(jobCategoryIds) : undefined,
@@ -432,7 +457,7 @@ export class JobService {
           },
         },
       }),
-      ...whereSalary,
+      // ...whereSalary,
       // yearExperience: {
       //   gte: yearExperienceMin,
       //   lte: yearExperienceMax,

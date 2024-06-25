@@ -562,7 +562,8 @@ export class UserService {
           //   lte: yearExperienceMax,
           //   gte: yearExperienceMin,
           // },
-          yearExperience: yearExperienceQuery,
+          // yearExperience: yearExperienceQuery,
+          yearExperience,
           desiredJobCategory: {
             id: {
               in: desiredJobCategoryIds
@@ -615,7 +616,8 @@ export class UserService {
           //   lte: yearExperienceMax,
           //   gte: yearExperienceMin,
           // },
-          yearExperience: yearExperienceQuery,
+          // yearExperience: yearExperienceQuery,
+          yearExperience,
           desiredJobCategory: {
             id: {
               in: desiredJobCategoryIds
