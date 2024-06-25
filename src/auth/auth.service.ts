@@ -55,6 +55,8 @@ export class AuthService {
       dob,
       gender,
       phoneNumber,
+      yearExperience,
+      desiredJobCategoryId,
     } = body;
 
     const user = await this.prisma.user.findUnique({ where: { email } });
@@ -101,6 +103,8 @@ export class AuthService {
             advancedSkill: [],
             languageSkill: [],
             project: [],
+            yearExperience,
+            desiredJobCategoryId,
           },
         });
 
