@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import {
   EApplicationStatus,
   EJobStatus,
+  ENotificationType,
   EPublicCVType,
   ERole,
   ESort,
@@ -295,6 +296,7 @@ export class UserService {
             fromUserId: userId,
             toUserId: job.creatorId,
             content,
+            type: ENotificationType.CANDIDATE_APPLY_JOB,
           };
           this.notificationGateway.createNotification(createNotification);
         }
@@ -367,6 +369,7 @@ export class UserService {
             fromUserId: userId,
             toUserId: job.creatorId,
             content,
+            type: ENotificationType.CANDIDATE_DELETE_APPLY_JOB,
           };
           this.notificationGateway.createNotification(createNotification);
         }
@@ -559,7 +562,8 @@ export class UserService {
           //   lte: yearExperienceMax,
           //   gte: yearExperienceMin,
           // },
-          yearExperience: yearExperienceQuery,
+          // yearExperience: yearExperienceQuery,
+          yearExperience,
           desiredJobCategory: {
             id: {
               in: desiredJobCategoryIds
@@ -612,7 +616,8 @@ export class UserService {
           //   lte: yearExperienceMax,
           //   gte: yearExperienceMin,
           // },
-          yearExperience: yearExperienceQuery,
+          // yearExperience: yearExperienceQuery,
+          yearExperience,
           desiredJobCategory: {
             id: {
               in: desiredJobCategoryIds

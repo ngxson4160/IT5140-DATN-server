@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Put, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { Public } from 'src/auth/decorator/public.decorator';
 import { UserData } from 'src/auth/decorator/user-data.decorator';
@@ -39,6 +39,17 @@ export class CompanyController {
     @Body() body: CompanyUpdateDto,
   ) {
     return this.companyService.updateCompany(userData.id, body);
+  }
+
+  @Post('candidates/:id/view-profile')
+  companyViewProfileCandidate(
+    @UserData() userData: IUserData,
+    @Param('id') candidateId: string,
+  ) {
+    return this.companyService.companyViewProfileCandidate(
+      userData.id,
+      +candidateId,
+    );
   }
 
   @Put('jobs/:jobId/applications/:applicationId')

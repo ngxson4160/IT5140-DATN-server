@@ -8,7 +8,11 @@ import { CompanyGetListJobDto } from './dto/get-list-job.dto';
 import { EOrderPaging } from 'src/_core/type/order-paging.type';
 import { EJobType } from 'src/_core/type/common.type';
 import { GetListApplicationJobDto } from './dto/get-list-application.dto';
-import { EApplicationStatus, ESort } from 'src/_core/constant/enum.constant';
+import {
+  EApplicationStatus,
+  ENotificationType,
+  ESort,
+} from 'src/_core/constant/enum.constant';
 import { GetListCandidateDto } from './dto/get-list-candidate.dto';
 import { GetListCompanyDto } from './dto/get-list-company.dto';
 import { NodeMailerService } from 'src/node-mailer/node-mailer.service';
@@ -284,6 +288,7 @@ export class CompanyService {
         fromUserId: userId,
         toUserId: userCandidate.user.id,
         content,
+        type: ENotificationType.COMPANY_UPDATE_APPLICATION_STATUS,
       };
       this.notificationGateway.createNotification(createNotification);
     }
@@ -304,6 +309,7 @@ export class CompanyService {
         fromUserId: userId,
         toUserId: userCandidate.user.id,
         content,
+        type: ENotificationType.COMPANY_ADD_INTERVIEW_SCHEDULE,
       };
       this.notificationGateway.createNotification(createNotification);
     }
@@ -539,5 +545,64 @@ export class CompanyService {
       },
       data: listApplication,
     };
+  }
+
+  async companyViewProfileCandidate(userId: number, candidateId: number) {
+    const userCompany = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        company: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!userCompany) {
+      throw new CommonException(
+        MessageResponse.COMPANY.NOT_FOUND(userCompany.company.id),
+      );
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: candidateId,
+      },
+    });
+
+    if (!user) {
+      throw new CommonException(MessageResponse.USER.NOT_FOUND(candidateId));
+    }
+
+    const notification = await this.prisma.notification.findFirst({
+      where: {
+        fromUserId: userId,
+        toUserId: candidateId,
+        type: ENotificationType.COMPANY_VIEW_CV,
+      },
+    });
+
+    if (notification) return;
+
+    const notificationTemplate =
+      await this.prisma.notificationTemplate.findUnique({
+        where: {
+          code: NOTIFICATION_TEMPLATE.COMPANY_VIEW_CV,
+        },
+      });
+    const content = formatMessage(notificationTemplate.content, [
+      `${userCompany.company.name}`,
+    ]);
+    const createNotification = {
+      fromUserId: userId,
+      toUserId: candidateId,
+      content,
+      type: ENotificationType.COMPANY_VIEW_CV,
+    };
+    this.notificationGateway.createNotification(createNotification);
   }
 }
