@@ -54,6 +54,7 @@ model User {
   userFollowJobs       UserFollowJob[]
   userHasConversations UserHasConversation[]
   userFollowBlogs      UserFollowBlog[]
+  userRatingJobs       UserRatingJob[]
 
   @@fulltext([firstName, lastName])
   @@map("user")
@@ -212,6 +213,7 @@ model Job {
   jobHasTags     JobHasTag[]
   jobHasCities   JobHasCity[]
   userFollowJobs UserFollowJob[]
+  userRatingJobs UserRatingJob[]
 
   @@fulltext([title, description, requirement])
   @@map("job")
@@ -230,6 +232,22 @@ model UserFollowJob {
 
   @@unique([jobId, userId])
   @@map("user_follow_job")
+}
+
+model UserRatingJob {
+  id     Int @id @default(autoincrement())
+  jobId  Int @map("job_id")
+  userId Int @map("user_id")
+  score  Int @db.TinyInt
+
+  createdAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+  updatedAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+
+  job  Job  @relation(fields: [jobId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([jobId, userId])
+  @@map("user_rating_job")
 }
 
 model Application {

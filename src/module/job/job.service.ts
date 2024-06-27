@@ -11,6 +11,7 @@ import { FollowJobDto } from './dto/follow-job.dto';
 import { GetListFavoriteJobDto } from './dto/get-list-favorite-job';
 import { ReopenJobDto } from './dto/reopen-job.dto';
 import { Prisma } from '@prisma/client';
+import { CRatingJobScore } from 'src/_core/constant/common.constant';
 
 @Injectable()
 export class JobService {
@@ -92,7 +93,7 @@ export class JobService {
     return jobCreated;
   }
 
-  async getJob(id: number, userId: number) {
+  async getJob(id: number, userId?: number) {
     const job = await this.prisma.job.findUnique({
       where: { id, status: EJobStatus.PUBLIC },
       include: {
@@ -190,6 +191,40 @@ export class JobService {
       where: { id },
       data: { totalViews: ++job.totalViews },
     });
+
+    if (userId) {
+      const userRatingJob = await this.prisma.userRatingJob.findUnique({
+        where: {
+          jobId_userId: {
+            jobId: id,
+            userId,
+          },
+        },
+      });
+
+      if (userRatingJob) {
+        const score =
+          userRatingJob.score + CRatingJobScore.VIEW_DETAIL >
+          CRatingJobScore.APPLY_JOB
+            ? CRatingJobScore.APPLY_JOB
+            : userRatingJob.score + CRatingJobScore.VIEW_DETAIL;
+
+        await this.prisma.userRatingJob.update({
+          where: { id: userRatingJob.id },
+          data: {
+            score,
+          },
+        });
+      } else {
+        await this.prisma.userRatingJob.create({
+          data: {
+            jobId: id,
+            userId,
+            score: CRatingJobScore.VIEW_DETAIL,
+          },
+        });
+      }
+    }
 
     return { job, company: creator.company };
   }
@@ -656,6 +691,38 @@ export class JobService {
           jobId,
         },
       });
+
+      const userRatingJob = await this.prisma.userRatingJob.findUnique({
+        where: {
+          jobId_userId: {
+            jobId,
+            userId,
+          },
+        },
+      });
+
+      if (userRatingJob) {
+        const score =
+          userRatingJob.score + CRatingJobScore.FOLLOW_JOB >
+          CRatingJobScore.APPLY_JOB
+            ? CRatingJobScore.APPLY_JOB
+            : userRatingJob.score + CRatingJobScore.FOLLOW_JOB;
+
+        await this.prisma.userRatingJob.update({
+          where: { id: userRatingJob.id },
+          data: {
+            score,
+          },
+        });
+      } else {
+        await this.prisma.userRatingJob.create({
+          data: {
+            jobId,
+            userId,
+            score: CRatingJobScore.FOLLOW_JOB,
+          },
+        });
+      }
     } else {
       if (!userFollowJob) {
         throw new CommonException(MessageResponse.USER_FOLLOW_JOB.NOT_FOUND);
@@ -750,5 +817,287 @@ export class JobService {
       },
       data: result,
     };
+  }
+
+  async recommendJob(userId: number) {
+    //cosine similarity
+    function cosineSimilarity(vecA: number[], vecB: number[]): number {
+      // Kiểm tra nếu hai vectơ không cùng kích thước
+      if (vecA.length !== vecB.length) {
+        throw new Error('Hai vectơ phải cùng kích thước.');
+      }
+
+      let dotProduct = 0;
+      let magnitudeA = 0;
+      let magnitudeB = 0;
+
+      for (let i = 0; i < vecA.length; i++) {
+        dotProduct += vecA[i] * vecB[i];
+        magnitudeA += vecA[i] * vecA[i];
+        magnitudeB += vecB[i] * vecB[i];
+      }
+
+      magnitudeA = Math.sqrt(magnitudeA);
+      magnitudeB = Math.sqrt(magnitudeB);
+
+      if (magnitudeA === 0 || magnitudeB === 0) {
+        // throw new Error('Vectơ không được có độ lớn bằng 0.');
+        return 0;
+      }
+
+      return dotProduct / (magnitudeA * magnitudeB);
+    }
+
+    //utility matrix
+    const buildDataMatrix = (
+      ratings: Array<{ userId: number; jobId: number; score: number }>,
+      userIdCheck: number,
+    ) => {
+      const matrix = new Map();
+      const listJobRating = [] as number[];
+
+      const users = new Set<number>();
+      const jobs = new Set<number>();
+
+      let listUser = [] as number[];
+      let listJob = [] as number[];
+
+      const avgRating = new Map();
+
+      ratings.forEach((rating) => {
+        const { userId, jobId, score } = rating;
+        users.add(userId);
+        jobs.add(-jobId);
+
+        const key = `${userId},-${jobId}`;
+        matrix.set(key, score);
+      });
+
+      const listJobTmp = Array.from(jobs);
+      listJobTmp.sort((a, b) => b - a);
+      listJob = listJobTmp;
+
+      const listUserTmp = Array.from(users);
+      listUserTmp.sort((a, b) => a - b);
+      listUser = listUserTmp;
+
+      users.forEach((user) => {
+        let sum = 0;
+        let count = 0;
+        const listEmpty = [] as number[];
+
+        jobs.forEach((job) => {
+          const key = `${user},${job}`;
+
+          if (isNaN(Number(matrix.get(key)))) {
+            matrix.set(key, 0);
+            listEmpty.push(job);
+
+            if (user === userIdCheck) {
+              listJobRating.push(-job);
+            }
+          } else {
+            count++;
+            sum += matrix.get(key);
+          }
+        });
+
+        avgRating.set(user, sum / count);
+
+        jobs.forEach((job) => {
+          const key = `${user},${job}`;
+
+          if (!listEmpty.includes(job)) {
+            matrix.set(key, matrix.get(key) - sum / count);
+          }
+        });
+      });
+
+      return { matrix, listJobRating, listUser, listJob, avgRating };
+    };
+
+    //matrix similar user
+    const matrixSimilarUser = (
+      userIds: number[],
+      jobIds: number[],
+      utilityMatrix: Map<string, number>,
+    ) => {
+      const matrixSimilar = new Map<string, number>();
+
+      for (let i = 0; i < userIds.length - 1; i++) {
+        const vector1 = [] as any;
+
+        jobIds.forEach((job) => {
+          const key = `${userIds[i]},${job}`;
+          vector1.push(utilityMatrix.get(key));
+        });
+
+        for (let j = i + 1; j < userIds.length; j++) {
+          const vector2 = [] as any;
+
+          jobIds.forEach((job) => {
+            const key = `${userIds[j]},${job}`;
+            vector2.push(utilityMatrix.get(key));
+          });
+
+          matrixSimilar.set(
+            `${userIds[i]},${userIds[j]}`,
+            cosineSimilarity(vector1, vector2),
+          );
+          matrixSimilar.set(
+            `${userIds[j]},${userIds[i]}`,
+            cosineSimilarity(vector1, vector2),
+          );
+        }
+      }
+
+      return matrixSimilar;
+    };
+
+    //predict rating
+    const predictRating = (
+      k: number,
+      userId: number,
+      ratings: { userId: number; jobId: number; score: number }[],
+    ) => {
+      const {
+        matrix: matrixUtility,
+        listJobRating,
+        listUser,
+        listJob,
+        avgRating,
+      } = buildDataMatrix(ratings, userId);
+
+      const matrixSimilar: Map<string, any> = matrixSimilarUser(
+        listUser,
+        listJob,
+        matrixUtility,
+      );
+
+      const predict = [] as any[];
+
+      listJobRating.forEach((jobId) => {
+        const userIdRatings = ratings
+          .filter((el) => el.jobId === jobId)
+          .map((el) => el.userId);
+
+        const similarScore = new Map<string, any>();
+
+        userIdRatings.forEach((userIdRating) => {
+          similarScore.set(
+            `${userId},${userIdRating}`,
+            matrixSimilar.get(`${userId},${userIdRating}`),
+          );
+        });
+
+        let entries = Array.from(similarScore.entries());
+        if (userIdRatings.length > k) {
+          entries.sort((a, b) => b[1] - a[1]);
+          entries = entries.slice(0, k);
+        }
+
+        const maxItem = userIdRatings.length > k ? k : userIdRatings.length;
+        let t = 0,
+          m = 0;
+        for (let i = 0; i < maxItem; i++) {
+          t +=
+            matrixSimilar.get(entries[i][0]) *
+            matrixUtility.get(`${entries[i][0].split(',')[1]},${-jobId}`);
+          m += Math.abs(matrixSimilar.get(entries[i][0]));
+        }
+
+        if (m === 0) {
+          predict.push([jobId, avgRating.get(userId)]);
+        } else {
+          predict.push([jobId, t / m + avgRating.get(userId)]);
+        }
+      });
+
+      predict.sort((a, b) => b[1] - a[1]);
+      return predict;
+    };
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        candidateInformation: {
+          select: {
+            desiredJobCategoryId: true,
+          },
+        },
+      },
+    });
+
+    const userRatingJob = await this.prisma.userRatingJob.findMany({
+      where: {
+        userId,
+      },
+      // take: 5,
+      orderBy: [{ createdAt: ESort.DESC }, { score: ESort.DESC }],
+      select: {
+        userId: true,
+        jobId: true,
+        score: true,
+      },
+    });
+
+    // console.log('userRatingJob', userRatingJob);
+
+    const userSimilar = await this.prisma.userRatingJob.findMany({
+      where: {
+        jobId: {
+          in: userRatingJob.map((el) => el.jobId),
+        },
+        userId: {
+          not: userId,
+        },
+        // user: {
+        //   candidateInformation: {
+        //     desiredJobCategoryId:
+        //       user.candidateInformation.desiredJobCategoryId,
+        //   },
+        // },
+      },
+      // take: 10,
+      orderBy: [{ createdAt: ESort.DESC }, { score: ESort.DESC }],
+      select: {
+        userId: true,
+        jobId: true,
+        score: true,
+      },
+    });
+
+    const jobNotRating = await this.prisma.userRatingJob.findMany({
+      where: {
+        userId: {
+          in: userSimilar.map((el) => el.userId),
+        },
+        jobId: {
+          notIn: userRatingJob.map((el) => el.jobId),
+        },
+        // user: {
+        //   candidateInformation: {
+        //     desiredJobCategoryId:
+        //       user.candidateInformation.desiredJobCategoryId,
+        //   },
+        // },
+      },
+      // take: 30,
+      orderBy: [{ createdAt: ESort.DESC }, { score: ESort.DESC }],
+      select: {
+        userId: true,
+        jobId: true,
+        score: true,
+      },
+    });
+
+    const input = [...userRatingJob, ...userSimilar, ...jobNotRating];
+    // console.log('input', input);
+
+    const predict = predictRating(2, userId, input);
+
+    return predict;
   }
 }
