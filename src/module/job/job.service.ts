@@ -552,7 +552,12 @@ export class JobService {
       skip: (page - 1) * limit,
       take: limit,
       orderBy,
-      include: {
+      select: {
+        id: true,
+        title: true,
+        salaryMin: true,
+        salaryMax: true,
+        hiringEndDate: true,
         jobHasCities: {
           select: {
             city: {
