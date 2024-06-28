@@ -1069,7 +1069,8 @@ export class JobService {
       const jobIds = [];
       const max =
         listJobFilter.length > takeItem ? takeItem : listJobFilter.length;
-      for (let i = 0; i <= max; i++) {
+
+      for (let i = 0; i < max; i++) {
         jobIds.push(listJobFilter[i][0]);
       }
 

@@ -26,10 +26,12 @@ export class UserSignUpDto {
   @MinLength(8, MessageResponse.COMMON.MIN_LENGTH_8)
   password: string;
 
+  @IsOptional()
   @IsEnum(EYearExperience)
   @TransformStringToNumber()
   yearExperience: EYearExperience;
 
+  @IsOptional()
   @IsNumber()
   @TransformStringToNumber()
   desiredJobCategoryId: number;
