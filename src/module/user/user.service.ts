@@ -465,6 +465,7 @@ export class UserService {
             },
             creator: {
               select: {
+                id: true,
                 company: {
                   select: {
                     id: true,
