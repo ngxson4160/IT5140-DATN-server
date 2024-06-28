@@ -974,6 +974,9 @@ export class JobService {
         matrixUtility,
       );
 
+      // console.log('similarUser 13', matrixSimilar.get('13,2'));
+      // console.log('similarUser 18', matrixSimilar.get('18,2'));
+
       const predict = [] as any[];
 
       listJobRating.forEach((jobId) => {
@@ -999,12 +1002,41 @@ export class JobService {
         const maxItem = userIdRatings.length > k ? k : userIdRatings.length;
         let t = 0,
           m = 0;
+
+        let isSimilarZero = false;
+        let idUser;
+        // console.log('------------------------ jobId = ', jobId);
         for (let i = 0; i < maxItem; i++) {
+          if (matrixSimilar.get(entries[i][0]) === 0) {
+            isSimilarZero = true;
+            idUser = entries[i][0];
+            // console.log('run similar zero', entries[i][0], 'jobId', jobId, avgRating.get(userId));
+          }
+          // console.log(entries[i][0], matrixSimilar.get(entries[i][0]));
+          // console.log(
+          //   `${entries[i][0].split(',')[1]},${-jobId}`,
+          //   matrixUtility.get(`${entries[i][0].split(',')[1]},${-jobId}`),
+          // );
           t +=
             matrixSimilar.get(entries[i][0]) *
             matrixUtility.get(`${entries[i][0].split(',')[1]},${-jobId}`);
           m += Math.abs(matrixSimilar.get(entries[i][0]));
+
+          // console.log('t', t);
+          // console.log('m', m);
         }
+
+        // if (isSimilarZero || maxItem === 1) {
+        //   // console.log('run similar zero', idUser, 'jobId', jobId);
+        //   isSimilarZero = false;
+        //   predict.push([jobId, avgRating.get(userId)]);
+        // } else {
+        //   if (m === 0) {
+        //     predict.push([jobId, avgRating.get(userId)]);
+        //   } else {
+        //     predict.push([jobId, t / m + avgRating.get(userId)]);
+        //   }
+        // }
 
         if (m === 0) {
           predict.push([jobId, avgRating.get(userId)]);
@@ -1015,6 +1047,33 @@ export class JobService {
 
       predict.sort((a, b) => b[1] - a[1]);
       return predict;
+    };
+
+    //get list job
+    const filerJobByRating = (
+      listJobRating: Array<number[]>,
+      takeItem: number,
+      ratingMin: number,
+      ratingMax?: number,
+    ) => {
+      let listJobFilter;
+      if (ratingMax) {
+        listJobFilter = listJobRating.filter(
+          (el) => el[1] >= ratingMin && el[1] <= ratingMax,
+        );
+      } else {
+        listJobFilter = listJobRating.filter((el) => el[1] >= ratingMin);
+      }
+
+      // const jobIds = listJobFilter.map((el) => el[0]);
+      const jobIds = [];
+      const max =
+        listJobFilter.length > takeItem ? takeItem : listJobFilter.length;
+      for (let i = 0; i <= max; i++) {
+        jobIds.push(listJobFilter[i][0]);
+      }
+
+      return jobIds;
     };
 
     const user = await this.prisma.user.findUnique({
@@ -1034,7 +1093,7 @@ export class JobService {
       where: {
         userId,
       },
-      // take: 5,
+      take: 10,
       orderBy: [{ createdAt: ESort.DESC }, { score: ESort.DESC }],
       select: {
         userId: true,
@@ -1097,7 +1156,62 @@ export class JobService {
     // console.log('input', input);
 
     const predict = predictRating(2, userId, input);
+    const jobIds = filerJobByRating(predict, 7, 2);
 
-    return predict;
+    const listJobPredict = await this.prisma.job.findMany({
+      where: {
+        id: { in: jobIds },
+      },
+      select: {
+        id: true,
+        title: true,
+        salaryMin: true,
+        salaryMax: true,
+        hiringEndDate: true,
+        creator: {
+          select: {
+            company: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+                coverImage: true,
+              },
+            },
+          },
+        },
+        jobHasCities: {
+          select: {
+            city: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    for (let i = 0; i < listJobPredict.length; i++) {
+      if (listJobPredict[i]) {
+        const company = listJobPredict[i].creator.company;
+        delete listJobPredict[i].creator;
+        listJobPredict[i]['company'] = company;
+
+        const cities = listJobPredict[i].jobHasCities.map((el) => ({
+          id: el.city.id,
+          name: el.city.name,
+        }));
+        delete listJobPredict[i].jobHasCities;
+        listJobPredict[i]['cities'] = cities;
+      }
+    }
+
+    const sortedJobs = jobIds.map((id) =>
+      listJobPredict.find((job) => job.id === id),
+    );
+
+    return sortedJobs;
   }
 }
