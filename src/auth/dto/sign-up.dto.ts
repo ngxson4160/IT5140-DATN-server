@@ -3,12 +3,14 @@ import {
   IsDateString,
   IsEmail,
   IsEnum,
+  IsNumber,
   IsOptional,
   IsString,
   MinLength,
 } from 'class-validator';
-import { EGender } from 'src/_core/constant/enum.constant';
+import { EGender, EYearExperience } from 'src/_core/constant/enum.constant';
 import { MessageResponse } from 'src/_core/constant/message-response.constant';
+import { TransformStringToNumber } from 'src/_core/decorator/transform-string-to-number.decorator';
 
 export class UserSignUpDto {
   @IsEmail()
@@ -23,6 +25,16 @@ export class UserSignUpDto {
   @IsString()
   @MinLength(8, MessageResponse.COMMON.MIN_LENGTH_8)
   password: string;
+
+  @IsOptional()
+  @IsEnum(EYearExperience)
+  @TransformStringToNumber()
+  yearExperience: EYearExperience;
+
+  @IsOptional()
+  @IsNumber()
+  @TransformStringToNumber()
+  desiredJobCategoryId: number;
 
   @IsOptional()
   @IsString()

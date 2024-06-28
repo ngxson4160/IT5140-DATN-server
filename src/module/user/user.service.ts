@@ -19,7 +19,10 @@ import { UpdateAccountInfoDto } from './dto/update-user-profile';
 import { GetListCandidateDto } from './dto/get-list-candidate.dto';
 import { FormatQueryArray, formatMessage } from 'src/_core/helper/utils';
 import { NotificationGateway } from '../notification/notification.gateway';
-import { NOTIFICATION_TEMPLATE } from 'src/_core/constant/common.constant';
+import {
+  CRatingJobScore,
+  NOTIFICATION_TEMPLATE,
+} from 'src/_core/constant/common.constant';
 
 @Injectable()
 export class UserService {
@@ -301,6 +304,23 @@ export class UserService {
           this.notificationGateway.createNotification(createNotification);
         }
 
+        await this.prisma.userRatingJob.upsert({
+          where: {
+            jobId_userId: {
+              jobId,
+              userId,
+            },
+          },
+          update: {
+            score: CRatingJobScore.APPLY_JOB,
+          },
+          create: {
+            jobId,
+            userId,
+            score: CRatingJobScore.APPLY_JOB,
+          },
+        });
+
         return applicationCreated;
       });
 
@@ -445,6 +465,7 @@ export class UserService {
             },
             creator: {
               select: {
+                id: true,
                 company: {
                   select: {
                     id: true,

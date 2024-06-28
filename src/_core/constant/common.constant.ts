@@ -41,3 +41,9 @@ export const CApplicationStatus = [
   { value: EApplicationStatus.SUCCESS, name: 'Trúng tuyển' },
   { value: EApplicationStatus.FAILURE, name: 'Từ chối' },
 ];
+
+export const CRatingJobScore = {
+  VIEW_DETAIL: 1,
+  FOLLOW_JOB: 3,
+  APPLY_JOB: 5,
+};

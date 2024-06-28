@@ -34,6 +34,11 @@ export class JobController {
     return this.jobService.getListJob(query, userData?.id);
   }
 
+  @Get('recommend')
+  recommendJob(@UserData() userData: IUserData) {
+    return this.jobService.recommendJob(userData.id);
+  }
+
   @PublicOrAuth()
   @Get(':id')
   getJob(@Param('id') id: string, @UserData() userData: IUserData) {
