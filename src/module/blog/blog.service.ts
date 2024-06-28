@@ -201,7 +201,12 @@ export class BlogService {
       skip: (page - 1) * limit,
       take: limit,
       orderBy,
-      include: {
+      select: {
+        id: true,
+        title: true,
+        createdAt: true,
+        image: true,
+        content: true,
         creator: {
           select: {
             company: {
