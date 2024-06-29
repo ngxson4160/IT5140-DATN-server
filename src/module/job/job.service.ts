@@ -1082,19 +1082,6 @@ export class JobService {
       return jobIds;
     };
 
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-      select: {
-        candidateInformation: {
-          select: {
-            desiredJobCategoryId: true,
-          },
-        },
-      },
-    });
-
     const userRatingJob = await this.prisma.userRatingJob.findMany({
       where: {
         userId,
