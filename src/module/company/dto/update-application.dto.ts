@@ -3,10 +3,12 @@ import {
   EApplicationClassify,
   EApplicationStatus,
 } from 'src/_core/constant/enum.constant';
+import { TransformStringToNumber } from 'src/_core/decorator/transform-string-to-number.decorator';
 
 export class ApplicationUpdateDto {
   @IsOptional()
   @IsEnum(EApplicationStatus)
+  @TransformStringToNumber()
   status: EApplicationStatus;
 
   @IsOptional()
@@ -19,5 +21,6 @@ export class ApplicationUpdateDto {
 
   @IsOptional()
   @IsEnum(EApplicationClassify)
+  @TransformStringToNumber()
   classify: EApplicationClassify;
 }

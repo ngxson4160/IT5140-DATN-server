@@ -10,12 +10,16 @@ import { FormatQueryArray } from 'src/_core/helper/utils';
 import { FollowJobDto } from './dto/follow-job.dto';
 import { GetListFavoriteJobDto } from './dto/get-list-favorite-job';
 import { ReopenJobDto } from './dto/reopen-job.dto';
-import { Prisma } from '@prisma/client';
 import { CRatingJobScore } from 'src/_core/constant/common.constant';
+import { ConfigService } from '@nestjs/config';
+import { ENV } from 'src/_core/config/env.config';
 
 @Injectable()
 export class JobService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async createJob(userId: number, data: CreateJobDto) {
     const {
@@ -359,6 +363,16 @@ export class JobService {
           },
         });
         await tx.userFollowJob.deleteMany({
+          where: {
+            jobId,
+          },
+        });
+        await tx.userRatingJob.deleteMany({
+          where: {
+            jobId,
+          },
+        });
+        await tx.jobHasCity.deleteMany({
           where: {
             jobId,
           },
@@ -1082,24 +1096,11 @@ export class JobService {
       return jobIds;
     };
 
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-      select: {
-        candidateInformation: {
-          select: {
-            desiredJobCategoryId: true,
-          },
-        },
-      },
-    });
-
     const userRatingJob = await this.prisma.userRatingJob.findMany({
       where: {
         userId,
       },
-      take: 10,
+      take: +this.configService.get(ENV.TAKE_USER_RATING_JOB),
       orderBy: [{ createdAt: ESort.DESC }, { score: ESort.DESC }],
       select: {
         userId: true,
@@ -1125,7 +1126,7 @@ export class JobService {
         //   },
         // },
       },
-      // take: 10,
+      take: +this.configService.get(ENV.TAKE_USER_SIMILAR),
       orderBy: [{ createdAt: ESort.DESC }, { score: ESort.DESC }],
       select: {
         userId: true,
@@ -1134,31 +1135,67 @@ export class JobService {
       },
     });
 
-    const jobNotRating = await this.prisma.userRatingJob.findMany({
+    // const jobNotRating = await this.prisma.userRatingJob.findMany({
+    //   where: {
+    //     userId: {
+    //       in: userSimilar.map((el) => el.userId),
+    //     },
+    //     job: {
+    //       hiringEndDate: {
+    //         gt: new Date(),
+    //       },
+    //       userRatingJobs: {
+    //         some: {
+    //           userId: {
+    //             not: userId,
+    //           },
+    //         },
+    //       },
+    //     },
+    //   },
+    //   // take: 30,
+    //   orderBy: [{ createdAt: ESort.DESC }, { score: ESort.DESC }],
+    //   select: {
+    //     userId: true,
+    //     jobId: true,
+    //     score: true,
+    //   },
+    // });
+
+    const jobNotRating = await this.prisma.job.findMany({
       where: {
-        userId: {
-          in: userSimilar.map((el) => el.userId),
+        hiringEndDate: {
+          gt: new Date(),
         },
-        jobId: {
-          notIn: userRatingJob.map((el) => el.jobId),
+        userRatingJobs: {
+          some: {
+            userId: {
+              in: userSimilar.map((el) => el.userId),
+              not: userId,
+            },
+          },
         },
-        // user: {
-        //   candidateInformation: {
-        //     desiredJobCategoryId:
-        //       user.candidateInformation.desiredJobCategoryId,
-        //   },
-        // },
       },
-      // take: 30,
-      orderBy: [{ createdAt: ESort.DESC }, { score: ESort.DESC }],
       select: {
-        userId: true,
-        jobId: true,
-        score: true,
+        userRatingJobs: {
+          select: {
+            userId: true,
+            jobId: true,
+            score: true,
+          },
+          orderBy: [{ createdAt: ESort.DESC }, { score: ESort.DESC }],
+        },
       },
+      take: +this.configService.get(ENV.TAKE_JOB_PREDICT),
     });
 
-    const input = [...userRatingJob, ...userSimilar, ...jobNotRating];
+    const convertJobNotRating = [];
+    jobNotRating.forEach((job) =>
+      convertJobNotRating.push(...job.userRatingJobs),
+    );
+
+    // const input = [...userRatingJob, ...userSimilar, ...jobNotRating];
+    const input = [...userRatingJob, ...userSimilar, ...convertJobNotRating];
     // console.log('input', input);
 
     const predict = predictRating(2, userId, input);

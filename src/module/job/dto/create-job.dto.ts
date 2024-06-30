@@ -15,6 +15,7 @@ import {
   EJobLevel,
   EJobMode,
 } from 'src/_core/constant/enum.constant';
+import { TransformStringToNumber } from 'src/_core/decorator/transform-string-to-number.decorator';
 
 export class CreateJobDto {
   @IsNumber()
@@ -57,9 +58,11 @@ export class CreateJobDto {
   hours: number;
 
   @IsEnum(EJobMode)
+  @TransformStringToNumber()
   jobMode: EJobMode;
 
   @IsEnum(EJobLevel)
+  @TransformStringToNumber()
   level: EJobLevel;
 
   @IsOptional()
@@ -73,6 +76,7 @@ export class CreateJobDto {
   quantity: number;
 
   @IsEnum(EJobStatus)
+  @TransformStringToNumber()
   status: EJobStatus;
 
   @IsString()
@@ -85,6 +89,7 @@ export class CreateJobDto {
   requirement: string;
 
   @IsOptional()
+  @TransformStringToNumber()
   @IsEnum(EGender)
   gender: EGender;
 

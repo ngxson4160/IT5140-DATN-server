@@ -175,10 +175,10 @@ const main = async () => {
       id: 1,
       jobCategoryParentId: 1,
       primaryEmail: 'company@gmail.com',
-      name: 'ABCxyz',
+      name: 'TNHH NXS',
       primaryAddress: 'Đông Anh, Hà Nội',
       aboutUs: 'About us',
-      sizeType: 10,
+      sizeType: 0,
       primaryPhoneNumber: '0987654329',
       status: 1,
       canCreateJob: true,
@@ -448,6 +448,46 @@ const main = async () => {
       id: 33,
       action: 'ConversationController.getListConversation',
     },
+    {
+      id: 34,
+      action: 'JobController.reopenJob',
+    },
+    {
+      id: 35,
+      action: 'ConversationController.getConversationDetail',
+    },
+    {
+      id: 36,
+      action: 'BlogController.createBlog',
+    },
+    {
+      id: 37,
+      action: 'BlogController.getDetail',
+    },
+    {
+      id: 38,
+      action: 'BlogController.getListBlog',
+    },
+    {
+      id: 39,
+      action: 'BlogController.deleteBlog',
+    },
+    {
+      id: 40,
+      action: 'BlogController.updateBlog',
+    },
+    {
+      id: 41,
+      action: 'BlogController.userFollowBlog',
+    },
+    {
+      id: 42,
+      action: 'CompanyController.companyViewProfileCandidate',
+    },
+    {
+      id: 43,
+      action: 'JobController.recommendJob',
+    },
   ];
 
   const permissionPromise = permissions.map((permission) => {
@@ -569,6 +609,42 @@ const main = async () => {
       roleId: 3,
       permissionId: 33,
     },
+    {
+      roleId: 3,
+      permissionId: 34,
+    },
+    {
+      roleId: 3,
+      permissionId: 35,
+    },
+    {
+      roleId: 3,
+      permissionId: 36,
+    },
+    {
+      roleId: 3,
+      permissionId: 37,
+    },
+    {
+      roleId: 3,
+      permissionId: 38,
+    },
+    {
+      roleId: 3,
+      permissionId: 39,
+    },
+    {
+      roleId: 3,
+      permissionId: 40,
+    },
+    {
+      roleId: 3,
+      permissionId: 41,
+    },
+    {
+      roleId: 3,
+      permissionId: 42,
+    },
 
     //USER
     {
@@ -663,6 +739,26 @@ const main = async () => {
       roleId: 4,
       permissionId: 33,
     },
+    {
+      roleId: 4,
+      permissionId: 35,
+    },
+    {
+      roleId: 4,
+      permissionId: 37,
+    },
+    {
+      roleId: 4,
+      permissionId: 38,
+    },
+    {
+      roleId: 4,
+      permissionId: 41,
+    },
+    {
+      roleId: 4,
+      permissionId: 43,
+    },
   ];
 
   rolePermissions = [...rolePermissions, ...roleRootPermission];
@@ -689,7 +785,7 @@ const main = async () => {
       desiredCityId: 4,
       target: 'Đi làm kiếm tiền',
       cv: [],
-      yearExperience: 10,
+      yearExperience: 4,
       workExperience: [
         {
           position: 'Thực tập',
@@ -801,21 +897,19 @@ const main = async () => {
       jobMode: 0,
       level: 0,
       address: [
-        { data: '123 BD, Quận Ba Đình, Hà Nội', cityId: 1, cityName: 'Hà Nội' },
         {
-          data: '123 HK, Quận Hoàn Kiếm, Hà Nội',
-          cityId: 1,
-          cityName: 'Hà Nội',
+          cityId: 2,
+          address: [
+            { data: 'Thành phố Hà Giang', districtId: null, districtName: '' },
+          ],
+          cityName: 'Hà Giang',
         },
         {
-          data: '123 DA, Huyện Đông Anh, Hà Nội',
           cityId: 1,
+          address: [
+            { data: '', districtId: null, districtName: 'Quận Hoàn Kiếm' },
+          ],
           cityName: 'Hà Nội',
-        },
-        {
-          data: '123 Q1, Quận 1, Hồ Chí Minh',
-          cityId: 79,
-          cityName: 'Hồ Chí Minh',
         },
       ],
       quantity: 3,

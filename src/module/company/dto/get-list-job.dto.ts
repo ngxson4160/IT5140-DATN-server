@@ -11,7 +11,7 @@ export class CompanyGetListJobDto extends PaginationDto {
 
   @IsOptional()
   @IsEnum(EJobStatus)
-  @Type(() => Number)
+  @TransformStringToNumber()
   status?: EJobStatus;
 
   @IsOptional()
