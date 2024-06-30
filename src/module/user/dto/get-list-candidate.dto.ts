@@ -14,7 +14,7 @@ import { PaginationDto } from 'src/_core/dto/query-paging.dto';
 export class GetListCandidateDto extends PaginationDto {
   @IsOptional()
   @IsNumber()
-  @Type(() => Number)
+  @TransformStringToNumber()
   cityId?: number;
 
   // @IsOptional()

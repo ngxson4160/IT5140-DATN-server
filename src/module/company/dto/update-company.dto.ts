@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ECompanySizeType } from 'src/_core/constant/enum.constant';
+import { TransformStringToNumber } from 'src/_core/decorator/transform-string-to-number.decorator';
 
 export class CompanyUpdateDto {
   @IsOptional()
@@ -25,7 +26,7 @@ export class CompanyUpdateDto {
   jobCategoryParentId: number;
 
   @IsOptional()
-  @Type(() => Number)
+  @TransformStringToNumber()
   @IsEnum(ECompanySizeType)
   sizeType: ECompanySizeType;
 

@@ -17,6 +17,7 @@ import {
   EMaritalStatus,
   EPublicCVType,
 } from 'src/_core/constant/enum.constant';
+import { TransformStringToNumber } from 'src/_core/decorator/transform-string-to-number.decorator';
 
 export class UpdateUserProfileDto {
   @IsOptional()
@@ -47,6 +48,7 @@ export class UpdateUserProfileDto {
 
   @IsOptional()
   @IsEnum(EGender)
+  @TransformStringToNumber()
   gender?: EGender;
 
   @IsString()
@@ -55,6 +57,7 @@ export class UpdateUserProfileDto {
 
   @IsOptional()
   @IsEnum(EMaritalStatus)
+  @TransformStringToNumber()
   maritalStatus?: EMaritalStatus;
 
   @IsOptional()
@@ -63,6 +66,7 @@ export class UpdateUserProfileDto {
 
   @IsOptional()
   @IsEnum(EEducationLevel)
+  @TransformStringToNumber()
   educationalLevel: EEducationLevel;
 
   //candidate information
@@ -116,14 +120,17 @@ export class UpdateUserProfileDto {
 
   @IsOptional()
   @IsEnum(EJobLevel)
+  @TransformStringToNumber()
   desiredJobLevel?: EJobLevel;
 
   @IsOptional()
   @IsEnum(EJobMode)
+  @TransformStringToNumber()
   desiredJobMode?: EJobMode;
 
   @IsOptional()
   @IsEnum(EPublicCVType)
+  @TransformStringToNumber()
   publicCvType?: EPublicCVType;
 
   @IsOptional()

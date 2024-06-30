@@ -367,6 +367,16 @@ export class JobService {
             jobId,
           },
         });
+        await tx.userRatingJob.deleteMany({
+          where: {
+            jobId,
+          },
+        });
+        await tx.jobHasCity.deleteMany({
+          where: {
+            jobId,
+          },
+        });
         await tx.job.delete({
           where: { id: jobId },
         });

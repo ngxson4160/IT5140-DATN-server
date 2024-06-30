@@ -46,6 +46,7 @@ export class UserSignUpDto {
 
   @IsOptional()
   @IsEnum(EGender)
+  @TransformStringToNumber()
   gender?: EGender;
 
   @IsOptional()

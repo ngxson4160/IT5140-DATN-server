@@ -785,7 +785,7 @@ const main = async () => {
       desiredCityId: 4,
       target: 'Đi làm kiếm tiền',
       cv: [],
-      yearExperience: 10,
+      yearExperience: 4,
       workExperience: [
         {
           position: 'Thực tập',
