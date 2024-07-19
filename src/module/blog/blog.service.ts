@@ -207,6 +207,7 @@ export class BlogService {
         createdAt: true,
         image: true,
         content: true,
+        totalViews: true,
         creator: {
           select: {
             company: {
