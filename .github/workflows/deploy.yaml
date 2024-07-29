@@ -12,7 +12,16 @@ on:
         types:
             - created
     workflow_dispatch:
-
+        inputs:
+              logLevel:
+                  description: "Log level"
+                  required: true
+                  default: "info"
+                  type: choice
+                  options:
+                      - info
+                      - warning
+                      - debug
 jobs:
     deploy-to-dev:
         runs-on: ubuntu-latest
