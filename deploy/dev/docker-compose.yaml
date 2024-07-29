@@ -1,0 +1,15 @@
+services:
+    app-dev:
+        image: ${DOCKER_ID}/${DOCKER_IMAGE_NAME}:${IMAGE_TAG:-latest}
+        container_name: job-nest-be-dev
+        restart: unless-stopped
+        env_file: ${CONFIG_FILE}
+        environment:
+            - DB_POSTGRES_PASSWORD=${DB_POSTGRES_PASSWORD}
+            - JWT_ACCESS_TOKEN_SECRET=${JWT_ACCESS_TOKEN_SECRET}
+            - JWT_REFRESH_TOKEN_SECRET=${JWT_REFRESH_TOKEN_SECRET}
+        ports:
+            - "3001:3001"
+        # volumes:
+        #     - /app/ronin-be/${ENV}/public:/app/dist/public/api
+        # command: ["pm2-runtime", "ecosystem.config.js", "--env", "development"]
