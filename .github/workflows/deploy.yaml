@@ -61,7 +61,7 @@ jobs:
                   IMAGE_TAG: ${{ env.IMAGE_TAG }}
                   CONFIG_FILE: "/home/${{ secrets.EC2_USERNAME }}/app/deploy/dev/.env.dev"
                   DOCKER_COMPOSE_PATH: "/home/${{ secrets.EC2_USERNAME }}/app/deploy/dev/docker-compose.yaml"
-                  secrets.DOCKER_IMAGE_NAME: ${{ secrets.secrets.DOCKER_IMAGE_NAME }}
+                  DOCKER_IMAGE_NAME: ${{ secrets.DOCKER_IMAGE_NAME }}
                   DB_MYSQL_PASSWORD: ${{ secrets.DB_MYSQL_PASSWORD }}
                   DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
                   DATABASE_URL: "mysql://root:password@mysql-job-nest:3306/job-nest-test"
@@ -69,11 +69,13 @@ jobs:
                   AWS_BUCKET_REGION: ${{ secrets.AWS_BUCKET_REGION }}
                   AWS_ACCESS_KEY:  ${{ secrets.AWS_ACCESS_KEY }}
                   AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+                  REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
               with:
                   host: ${{ secrets.EC2_HOST }}
                   username: ${{ secrets.EC2_USERNAME }}
                   key: ${{ secrets.EC2_SSH_KEY }}
-                  envs: DOCKER_ID,IMAGE_TAG,CONFIG_FILE,DOCKER_COMPOSE_PATH,secrets.DOCKER_IMAGE_NAME,DATABASE_PASSWORD
+                  envs: DOCKER_ID,IMAGE_TAG,CONFIG_FILE,DOCKER_COMPOSE_PATH,DOCKER_IMAGE_NAME,DATABASE_PASSWORD,DB_MYSQL_PASSWORD,ACCESS_TOKEN_SECRET,REFRESH_TOKEN_SECRET
                   script_stop: true
                   script: |
                       echo $IMAGE_TAG
