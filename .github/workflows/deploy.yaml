@@ -64,7 +64,7 @@ jobs:
                   DOCKER_IMAGE_NAME: ${{ secrets.DOCKER_IMAGE_NAME }}
                   DB_MYSQL_PASSWORD: ${{ secrets.DB_MYSQL_PASSWORD }}
                   DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-                  DATABASE_URL: "mysql://root:password@job-nest-mysql:3306/job-nest-test"
+                  DATABASE_URL: "mysql://root:${{ secrets.DB_MYSQL_PASSWORD }}@job-nest-mysql:3306/job-nest"
                   AWS_BUCKET_NAME:  ${{ secrets.AWS_BUCKET_NAME }}
                   AWS_BUCKET_REGION: ${{ secrets.AWS_BUCKET_REGION }}
                   AWS_ACCESS_KEY:  ${{ secrets.AWS_ACCESS_KEY }}
@@ -75,7 +75,7 @@ jobs:
                   host: ${{ secrets.EC2_HOST }}
                   username: ${{ secrets.EC2_USERNAME }}
                   key: ${{ secrets.EC2_SSH_KEY }}
-                  envs: DOCKER_ID,IMAGE_TAG,CONFIG_FILE,DOCKER_COMPOSE_PATH,DOCKER_IMAGE_NAME,DATABASE_PASSWORD,DB_MYSQL_PASSWORD,ACCESS_TOKEN_SECRET,REFRESH_TOKEN_SECRET
+                  envs: DOCKER_ID,IMAGE_TAG,CONFIG_FILE,DOCKER_COMPOSE_PATH,DOCKER_IMAGE_NAME,DATABASE_PASSWORD,DB_MYSQL_PASSWORD,ACCESS_TOKEN_SECRET,REFRESH_TOKEN_SECRET,DATABASE_URL
                   script_stop: true
                   script: |
                       echo $IMAGE_TAG
