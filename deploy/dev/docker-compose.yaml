@@ -1,0 +1,17 @@
+services:
+    app-dev:
+        image: ${DOCKER_ID}/${DOCKER_IMAGE_NAME}:${IMAGE_TAG:-latest}
+        container_name: job-nest-be-dev
+        restart: unless-stopped
+        env_file: ${CONFIG_FILE}
+        environment:
+            - DB_MYSQL_PASSWORD=${DB_MYSQL_PASSWORD}
+            - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+            - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+            - DATABASE_URL=${DATABASE_URL}
+        ports:
+            - "3001:3001"
+        # volumes:
+        #     - /app/ronin-be/${ENV}/public:/app/dist/public/api
+        # command: ["pm2-runtime", "ecosystem.config.js", "--env", "development"]
+        command: ["npm", "start"]
