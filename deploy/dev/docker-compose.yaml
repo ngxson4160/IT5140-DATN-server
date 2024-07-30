@@ -13,3 +13,4 @@ services:
         # volumes:
         #     - /app/ronin-be/${ENV}/public:/app/dist/public/api
         # command: ["pm2-runtime", "ecosystem.config.js", "--env", "development"]
+        command: ["npm", "start"]
