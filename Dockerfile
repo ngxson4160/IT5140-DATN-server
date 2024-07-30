@@ -5,6 +5,7 @@ COPY package*.json ./
 COPY tsconfig.json ./         
 RUN npm i
 COPY . .
+RUN npx prisma generate
 RUN npm run build
 
 # Generate prisma client
