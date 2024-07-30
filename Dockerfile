@@ -10,7 +10,7 @@ RUN npm run build
 # Generate prisma client
 # RUN npx prisma generate
 # RUN npx prisma migrate dev
-# RUN npx prisma db seed
+# RUN npx prisma db seed 
 
 # Run Stage
 FROM node:20
